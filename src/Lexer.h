@@ -2,35 +2,17 @@
 #define LEXER_H
 
 #include "FileManager.h"
+#include "Token.h"
 #include <cstddef>
 #include <string>
-
-struct Token {
-    enum class Type {
-        tok_not_init = -1,
-        tok_eof = -2,
-
-        // commands
-        tok_def = -3,
-        tok_extern = -4,
-
-        // primary
-        tok_identifier = -5,
-        tok_number = -6,
-    };
-
-    Token() : type(Type::tok_not_init){};
-    Token(Type tokType, std::string &&tokenStr) : type(tokType), token(tokenStr) {}
-
-    Type        type;
-    std::string token;
-};
 
 class Lexer {
   public:
     Lexer(std::string_view &str);
 
-    Token next();
+    Token nextToken();
+    Token nextTokenRaw();
+
     Token peak();
 
   private:
@@ -40,9 +22,12 @@ class Lexer {
     Token _lastToken;
     Token _nextToken;
 
+    Token _lastRawToken;
+    Token _nextRawToken;
+
     // internal of the next function
-    Token _next();
-    int  _getChar(void);
+    Token _nextTokenRaw();
+    int   _getChar(void);
 };
 
 #endif /* LEXER_H */

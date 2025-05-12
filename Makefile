@@ -1,8 +1,8 @@
 NAME := scc
 CC := clang++
-CFLAGS := -g
+CFLAGS := -g  -Isrc
 SRC_DIR := .
-HSRCS := .
+HSRCS := . 
 OBJ_DIR := obj
 
 SRC = $(shell find src -name '*.cpp')

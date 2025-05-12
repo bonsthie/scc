@@ -5,7 +5,7 @@
 #endif
 
 #ifndef TOKENKIND
-#define TOKENKIND(id, string) TOK(x)
+#define TOKENKIND(id, string) TOK(id)
 #endif
 
 #ifndef DELIMITERS
@@ -31,7 +31,7 @@
 #define __PP_TOKENKIND(id, string) PP_TOKENKIND(pp_##id, #string)
 
 #ifndef PP_KEYWORD
-#ifndef PP_KEYWORD(x) __PP_TOKENKIND(x, x)
+#define PP_KEYWORD(x) __PP_TOKENKIND(x, x)
 #endif
 
 #ifndef PP_PRAGMA_KEYWORD
@@ -39,14 +39,16 @@
 #endif
 
 #ifndef ATTRIBUTE_TOKENKIND
-#define ATTRIBUTE_TOKENKIND(id, string) __PP_TOKENKIND(x, x)
+#define ATTRIBUTE_TOKENKIND(id, string)
 #endif
 
 // Special tokens
+TOK(not_init)
 TOK(unknown)
 TOK(space)
 TOK(comment)
 TOK(header_name)
+TOK(eol) // end of line
 TOK(eof)
 
 // Identifiers & literals
@@ -57,7 +59,6 @@ TOK(string_literal)
 
 // Comments
 
-#endif // BASIC TOKEN
 
 #define KEYWORDS_TOKEN
 
@@ -186,9 +187,17 @@ ATTRIBUTE_TOKENKIND(pp_attribute,       "__attribute__")
 
 ATTRIBUTE_TOKENKIND(pp_attribute_l_square,       "[[")
 ATTRIBUTE_TOKENKIND(pp_attribute_r_square,       "]]")
-#endif
 
 #endif // USE_GNU_ATTRIBUTE
 
+#undef TOK
+#undef TOKENKIND
+#undef DELIMITERS
+#undef OPERATORS
+#undef KEYWORD
+#undef TYPE_KEYWORD
+#undef PP_TOKENKIND
+#undef PP_KEYWORD
+#undef PP_PRAGMA_KEYWORD
+#undef ATTRIBUTE_TOKENKIND
 
-#endif // PP_TOKEN
