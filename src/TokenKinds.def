@@ -1,0 +1,194 @@
+// Token definition
+
+#ifndef TOK
+#define TOK(id)
+#endif
+
+#ifndef TOKENKIND
+#define TOKENKIND(id, string) TOK(x)
+#endif
+
+#ifndef DELIMITERS
+#define DELIMITERS(id, string) TOKENKIND(id, string)
+#endif
+
+#ifndef OPERATORS
+#define OPERATORS(id, string) TOKENKIND(id, string)
+#endif
+
+#ifndef KEYWORD
+#define KEYWORD(x) TOKENKIND(kw_##x, #x)
+#endif
+
+#ifndef TYPE_KEYWORD
+#define TYPE_KEYWORD(x) TOKENKIND(t_##x, #x)
+#endif
+
+#ifndef PP_TOKENKIND
+#define PP_TOKENKIND(id, string)
+#endif
+
+#define __PP_TOKENKIND(id, string) PP_TOKENKIND(pp_##id, #string)
+
+#ifndef PP_KEYWORD
+#ifndef PP_KEYWORD(x) __PP_TOKENKIND(x, x)
+#endif
+
+#ifndef PP_PRAGMA_KEYWORD
+#define PP_PRAGMA_KEYWORD(x)
+#endif
+
+#ifndef ATTRIBUTE_TOKENKIND
+#define ATTRIBUTE_TOKENKIND(id, string) __PP_TOKENKIND(x, x)
+#endif
+
+// Special tokens
+TOK(unknown)
+TOK(space)
+TOK(comment)
+TOK(header_name)
+TOK(eof)
+
+// Identifiers & literals
+TOK(identifier)
+TOK(numeric_constant)
+TOK(char_constant)
+TOK(string_literal)
+
+// Comments
+
+#endif // BASIC TOKEN
+
+#define KEYWORDS_TOKEN
+
+// Punctuation and delimiters
+DELIMITERS(l_paren,           "(")
+DELIMITERS(r_paren,           ")")
+DELIMITERS(l_brace,           "{")
+DELIMITERS(r_brace,           "}")
+DELIMITERS(l_square,          "[")
+DELIMITERS(r_square,          "]")
+DELIMITERS(semi,              ";")
+DELIMITERS(comma,             ",")
+DELIMITERS(dot,               ".")
+DELIMITERS(ellipsis,          "...")
+DELIMITERS(arrow,             "->")
+DELIMITERS(colon,             ":")
+DELIMITERS(question,          "?")
+
+// Operators
+OPERATORS(plus,              "+")
+OPERATORS(plus_plus,         "++")
+OPERATORS(plus_equal,        "+=")
+OPERATORS(minus,             "-")
+OPERATORS(minus_minus,       "--")
+OPERATORS(minus_equal,       "-=")
+OPERATORS(star,              "*")
+OPERATORS(star_equal,        "*=")
+OPERATORS(slash,             "/")
+OPERATORS(slash_equal,       "/=")
+OPERATORS(percent,           "%")
+OPERATORS(percent_equal,     "%=")
+OPERATORS(caret,             "^")
+OPERATORS(caret_equal,       "^=")
+OPERATORS(pipe,              "|")
+OPERATORS(pipe_equal,        "|=")
+OPERATORS(amp,               "&")
+OPERATORS(amp_amp,           "&&")
+OPERATORS(amp_equal,         "&=")
+OPERATORS(pipe_pipe,         "||")
+OPERATORS(tilde,             "~")
+OPERATORS(exclaim,           "!")
+OPERATORS(exclaim_equal,     "!=")
+OPERATORS(equal,             "=")
+OPERATORS(equal_equal,       "==")
+OPERATORS(less,              "<")
+OPERATORS(less_equal,        "<=")
+OPERATORS(greater,           ">")
+OPERATORS(greater_equal,     ">=")
+
+KEYWORD(break)
+KEYWORD(case)
+KEYWORD(const)
+KEYWORD(continue)
+KEYWORD(do)
+KEYWORD(else)
+KEYWORD(enum)
+KEYWORD(extern)
+KEYWORD(for)
+KEYWORD(goto)
+KEYWORD(if)
+KEYWORD(inline)
+KEYWORD(register)
+KEYWORD(restrict)
+KEYWORD(return)
+KEYWORD(sizeof)
+KEYWORD(static)
+KEYWORD(struct)
+KEYWORD(switch)
+KEYWORD(typedef)
+KEYWORD(union)
+KEYWORD(volatile)
+
+// C11 additional keywords
+KEYWORD(_Alignas)
+KEYWORD(_Alignof)
+KEYWORD(_Atomic)
+KEYWORD(_Generic)
+KEYWORD(_Noreturn)
+KEYWORD(_Static_assert)
+KEYWORD(thread_local)
+KEYWORD(__thread)
+
+// type
+TYPE_KEYWORD(_Bool)
+TYPE_KEYWORD(_Complex)
+TYPE_KEYWORD(_Imaginary)
+TYPE_KEYWORD(void)
+TYPE_KEYWORD(char)
+TYPE_KEYWORD(short)
+TYPE_KEYWORD(int)
+TYPE_KEYWORD(long)
+TYPE_KEYWORD(float)
+TYPE_KEYWORD(double)
+TYPE_KEYWORD(signed)
+TYPE_KEYWORD(unsigned)
+
+// Preprocessor-specific tokens
+PP_TOKENKIND(pp_hash,              "#")
+PP_TOKENKIND(pp_hash_hash,         "##")
+
+// Preprocessor directive keywords
+PP_KEYWORD(if)
+PP_KEYWORD(ifdef)
+PP_KEYWORD(ifndef)
+PP_KEYWORD(else)
+PP_KEYWORD(elif)
+PP_KEYWORD(endif)
+PP_KEYWORD(define)
+PP_KEYWORD(undef)
+PP_KEYWORD(include)
+PP_KEYWORD(include_next)
+PP_KEYWORD(error)
+PP_KEYWORD(warning)
+PP_KEYWORD(line)
+PP_KEYWORD(ident)
+
+// Pragma handling tokens
+PP_PRAGMA_KEYWORD(pragma)
+PP_PRAGMA_KEYWORD(_Pragma)
+PP_PRAGMA_KEYWORD(__pragma)
+
+
+ATTRIBUTE_TOKENKIND(pp_attribute,       "__attribute__")
+
+#ifdef USE_GNU_ATTRIBUTE
+
+ATTRIBUTE_TOKENKIND(pp_attribute_l_square,       "[[")
+ATTRIBUTE_TOKENKIND(pp_attribute_r_square,       "]]")
+#endif
+
+#endif // USE_GNU_ATTRIBUTE
+
+
+#endif // PP_TOKEN
