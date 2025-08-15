@@ -8,8 +8,5 @@ BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: BeforeColon
 AllowAllConstructorInitializersOnNextLine: false
 
-# Use custom brace wrapping settings
-BreakBeforeBraces: Custom
-
 # Indent preprocessor directives after the hash symbol
 IndentPPDirectives: AfterHash

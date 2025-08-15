@@ -1,4 +1,4 @@
-file(GLOB BYTECODE_READER_SOURCES
+file(GLOB FILEMANAGER_READER_SOURCES
      "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
 
@@ -6,7 +6,7 @@ add_library(FileManager STATIC)
 
 target_sources(FileManager
   PRIVATE
-    ${BYTECODE_READER_SOURCES}
+    ${FILEMANAGER_READER_SOURCES}
 )
 
 target_include_directories(FileManager

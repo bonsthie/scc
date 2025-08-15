@@ -1,60 +1,73 @@
-#include "scc/FileManager/MemoryBuffer.h"
+#include "scc/Option/OptionTable.h"
 #include <cstring>
 #include <iostream>
-#include <vector>
+#include <memory>
 
-int cc1(int argc, char **argv, char **env);
+using namespace scc;
+using namespace scc::opt;
 
+namespace scc {
+enum SccOptionIndex { Opt_none, Opt_test, Opt_oui, Opt_L };
 
-int cc1(int argc, char** argv, char** env);
+class SccOptionTable : public OptionTable {
 
-// ==== main ===============================================================
-int main(int argc, char** argv, char** env) {
-  // 1) cc1 fast-path (tool mode)
-  if (argc >= 2 && std::strcmp(argv[1], "-cc1") == 0)
-    return cc1(argc, argv, env);
+    static constexpr OptionSpec opt[] = {
+        {Opt_test, "-test", OptKind::Flag, ValType::None, "this is a test", false},
+        {Opt_oui, "--oui=", OptKind::Equal, ValType::Str, "oui oui baguette", false},
+        {Opt_L, "-L", OptKind::Separate, ValType::StrList, "L is for losser", false},
+    };
 
-  // 2) infra
-//  FileManager FM;          // filesystem abstraction
-//  Diagnostics Diag;        // owns sinks/printers
-//  WarningSystem WS(Diag);  // warning flags, -Werror, etc.
-//
-//  // 3) parse args (raw, order-preserving)
-//  OptionTable Opts = buildOptionTable();          // your table of flags
-//  auto parseRes = parseCommandLine(Opts, argc, argv); // -> Args + diagnostics
-//  if (!parseRes) {
-//    Diag.error("failed to parse command line");
-//    return static_cast<int>(DriverStatus::InvalidCommand);
-//  }
-//  const Args& RawArgs = *parseRes;
-//
-//  // 4) configure warnings early (before we emit other diags)
-//  if (!WS.setup(RawArgs)) {
-//    // setup should self-diagnose; treat as invalid command
-//    return static_cast<int>(DriverStatus::InvalidCommand);
-//  }
-//
-//  // 5) build typed driver config (defaults, validation, conflicts)
-//  auto cfgOrErr = buildDriverConfig(RawArgs, FM, Diag); // returns Expected<DriverConfig>
-//  if (!cfgOrErr) {
-//    // errors already reported
-//    return static_cast<int>(DriverStatus::InvalidCommand);
-//  }
-//  DriverConfig Cfg = std::move(*cfgOrErr);
-//
-//  // 6) create the driver and a compilation plan (jobs & temps)
-//  Driver TheDriver(FM, Diag, WS);
-//  std::unique_ptr<Compilation> C = TheDriver.createCompilation(Cfg);
-//  if (!C) {
-//    // driver should have reported why
-//    return static_cast<int>(DriverStatus::InvalidCommand);
-//  }
-//
-//  // 7) execute the plan
-//  DriverStatus status = TheDriver.run(*C);
-//
-//  // 8) clean-up temps if policy says so
-//  TheDriver.cleanup(*C, status);
-//
-//  return static_cast<int>(status);
+    virtual std::span<const OptionSpec> specs() const { return opt; }
+};
+
+} // namespace scc
+
+int cc1(int argc, char **argv, char **env) { return 1; }
+
+int main(int argc, char **argv, char **env) {
+    if (argc >= 2 && strcmp(argv[1], "-cc1") == 0)
+        return cc1(argc, argv, env);
+
+    // FileManager FM;
+
+    SccOptionTable Opt;
+
+    std::unique_ptr<ArgsList> Args(Opt.parseArgs(std::vector<const char *>(argv + 1, argv + argc)));
+    if (!Args)
+        return 10;
+
+    // Opt.printOpt(std::cout);
+
+    if (auto a = Args->getArg(Opt_oui))
+        std::cout << *a->getValue() << std::endl;
+
+    if (auto a = Args->getArg(Opt_L)) {
+        auto strs = a->getValuesList();
+        if (strs) {
+            std::cout << "opt value : ";
+            for (auto str : *strs) {
+                std::cout << str << " ";
+            }
+            std::cout << std::endl;
+        } else {
+            std::cout << "opt L no value" << std::endl;
+        }
+    }
+
+	Opt.printOpt(std::cout);
+
+    // WarningSystem WS;
+    // if (WarningSystem.setup(*Args))
+    // return ;
+
+    // Driver TheDriver(FS, WS);
+
+    // std::unique_ptr<Compilation> C =  Driver.createCompilation(*Args);
+    // if (!C)
+    // return;
+
+    // DriverStatus status = Driver.run(*C);
+
+    // handleerror
+    return 0;
 }
