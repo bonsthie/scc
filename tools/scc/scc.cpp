@@ -1,3 +1,5 @@
+#include "scc/Error/Error.h"
+#include "scc/Error/ErrorManager.h"
 #include "scc/Option/OptionTable.h"
 #include <cstring>
 #include <iostream>
@@ -54,8 +56,16 @@ int main(int argc, char **argv, char **env) {
         }
     }
 
-	Opt.printOpt(std::cout);
+    Opt.printOpt(std::cout);
+	
+	std::cout << "\n === warning === \n";
 
+	err::ErrorManager EM;
+
+	EM.report(err::warning).msg("j'ai les crampte").msg("de bzh");
+	EM.report(err::error).msg("rhaaaaaaaaaaaa");
+
+	EM.emit();
     // WarningSystem WS;
     // if (WarningSystem.setup(*Args))
     // return ;
