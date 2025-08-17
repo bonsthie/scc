@@ -1,5 +1,15 @@
 #ifndef SCC_OPTION_ARGS_H
 #define SCC_OPTION_ARGS_H
+///
+///
+/// TODO:
+/// change the args map into a list so i could implement fucntion like
+/// get lastOf a template <typename ...T> class that return wich is the last option to apear in the
+/// list args (ex : use write scc -m32 -m64 -> this will return -m64 with getLastOf(Opt_64,
+/// Opt_m32))
+///
+///
+///
 
 #include <map>
 #include <memory>
@@ -22,7 +32,10 @@ class Arg {
 
   public:
     explicit Arg(const int type) : Type(type), ValueType(None) {}
-    explicit Arg(const int type, valueType VType, const std::string &str) : Type(type), ValueType(VType), Value{str} {}
+    explicit Arg(const int type, valueType VType, const std::string &str)
+        : Type(type),
+          ValueType(VType),
+          Value{str} {}
     explicit Arg(const int type, const std::vector<std::string> &strs)
         : Type(type),
           ValueType(StrList),
@@ -78,7 +91,7 @@ class ArgsList {
 
     Arg *getArg(int index);
 
-	void addArgFlag(std::unique_ptr<Arg> A);
+    void addArgFlag(std::unique_ptr<Arg> A);
 };
 
 } // namespace opt
