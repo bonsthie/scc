@@ -1,5 +1,6 @@
 file(GLOB FILEMANAGER_READER_SOURCES
-     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
+	FileFinder.cpp
+	MemoryBuffer.cpp
 )
 
 add_library(FileManager STATIC)

@@ -53,6 +53,13 @@ class Error {
         }
         O << std::endl;
     }
+
+    int emit(std::ostream &O) {
+        int E = shouldEmit();
+        if (E & Emit)
+            print(O);
+        return E & Stop;
+    }
 };
 
 } // namespace err

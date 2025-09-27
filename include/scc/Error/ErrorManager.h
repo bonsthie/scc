@@ -3,38 +3,45 @@
 
 #include "scc/Error/Error.h"
 
-#include <vector>
+#include <functional>
 #include <iostream>
+#include <memory>
 #include <ostream>
+#include <vector>
 
 namespace scc {
 namespace err {
 
 class ErrorManager {
+    std::vector<Error> Errs;
+    std::ostream      &O;
+
+	using FactoryFunc = std::function<std::unique_ptr<Error>(DiagLevel)>;
+    FactoryFunc       Factory;
+
   public:
-    ErrorManager() : O(std::cerr) {}
-    ErrorManager(std::ostream &O) : O(O) {}
+    ErrorManager(FactoryFunc FF = defaultFactory(), std::ostream &O = std::cerr) : O(O), Factory(FF) {}
+
 
     Error &report(DiagLevel Level) {
-        Error Err(Level);
-        Errs.push_back(std::move(Err));
+        auto ptr = Factory(Level);
+        auto&  ref = *ptr;
+        Errs.push_back(std::move(ref));
         return Errs.back();
     }
 
     int emit() {
         for (auto e : Errs) {
-            EmitionLeveL lvl = e.shouldEmit();
-            if (lvl & EmitionLeveL::Emit)
-                e.print(O);
-            if (lvl & EmitionLeveL::Stop)
+            if (e.emit(O))
                 return 1;
         }
         return 0;
     }
 
-  private:
-    std::vector<Error> Errs;
-    std::ostream      &O;
+	static FactoryFunc defaultFactory() {
+		return [](DiagLevel L) { return std::make_unique<Error>(L); };
+	}
+
 };
 
 } // namespace err

@@ -28,5 +28,6 @@ template <typename T> class StringSwitch {
 } // namespace str
 
 } // namespace scc
+//
 
 #endif // SCC_STRING_STRINGSWITCH_H

@@ -1,4 +1,4 @@
-#include "Lexer.h"
+#include "scc/Lex/Lexer.h"
 
 Lexer::Lexer(std::string_view &str) : _str(str) {}
 
@@ -13,11 +13,11 @@ Token Lexer::nextToken() {
 }
 
 Token Lexer::nextTokenRaw() {
-    _nextRawToken =  _nextTokenRaw();
+    _nextRawToken =  nextTokenRaw();
 	return _nextRawToken;
 }
 
-Token Lexer::_nextTokenRaw() {
+Token Lexer::nextTokenRaw() {
     // if the token is already consume by peak();
     if (_nextToken.is(tok::not_init) == false) {
         Token t = _nextToken;
@@ -25,7 +25,7 @@ Token Lexer::_nextTokenRaw() {
         return t;
     }
 
-    int last_char = _getChar();
+    int last_char = getChar();
 
     std::string tok;
     if (last_char == '\0') {
@@ -48,7 +48,7 @@ Token Lexer::peak() {
     return _nextToken;
 }
 
-int Lexer::_getChar(void) {
+int Lexer::getChar(void) {
     int c =  _str[_position];
 	_position++;
 	return c;

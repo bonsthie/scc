@@ -11,6 +11,7 @@
 ///
 ///
 
+#include <cassert>
 #include <map>
 #include <memory>
 #include <string>
@@ -47,16 +48,14 @@ class Arg {
 
     int getType() const { return Type; }
 
-    const std::string *getValue() {
-        if (isSingle())
-            return &Value[0];
-        return nullptr;
+    const std::string &getValue() {
+        assert(isSingle() && "getValue Should be Use only for Arg With one Value");
+        return Value[0];
     }
 
-    const std::vector<std::string> *getValuesList() {
-        if (isMulti())
-            return &Value;
-        return nullptr;
+    const std::vector<std::string> &getValuesList() {
+        assert(isMulti() && "getValueList Should be Use only for Arg With Multiple Value");
+        return Value;
     }
 
     // only works for StrList Arg
@@ -87,9 +86,9 @@ class ArgsList {
   public:
     ~ArgsList() = default;
 
-    bool hasArg(int index) { return getArg(index) != nullptr; }
-
     Arg *getArg(int index);
+
+    bool hasArg(int index) { return getArg(index) != nullptr; }
 
     void addArgFlag(std::unique_ptr<Arg> A);
 };

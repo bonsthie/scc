@@ -23,7 +23,8 @@ ArgsList *OptionTable::parseArgs(const std::vector<const char *> &argv) {
             Args->addArgFlag(std::move(a));
         else
             std::cout << "nooop : " << *it << std::endl;
-        it++;
+		if (it != end)
+			it++;
     }
     return Args;
 }
@@ -44,6 +45,7 @@ std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end) {
 
         case OptKind::Separate:
             if (str.compare(Opt.spelling) == 0) {
+
                 it++;
                 if (it == end)
                     return nullptr;
