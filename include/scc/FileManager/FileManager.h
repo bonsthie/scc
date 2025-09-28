@@ -1,23 +1,27 @@
 #ifndef SCC_FILEMANAGER_FILEMANAGER_H
 #define SCC_FILEMANAGER_FILEMANAGER_H
 
+#include "File.h"
+#include "FileFinder.h"
+#include "FileID.h"
+#include "scc/Error/ErrorManager.h"
 #include <map>
 #include <string>
-#include "File.h"
 
 namespace scc {
 
 class FileManager {
-    std::map<std::string, File> Files;
-    // list of path where the FM can search
+    std::map<FileID, File> Files;
+
+    FileFinder   &FF;
+    ErrorManager &EM;
 
   public:
-    FileManager() {}
-    ~FileManager();
+    FileManager(FileFinder &FF, ErrorManager &EM) : FF(FF), EM(EM) {}
+    ~FileManager() = default;
 
-    // todo direct and undirect ("foo.h", <bar.h>)
-    File &get(const char *path);
-    File &get(const std::string &path);
+    File *getFile(const std::string &path);
+    File *getSystemFile(const char *path);
 };
 
 } // namespace scc

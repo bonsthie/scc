@@ -7,6 +7,7 @@
 #include <vector>
 
 namespace scc {
+
 namespace err {
 
 enum DiagLevel {
@@ -19,25 +20,27 @@ enum EmitionLeveL {
     Stop = 1 << 1,
 };
 
+} // namespace err
+
 #define ERR_MSG
 #define WARN_MSG
 
 class Error {
-    DiagLevel                Level;
+    err::DiagLevel           Level;
     std::vector<std::string> msgs;
 
   public:
-    explicit Error(DiagLevel Level) : Level(Level) {}
+    explicit Error(err::DiagLevel Level) : Level(Level) {}
 
     Error &msg(std::string msg) {
         msgs.push_back(std::move(msg));
         return *this;
     }
 
-    virtual EmitionLeveL shouldEmit() { return Emit; }
+    virtual err::EmitionLeveL shouldEmit() { return err::Emit; }
     virtual void         print(std::ostream &O) {
         // Prefix (e.g. "scc error: " or "scc warning: ")
-        if (Level == DiagLevel::error) {
+        if (Level == err::DiagLevel::error) {
             O << "scc " << "Error ";
         } else {
             O << "scc " << " Warning ";
@@ -56,13 +59,12 @@ class Error {
 
     int emit(std::ostream &O) {
         int E = shouldEmit();
-        if (E & Emit)
+        if (E & err::Emit)
             print(O);
-        return E & Stop;
+        return E & err::Stop;
     }
 };
 
-} // namespace err
 } // namespace scc
 
 #endif //  SCC_ERROR_ERROR_H

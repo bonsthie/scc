@@ -1,25 +1,27 @@
 #ifndef SCC_FILEMANAGER_FILE
 #define SCC_FILEMANAGER_FILE
 
+#include "scc/FileManager/FileID.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include <string>
 
 namespace scc {
 
 class File {
-    const std::string &FileName;
-    const int          id = 0;
-    size_t             FileSize = 0;
-    const char        *Data = nullptr;
+    FileID FID;
+    int    FD = -1;
+    char  *Data = nullptr;
+    size_t FileSize = 0;
 
   public:
     // mmap the file wr, setup the size and setup the FileStatus
-    File(const std::string &FileName, const int id);
+    File(const FileID &FID);
 
     // unmap the file
     ~File();
 
     const MemoryBufferView view() const { return MemoryBufferView(Data, FileSize); };
+    const FileID          &getFileID() const { return FID; }
 
     enum FileStatus {
         FOK,
@@ -27,7 +29,10 @@ class File {
     };
 
   private:
-    FileStatus FileStatus = FOK;
+    FileStatus FStatus = FOK;
+
+  public:
+    FileStatus status() const { return FStatus; };
 };
 
 } // namespace scc

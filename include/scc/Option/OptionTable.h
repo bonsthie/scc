@@ -1,6 +1,7 @@
 #ifndef SCC_OPTION_OPTIONTABLE_H
 #define SCC_OPTION_OPTIONTABLE_H
 
+#include "scc/Error/ErrorManager.h"
 #include "scc/Option/Args.h"
 #include <memory>
 #include <optional>
@@ -26,8 +27,10 @@ struct OptionSpec {
 
 class OptionTable {
     virtual std::span<const OptionSpec> specs() const = 0;
+    ErrorManager                       &EM;
 
   public:
+	OptionTable(ErrorManager &EM) : EM(EM) {}
     ~OptionTable() = default;
 
     ArgsList *parseArgs(const std::vector<const char *> &argv);

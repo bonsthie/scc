@@ -1,4 +1,5 @@
 #include "scc/Option/OptionTable.h"
+#include "scc/Error/Error.h"
 #include "scc/Option/Args.h"
 #include <cstring>
 #include <iomanip>
@@ -21,10 +22,9 @@ ArgsList *OptionTable::parseArgs(const std::vector<const char *> &argv) {
         std::unique_ptr<Arg> a = nextArg(it, end);
         if (a)
             Args->addArgFlag(std::move(a));
-        else
-            std::cout << "nooop : " << *it << std::endl;
-		if (it != end)
-			it++;
+        if (it == end)
+            break;
+        it++;
     }
     return Args;
 }
@@ -45,10 +45,11 @@ std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end) {
 
         case OptKind::Separate:
             if (str.compare(Opt.spelling) == 0) {
-
                 it++;
-                if (it == end)
+                if (it == end || (*it && *it[0] == '-')) {
+                    EM.report(err::warning).msg(std::string(str)).msg(" missing argument");
                     return nullptr;
+                }
                 return std::make_unique<Arg>((int)Opt.key, (Arg::valueType)Opt.vtype, *it);
             }
             break;

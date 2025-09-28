@@ -1,6 +1,7 @@
 #include "scc/Error/Error.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileFinder.h"
+#include "scc/FileManager/FileManager.h"
 #include "scc/Option/OptionTable.h"
 #include <cstring>
 #include <iostream>
@@ -21,7 +22,11 @@ class SccOptionTable : public OptionTable {
         {Opt_I, "-I", OptKind::Separate, ValType::StrList, "system include folder", false},
     };
 
+
     virtual std::span<const OptionSpec> specs() const { return opt; }
+
+public:
+    SccOptionTable(ErrorManager &EM) : OptionTable(EM) {}
 };
 
 } // namespace scc
@@ -35,38 +40,26 @@ int main(int argc, char **argv, char **env) {
 
     // FileManager FM;
 
-    SccOptionTable Opt;
+    ErrorManager   EM;
+    SccOptionTable Opt(EM);
 
     std::unique_ptr<ArgsList> Args(Opt.parseArgs(std::vector<const char *>(argv + 1, argv + argc)));
     if (!Args)
         return 10;
+	EM.emit();
 
-    auto       Inc = Args->getArg(Opt_I);
-    FileFinder FF(Inc ? Inc->getValuesList() : std::vector<std::string>{});
+    auto        Inc = Args->getArg(Opt_I);
+    FileFinder  FF(Inc ? Inc->getValuesList() : std::vector<std::string>{});
+    FileManager FM(FF, EM);
 
-    if (auto New = FF.getFileID("scc.cpp"))
-        std::cout << "scc.cpp path : " << New->getName() << " ID " << New->getFileFD() << std::endl;
-    else
-        std::cout << "scc.cpp path not found " << std::endl;
+#define TEST(file, get)                                                                            \
+    if (File *F = FM.get(file))                                                                    \
+        std::cout << file " :" << F->getFileID().getName() << std::endl;                           \
+    else                                                                                           \
+        EM.emit();
 
-    if (auto New = FF.getSystemFileID("test.h"))
-        std::cout << "test.h system path : " << New->getName() << " ID " << New->getFileFD()
-                  << std::endl;
-    else
-        std::cout << "test.h path not found " << std::endl;
-
-    if (auto New = FF.getFileID("test/test.h")) {
-        std::cout << "test/test.h path : " << New->getName() << " ID " << New->getFileFD()
-                  << std::endl;
-
-        if (auto Ok = FF.getFileID("test2.h", *New))
-            std::cout << "test2.h form test/test.h : " << Ok->getName() << " ID "
-                      << Ok->getFileFD() << std::endl;
-        else
-            std::cout << "test.h path not found " << std::endl;
-
-    } else
-        std::cout << "test/test.h path not found " << std::endl;
+    TEST("test.h", getSystemFile)
+    TEST("test.h", getFile)
 
     return 1;
 
@@ -88,8 +81,6 @@ int main(int argc, char **argv, char **env) {
     Opt.printOpt(std::cout);
 
     std::cout << "\n === warning === \n";
-
-    err::ErrorManager EM;
 
     EM.report(err::warning).msg("j'ai les crampte").msg("de bzh");
     EM.report(err::error).msg("rhaaaaaaaaaaaa");

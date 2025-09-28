@@ -1,5 +1,8 @@
 file(GLOB FILEMANAGER_READER_SOURCES
+	File.cpp
+	FileID.cpp
 	FileFinder.cpp
+	FileManager.cpp
 	MemoryBuffer.cpp
 )
 
