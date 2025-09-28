@@ -41,6 +41,8 @@ class ErrorManager {
         return 0;
     }
 
+	const std::vector<Error> &getErrsList() const { return Errs; }
+
     static FactoryFunc defaultFactory() {
         return [](err::DiagLevel L) { return std::make_unique<Error>(L); };
     }

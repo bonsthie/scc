@@ -9,7 +9,6 @@
 #include <span>
 
 namespace scc {
-namespace opt {
 
 enum class OptKind { Flag, Joined, Separate, JoinedOrSeparate, Equal };
 enum class ValType { None, Str, StrList };
@@ -43,7 +42,6 @@ class OptionTable {
     std::unique_ptr<Arg> nextArg(ArgvIt &it, ArgvIt end);
 };
 
-} // namespace opt
 } // namespace scc
 
 #endif // SCC_OPTION_OPTIONTABLE_H

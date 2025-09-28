@@ -8,7 +8,6 @@
 #include <memory>
 
 using namespace scc;
-using namespace scc::opt;
 
 namespace scc {
 enum SccOptionIndex { Opt_none, Opt_test, Opt_oui, Opt_L, Opt_I };

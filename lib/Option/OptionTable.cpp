@@ -8,7 +8,6 @@
 #include <string_view>
 
 using namespace scc;
-using namespace scc::opt;
 
 using ArgvIt = std::vector<const char *>::const_iterator;
 

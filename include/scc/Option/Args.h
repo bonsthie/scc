@@ -18,7 +18,6 @@
 #include <vector>
 
 namespace scc {
-namespace opt {
 
 class Arg {
   public:
@@ -47,6 +46,10 @@ class Arg {
     bool isMulti() const { return ValueType == StrList; }
 
     int getType() const { return Type; }
+    int getValueType() const { return ValueType; }
+
+    int count() const { return Value.size(); }
+    int empty() const { return Value.empty(); }
 
     const std::string &getValue() {
         assert(isSingle() && "getValue Should be Use only for Arg With one Value");
@@ -68,11 +71,17 @@ class Arg {
     }
 
     bool addValuesToList(const std::vector<std::string> &strs) {
+        assert(isMulti() && "addValuesToList Should be Use only for Arg With Multiple Value");
         for (auto s : strs) {
             if (addValueToList(s) == true)
                 return true;
         }
         return false;
+    }
+
+    void setValueSingle(const std::string &str) {
+        assert(isSingle() && "setValueSingle Should be Use only for Arg With one Value");
+        Value.front() = str;
     }
 
     void claim() { Claim = true; }
@@ -86,14 +95,15 @@ class ArgsList {
   public:
     ~ArgsList() = default;
 
-    Arg *getArg(int index);
+    Arg *getArg(int index) const;
+
+    int size() const { return ValMap.size(); }
 
     bool hasArg(int index) { return getArg(index) != nullptr; }
 
     void addArgFlag(std::unique_ptr<Arg> A);
 };
 
-} // namespace opt
 } // namespace scc
 
 #endif // SCC_OPTION_ARGS_H
