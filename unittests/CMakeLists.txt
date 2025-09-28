@@ -4,11 +4,13 @@ project(MyProj LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-enable_testing()
 
 
-add_custom_target(test-scc
+add_custom_target(test
   COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -j ${CMAKE_BUILD_PARALLEL_LEVEL}
+  DEPENDS
+	FileManagerTests
+	OptionTests
   USES_TERMINAL
 )
 
@@ -47,7 +49,7 @@ function(scc_create_test)
     PROPERTIES LABELS "${label}"
   )
 
-  add_custom_target("test-scc-${label}"
+  add_custom_target("test-${label}"
     COMMAND ${CMAKE_CTEST_COMMAND}
             --test-dir ${CMAKE_BINARY_DIR}
             -L ${label}
@@ -57,6 +59,7 @@ function(scc_create_test)
     USES_TERMINAL
   )
 endfunction()
+
 
 add_subdirectory(FileManager)
 add_subdirectory(Option)
