@@ -31,9 +31,12 @@ class ErrorManager {
     }
 
     int emit() {
-        for (auto e : Errs) {
-            if (e.emit(O))
+        for (auto it = Errs.begin(); it != Errs.end();) {
+            int status = it->emit(O);
+            it = Errs.erase(it);
+            if (status) {
                 return 1;
+            }
         }
         return 0;
     }

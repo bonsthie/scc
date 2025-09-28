@@ -19,7 +19,7 @@ class SccOptionTable : public OptionTable {
         {Opt_test, "-test", OptKind::Flag, ValType::None, "this is a test", false},
         {Opt_oui, "--oui=", OptKind::Equal, ValType::Str, "oui oui baguette", false},
         {Opt_L, "-L", OptKind::Separate, ValType::StrList, "L is for losser", false},
-        {Opt_I, "-I", OptKind::Separate, ValType::StrList, "system include folder", false},
+		{Opt_I, "-I", OptKind::JoinedOrSeparate, ValType::StrList, "system include folder", false},
     };
 
 
@@ -47,27 +47,12 @@ int main(int argc, char **argv, char **env) {
     if (!Args)
         return 10;
 	EM.emit();
+	return 1;
 
     auto        Inc = Args->getArg(Opt_I);
     FileFinder  FF(Inc ? Inc->getValuesList() : std::vector<std::string>{});
     FileManager FM(FF, EM);
 
-#define TEST(file, get)                                                                            \
-    if (File *F = FM.get(file))                                                                    \
-        std::cout << file " :" << F->getFileID().getName() << std::endl;                           \
-    else                                                                                           \
-        EM.emit();
-
-	TEST("../test.h", getFile)
-    TEST("test2.h", getSystemFile)
-
-	if (File *F  = FM.getFile("test/test.h")) {
-        std::cout << "test.h" " :" << F->getFileID().getName() << std::endl;
-		File *f = FM.getFile("test2.h", *F);
-        std::cout << "test2.h" "from test/test.h :" << f->getFileID().getName() << std::endl;
-	}
-
-    return 1;
 
     // Opt.printOpt(std::cout);
     if (auto a = Args->getArg(Opt_oui))

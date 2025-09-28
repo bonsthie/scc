@@ -3,6 +3,7 @@
 
 #include "scc/Error/ErrorColors.h"
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -26,36 +27,28 @@ enum EmitionLeveL {
 #define WARN_MSG
 
 class Error {
-    err::DiagLevel           Level;
-    std::vector<std::string> msgs;
+    err::DiagLevel     Level;
+    std::ostringstream Msg;
 
   public:
     explicit Error(err::DiagLevel Level) : Level(Level) {}
 
-    Error &msg(std::string msg) {
-        msgs.push_back(std::move(msg));
+    Error &msg(const std::string &msg) {
+        Msg << msg;
         return *this;
     }
 
     virtual err::EmitionLeveL shouldEmit() { return err::Emit; }
-    virtual void         print(std::ostream &O) {
-        // Prefix (e.g. "scc error: " or "scc warning: ")
-        if (Level == err::DiagLevel::error) {
-            O << "scc " << "Error ";
-        } else {
-            O << "scc " << " Warning ";
-        }
 
-        // Join all message pieces into one string
-        bool first = true;
-        for (auto &msg : msgs) {
-            if (!first)
-                O << " ";
-            O << msg;
-            first = false;
-        }
-        O << std::endl;
+    // clang-format off
+    virtual void print(std::ostream &O) {
+		O << getProgramNameString() << ": " 
+		<< COL_BOLD 
+		<< getPrintLevelString() 
+		<<  COL_BOLD ": "
+		<< Msg.str() << COL_RESET "\n";
     }
+    // clang-format on
 
     int emit(std::ostream &O) {
         int E = shouldEmit();
@@ -63,6 +56,18 @@ class Error {
             print(O);
         return E & err::Stop;
     }
+
+    std::string getPrintLevelString() {
+        switch (Level) {
+        case err::DiagLevel::error:
+            return COL_RED "error" COL_RESET;
+        case err::DiagLevel::warning:
+            return COL_MAGENTA "warning" COL_RESET;
+        }
+    };
+
+	// TODO take from the prog name
+    std::string getProgramNameString() { return "scc"; }
 };
 
 } // namespace scc

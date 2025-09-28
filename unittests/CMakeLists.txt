@@ -1,18 +1,7 @@
-cmake_minimum_required(VERSION 3.20)
-project(MyProj LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-
-
-add_custom_target(test
-  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -j ${CMAKE_BUILD_PARALLEL_LEVEL}
-  DEPENDS
-	FileManagerTests
-	OptionTests
-  USES_TERMINAL
+set_tests_properties(${exe} PROPERTIES
+  ENVIRONMENT "GTEST_COLOR=1;GTEST_BRIEF=1"
 )
+
 
 function(scc_create_test)
   set(options)
@@ -54,12 +43,23 @@ function(scc_create_test)
             --test-dir ${CMAKE_BINARY_DIR}
             -L ${label}
             --output-on-failure
-            -j ${CMAKE_BUILD_PARALLEL_LEVEL}
+			${verbose_flag}
     DEPENDS "${exe}"
     USES_TERMINAL
   )
 endfunction()
 
+
+
+add_custom_target(test
+  COMMAND ${CMAKE_CTEST_COMMAND} 
+		--output-on-failure ${CMAKE_BUILD_PARALLEL_LEVEL}
+		${verbose_flag}
+  DEPENDS
+	FileManagerTests
+	OptionTests
+  USES_TERMINAL
+)
 
 add_subdirectory(FileManager)
 add_subdirectory(Option)
