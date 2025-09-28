@@ -8,21 +8,21 @@ namespace scc {
 namespace str {
 
 template <typename T> class StringSwitch {
-    std::string_view s_;
-    std::optional<T> res_;
+    std::string_view S;
+    std::optional<T> Res;
 
   public:
-    explicit StringSwitch(std::string_view s) : s_(s) {}
+    explicit StringSwitch(std::string_view s) : S(s) {}
 
     StringSwitch &Case(std::string_view lit, const T &v) {
-        if (!res_ && s_ == lit)
-            res_ = v;
+        if (!Res && S == lit)
+            Res = v;
         return *this;
     }
 
-    T Default(const T &v) const { return res_.value_or(v); }
+    T Default(const T &v) const { return Res.value_or(v); }
 
-    operator T() const { return *res_; }
+    operator T() const { return *Res; }
 };
 
 } // namespace str
