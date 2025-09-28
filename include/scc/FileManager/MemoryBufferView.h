@@ -16,7 +16,7 @@ class MemoryBufferView {
   public:
     explicit MemoryBufferView(const char *Data, size_t Size) : Data(Data), Size(Size) {}
     MemoryBufferView(MemoryBufferView &&o) noexcept;
-    ~MemoryBufferView();
+    ~MemoryBufferView() = default;
 
     MemoryBufferView &operator=(MemoryBufferView &&o) noexcept {
         if (this != &o) {

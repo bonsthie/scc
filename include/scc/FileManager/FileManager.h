@@ -20,8 +20,16 @@ class FileManager {
     FileManager(FileFinder &FF, ErrorManager &EM) : FF(FF), EM(EM) {}
     ~FileManager() = default;
 
-    File *getFile(const std::string &path);
-    File *getSystemFile(const char *path);
+    /// return the File for the Name file from the BaseFileID or the System path
+    File *getFile(const std::string &Name, const FileID &BaseFile);
+    /// return the File for the Name file from the BaseFile or the System path
+    File *getFile(const std::string &Name, const File &BaseFile);
+    /// return the File for the Name file from the BasePath or the System path
+    File *getFile(const std::string &Name, const std::string &BasePath = "");
+    /// return a File for Name base On the System Path
+    File *getSystemFile(const std::string &Name);
+
+    File *fileFormFileID(const FileID *FID, const std::string &Path = "");
 };
 
 } // namespace scc

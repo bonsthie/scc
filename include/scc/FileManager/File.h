@@ -25,7 +25,10 @@ class File {
 
     enum FileStatus {
         FOK,
-        F_ERROR, // todo : more advence error
+        F_ERROR,
+		F_OPEN,
+		F_STAT,
+		F_MAPING
     };
 
   private:

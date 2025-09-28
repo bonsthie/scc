@@ -24,4 +24,4 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-# add_subdirectory(unittests)
+add_subdirectory(unittests)

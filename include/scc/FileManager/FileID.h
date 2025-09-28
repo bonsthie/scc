@@ -26,6 +26,6 @@ class FileID {
     bool operator!=(const FileID &ID) const { return this->ID != ID.ID; }
 };
 
-}
+} // namespace scc
 
 #endif // SCC_FILEMANAGER_FILEID

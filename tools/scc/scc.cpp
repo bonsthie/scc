@@ -58,8 +58,14 @@ int main(int argc, char **argv, char **env) {
     else                                                                                           \
         EM.emit();
 
-    TEST("test.h", getSystemFile)
-    TEST("test.h", getFile)
+	TEST("../test.h", getFile)
+    TEST("test2.h", getSystemFile)
+
+	if (File *F  = FM.getFile("test/test.h")) {
+        std::cout << "test.h" " :" << F->getFileID().getName() << std::endl;
+		File *f = FM.getFile("test2.h", *F);
+        std::cout << "test2.h" "from test/test.h :" << f->getFileID().getName() << std::endl;
+	}
 
     return 1;
 

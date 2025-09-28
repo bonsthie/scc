@@ -1,4 +1,6 @@
 #include "scc/FileManager/FileFinder.h"
+#include <filesystem>
+#include <iostream>
 
 using namespace scc;
 
@@ -26,11 +28,14 @@ FileID *FileFinder::getFileID(const std::string &Name, const std::string &BasePa
     auto FID = AbsPathFiles.find(AbsPathFile);
     if (FID != AbsPathFiles.end())
         return &FID->second;
+
     return openNewRelativeFileFromAbsPath(AbsPathFile);
 }
 
-/// return a FileID for Name base On the System Path
 FileID *FileFinder::getSystemFileID(const std::string &Name) {
+	if (Name.empty())
+		return nullptr;
+
     auto FID = SystemPathFiles.find(Name);
     if (FID == SystemPathFiles.end())
         return openNewSystemFile(Name);
@@ -101,6 +106,9 @@ std::string FileFinder::absolutePath(const std::string &path) {
     auto c = std::filesystem::weakly_canonical(abs, ec);
     if (ec)
         return "";
+
+	if (!std::filesystem::exists(abs))
+		return "";
 
     return c.string();
 }
