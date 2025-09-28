@@ -40,6 +40,7 @@ class Error {
 
     virtual err::EmitionLeveL shouldEmit() { return err::Emit; }
 
+	// TODO : handle NO_COLOR
     // clang-format off
     virtual void print(std::ostream &O) {
 		O << getProgramNameString() << ": " 
@@ -66,7 +67,7 @@ class Error {
         }
     };
 
-	// TODO take from the prog name
+	// TODO : take from the prog name
     std::string getProgramNameString() { return "scc"; }
 };
 
