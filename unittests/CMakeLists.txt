@@ -6,8 +6,9 @@ include(GoogleTest)
 
 add_executable(sccTest 
 	FileManager/FMUtils.cpp
+	FileManager/FileTest.cpp
 	FileManager/FileFinderTest.cpp
-	FileManager/FileManager.cpp
+	FileManager/FileManagerTest.cpp
 
 )
 
