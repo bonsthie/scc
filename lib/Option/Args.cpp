@@ -25,6 +25,8 @@ void ArgsList::addArgFlag(std::unique_ptr<Arg> A) {
             a->setValueSingle(str);
             return;
         }
+        case Arg::None:
+            assert("this function should be use for Arg without argument");
         }
     }
     ValMap.emplace(index, std::move(A));
