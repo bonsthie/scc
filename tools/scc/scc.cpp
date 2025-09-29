@@ -46,7 +46,7 @@ int main(int argc, char **argv, char **env) {
     if (!Args)
         return 10;
 	EM.emit();
-	return 1;
+	// return 1;
 
     auto        Inc = Args->getArg(Opt_I);
     FileFinder  FF(Inc ? Inc->getValuesList() : std::vector<std::string>{});
@@ -72,7 +72,7 @@ int main(int argc, char **argv, char **env) {
 
     std::cout << "\n === warning === \n";
 
-    EM.report(err::warning).msg("j'ai les crampte").msg("de bzh");
+    EM.report(err::warning).msg("j'ai les crampte").msg(" de bzh");
     EM.report(err::error).msg("rhaaaaaaaaaaaa");
 
     EM.emit();

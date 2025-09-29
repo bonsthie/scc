@@ -20,9 +20,9 @@ class File {
     // unmap the file
     ~File();
 
-    const MemoryBufferView view() const { return MemoryBufferView(Data, FileSize); };
-    size_t                 size() const { return FileSize; };
-    const FileID          &getFileID() const { return FID; }
+    MemoryBufferView view() const { return MemoryBufferView(Data, FileSize); };
+    size_t           size() const { return FileSize; };
+    const FileID    &getFileID() const { return FID; }
 
     enum FileStatus { FOK, F_ERROR, F_OPEN, F_STAT, F_MAPING };
 
