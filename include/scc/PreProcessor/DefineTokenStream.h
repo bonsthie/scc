@@ -6,7 +6,7 @@
 
 namespace scc {
 
-class DefineTokenStack : TokenStream {
+class DefineTokenStack : public TokenStream {
 	std::stack<Token> TokenStack;
 
   public:

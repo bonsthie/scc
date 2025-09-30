@@ -9,9 +9,7 @@ namespace scc {
 // main one FileLexer and DefineTokenStream
 class TokenStream {
   public:
-    TokenStream() = default;
-    ~TokenStream() = default;
-
+    virtual ~TokenStream() = default;
     virtual Token next() = 0;
 };
 

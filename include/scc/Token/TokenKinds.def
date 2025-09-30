@@ -16,19 +16,24 @@
 #define OPERATORS(id, string) TOKENKIND(id, string)
 #endif
 
+// use to sepate key word and symbol
+#ifndef KEYWORD_TOKENKIND(id, string)
+#define KEYWORD_TOKENKIND(id, string) TOKENKIND(id, strign)
+#endif
+
 #ifndef KEYWORD
-#define KEYWORD(x) TOKENKIND(kw_##x, #x)
+#define KEYWORD(x) KEYWORD_TOKENKIND(kw_##x, #x)
 #endif
 
 #ifndef TYPE_KEYWORD
-#define TYPE_KEYWORD(x) TOKENKIND(t_##x, #x)
+#define TYPE_KEYWORD(x) KEYWORD_TOKENKIND(t_##x, #x)
 #endif
 
 #ifndef PP_TOKENKIND
-#define PP_TOKENKIND(id, string)
+#define PP_TOKENKIND(id, string) TOKENKIND(id, string)
 #endif
 
-#define __PP_TOKENKIND(id, string) PP_TOKENKIND(pp_##id, #string)
+#define __PP_TOKENKIND(id, string) KEYWORD_TOKENKIND(pp_##id, #string)
 
 #ifndef PP_KEYWORD
 #define PP_KEYWORD(x) __PP_TOKENKIND(x, x)
@@ -200,4 +205,5 @@ ATTRIBUTE_TOKENKIND(pp_attribute_r_square,       "]]")
 #undef PP_KEYWORD
 #undef PP_PRAGMA_KEYWORD
 #undef ATTRIBUTE_TOKENKIND
+#undef KEYWORD_TOKENKIND
 

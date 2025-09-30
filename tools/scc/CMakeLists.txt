@@ -4,6 +4,8 @@ target_link_libraries(scc
 	PRIVATE
 	FileManager
 	Option
+	Lex
+	Token
 )
 
 target_include_directories(scc
