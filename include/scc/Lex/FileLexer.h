@@ -27,10 +27,21 @@ class FileLexer : public TokenStream {
     bool ParseInclue(Token &CurTok);
 
   private:
-    int getChar(void);
-    int peakChar(void);
-    int peakChar(int Idx);
-	void consumeChar(void);
+    int  getChar(void);
+    int  peakChar(void);
+    int  peakChar(int Idx);
+    void consumeChar(void);
+
+    // return the true and consume it only if equal to c
+    bool ConsumeCharIfEqual(int c);
+
+    inline int getCharIfOneOf(int c) { return ConsumeCharIfEqual(c) ? c : 0; }
+
+    template <typename... Args> int getCharIfOneOf(int c, Args... Next) {
+        if (ConsumeCharIfEqual(c))
+            return c;
+        return getCharIfOneOf(Next...);
+    }
 
     bool handleSpaceToken(Token &CurTok, int LastChar);
     bool handleNumToken(Token &CurTok, int LastChar);

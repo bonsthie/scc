@@ -2,7 +2,9 @@
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileFinder.h"
 #include "scc/FileManager/FileManager.h"
+#include "scc/Lex/FileLexer.h"
 #include "scc/Option/OptionTable.h"
+#include "scc/Token/Token.h"
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -18,13 +20,12 @@ class SccOptionTable : public OptionTable {
         {Opt_test, "-test", OptKind::Flag, ValType::None, "this is a test", false},
         {Opt_oui, "--oui=", OptKind::Equal, ValType::Str, "oui oui baguette", false},
         {Opt_L, "-L", OptKind::Separate, ValType::StrList, "L is for losser", false},
-		{Opt_I, "-I", OptKind::JoinedOrSeparate, ValType::StrList, "system include folder", false},
+        {Opt_I, "-I", OptKind::JoinedOrSeparate, ValType::StrList, "system include folder", false},
     };
-
 
     virtual std::span<const OptionSpec> specs() const { return opt; }
 
-public:
+  public:
     SccOptionTable(ErrorManager &EM) : OptionTable(EM) {}
 };
 
@@ -45,37 +46,53 @@ int main(int argc, char **argv, char **env) {
     std::unique_ptr<ArgsList> Args(Opt.parseArgs(std::vector<const char *>(argv + 1, argv + argc)));
     if (!Args)
         return 10;
-	EM.emit();
-	// return 1;
+    EM.emit();
+    // return 1;
 
     auto        Inc = Args->getArg(Opt_I);
     FileFinder  FF(Inc ? Inc->getValuesList() : std::vector<std::string>{});
     FileManager FM(FF, EM);
 
+    File *F = FM.getFile("LexerTest");
+	if (!F) {
+		std::cerr << "File not found\n";
+		return 1;
+	}
 
-    // Opt.printOpt(std::cout);
-    if (auto a = Args->getArg(Opt_oui))
-        std::cout << "--oui=" << a->getValue() << std::endl;
+    FileLexer FL(*F);
 
-    if (auto a = Args->getArg(Opt_L)) {
-        auto strs = a->getValuesList();
-        std::cout << "opt value : ";
-        for (auto str : strs) {
-            std::cout << str << " ";
+    Token CurTok;
+    while (FL.next(CurTok) == false) {
+        std::cout << "token kind : " << stringify_token_kind(CurTok.getTokenKind());
+        if (CurTok.is(tok::identifier)) {
+            std::cout << " value : " << CurTok.getValue();
         }
         std::cout << std::endl;
-    } else {
-        std::cout << "opt L no value" << std::endl;
     }
 
-    Opt.printOpt(std::cout);
-
-    std::cout << "\n === warning === \n";
-
-    EM.report(err::warning).msg("j'ai les crampte").msg(" de bzh");
-    EM.report(err::error).msg("rhaaaaaaaaaaaa");
-
-    EM.emit();
+    // // Opt.printOpt(std::cout);
+    // if (auto a = Args->getArg(Opt_oui))
+    //     std::cout << "--oui=" << a->getValue() << std::endl;
+    //
+    // if (auto a = Args->getArg(Opt_L)) {
+    //     auto strs = a->getValuesList();
+    //     std::cout << "opt value : ";
+    //     for (auto str : strs) {
+    //         std::cout << str << " ";
+    //     }
+    //     std::cout << std::endl;
+    // } else {
+    //     std::cout << "opt L no value" << std::endl;
+    // }
+    //
+    // Opt.printOpt(std::cout);
+    //
+    // std::cout << "\n === warning === \n";
+    //
+    // EM.report(err::warning).msg("j'ai les crampte").msg(" de bzh");
+    // EM.report(err::error).msg("rhaaaaaaaaaaaa");
+    //
+    // EM.emit();
     // WarningSystem WS;
     // if (WarningSystem.setup(*Args))
     // return ;

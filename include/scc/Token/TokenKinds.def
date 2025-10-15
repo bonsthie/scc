@@ -17,8 +17,8 @@
 #endif
 
 // use to sepate key word and symbol
-#ifndef KEYWORD_TOKENKIND(id, string)
-#define KEYWORD_TOKENKIND(id, string) TOKENKIND(id, strign)
+#ifndef KEYWORD_TOKENKIND
+#define KEYWORD_TOKENKIND(id, string) TOKENKIND(id, string)
 #endif
 
 #ifndef KEYWORD
@@ -52,7 +52,8 @@ TOK(not_init)
 TOK(unknown)
 TOK(space)
 TOK(comment)
-TOK(header_name)
+TOK(comment_line) // comment
+TOK(header_name) /* comment */
 TOK(eol) // end of line
 TOK(eof)
 
@@ -206,4 +207,3 @@ ATTRIBUTE_TOKENKIND(pp_attribute_r_square,       "]]")
 #undef PP_PRAGMA_KEYWORD
 #undef ATTRIBUTE_TOKENKIND
 #undef KEYWORD_TOKENKIND
-

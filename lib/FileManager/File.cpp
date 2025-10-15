@@ -24,9 +24,21 @@ File::File(const FileID &FID) : FID(FID) {
     }
 }
 
+File::File(File &&F)
+    : FID(std::move(F.FID)),
+      FD(F.FD),
+      Data(F.Data),
+      FileSize(F.FileSize),
+      FStatus(F.FStatus) {
+    F.FD = -1;
+    F.Data = nullptr;
+    F.FileSize = 0;
+    F.FStatus = F_ERROR;
+}
+
 File::~File() {
-	if (Data && Data != MAP_FAILED)
+    if (Data && Data != MAP_FAILED)
         munmap(Data, FileSize);
     if (FD >= 0)
-	::close(FD);
+        ::close(FD);
 }

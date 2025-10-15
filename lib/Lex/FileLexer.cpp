@@ -1,13 +1,19 @@
+
 #include "scc/Lex/FileLexer.h"
+#include "scc/FileManager/File.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include "scc/Token/Token.h"
+#include <cctype>
 
 using namespace scc;
 
 bool FileLexer::next(Token &CurTok) {
     do {
+        nextRaw(CurTok);
     } while (CurTok.is(tok::space, tok::comment, tok::eol));
     LastToken = CurTok;
+	if (LastToken.is(tok::eof))
+		return true;
     return false;
 }
 
@@ -26,23 +32,14 @@ bool FileLexer::nextRaw(Token &CurTok) {
         return true;
     } else if (isspace(LastChar)) {
         return handleSpaceToken(CurTok, LastChar);
-    } else if (isalnum(LastChar)) {
+    } else if (isdigit(LastChar)) {
         return handleNumToken(CurTok, LastChar);
     } else if (isalpha(LastChar) || LastChar == '_') {
         return handleKeyword(CurTok, LastChar);
     }
-    // todo sign
 
-    CurTok.setTokenKind(tok::unknown);
-    return true;
+    return LexSign(CurTok, LastChar);
 }
-
-// Token FileLexer::peak() {
-//     if (NextToken.is(tok::not_init)) {
-//         NextToken = nextToken();
-//     }
-//     return NextToken;
-// }
 
 void FileLexer::consumeChar(void) {
     if (MemBufferView[BuffPos] == '\n') {
@@ -67,16 +64,45 @@ int FileLexer::getChar(void) {
     return c;
 }
 
+bool FileLexer::ConsumeCharIfEqual(int c) {
+    int tmpChar = peakChar();
+    if (tmpChar != c)
+        return false;
+    consumeChar();
+    return true;
+}
+
 bool FileLexer::handleSpaceToken(Token &CurTok, int LastChar) {
-    //
+    int c = 0;
+    while (1) {
+        c = peakChar();
+        if (!isspace(c))
+            break;
+        consumeChar();
+    }
+	CurTok.setTokenKind(tok::space);
     return false;
 }
 
-bool FileLexer::handleNumToken(Token &CurTok, int LastChar) {
-    //
+bool FileLexer::handleNumToken(Token &CurTok, int LastChar) { return true; }
+
+bool FileLexer::handleKeyword(Token &CurTok, int LastChar) {
+
+    int         CurrentChar = 0;
+    std::string identifyer;
+
+    identifyer += LastChar;
+    while (1) {
+        CurrentChar = peakChar();
+
+        if (!(isalnum(CurrentChar) || CurrentChar == '_'))
+            break;
+        identifyer += CurrentChar;
+        consumeChar();
+    }
+    create_keyword_token(CurTok, std::move(identifyer));
     return false;
 }
-bool FileLexer::handleKeyword(Token &CurTok, int LastChar) { return false; }
 
 inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
     switch (LastChar) {
@@ -114,150 +140,161 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
         CurTok.setTokenKind(tok::tilde);
         return false;
 
-    case '.':
-        if (peakChar() == '.' && peakChar(2) == '.') {
-            consumeChar();
-            consumeChar();
+    case '.': {
+        // Ellipsis: '...'
+        if (ConsumeCharIfEqual('.') && ConsumeCharIfEqual('.')) {
             CurTok.setTokenKind(tok::ellipsis);
             return false;
         }
         CurTok.setTokenKind(tok::dot);
         return false;
+    }
 
-    case '-':
-        if (peakChar() == '>') {
-            consumeChar();
+    case '-': {
+        // Prefer '->' first
+        if (ConsumeCharIfEqual('>')) {
             CurTok.setTokenKind(tok::arrow);
+            return false;
         }
-        if (peakChar() == '-') {
-            consumeChar();
+        // Then '--' or '-='
+        int t = getCharIfOneOf('-', '=');
+        switch (t) {
+        case '-':
             CurTok.setTokenKind(tok::minus_minus);
             return false;
-        }
-        if (peakChar() == '=') {
-            consumeChar();
+        case '=':
             CurTok.setTokenKind(tok::minus_equal);
             return false;
+        default:
+            CurTok.setTokenKind(tok::minus);
+            return false;
         }
-        CurTok.setTokenKind(tok::minus);
-        return false;
+    }
 
-    case '+':
-        if (peakChar() == '+') {
-            consumeChar();
+    case '+': {
+        int t = getCharIfOneOf('+', '=');
+        switch (t) {
+        case '+':
             CurTok.setTokenKind(tok::plus_plus);
             return false;
-        }
-        if (peakChar() == '=') {
-            consumeChar();
+        case '=':
             CurTok.setTokenKind(tok::plus_equal);
             return false;
+        default:
+            CurTok.setTokenKind(tok::plus);
+            return false;
         }
-        CurTok.setTokenKind(tok::plus);
-        return false;
+    }
 
-    case '*':
-        if (peakChar() == '=') {
-            consumeChar();
+    case '*': {
+        if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::star_equal);
             return false;
         }
         CurTok.setTokenKind(tok::star);
         return false;
+    }
 
-    case '/':
-        if (peakChar() == '=') {
-            consumeChar();
+    case '/': {
+        int t = getCharIfOneOf('=', '/', '*');
+        switch (t) {
+        case '=':
             CurTok.setTokenKind(tok::slash_equal);
             return false;
+        case '/':
+            CurTok.setTokenKind(tok::comment_line);
+            return false;
+        case '*':
+            CurTok.setTokenKind(tok::comment);
+            return false;
+        default:
+            CurTok.setTokenKind(tok::slash);
+            return false;
         }
-        CurTok.setTokenKind(tok::slash);
-        return false;
+    }
 
-    case '%':
-        if (peakChar() == '=') {
-            consumeChar();
+    case '%': {
+        if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::percent_equal);
             return false;
         }
         CurTok.setTokenKind(tok::percent);
         return false;
+    }
 
-    case '^':
-        if (peakChar() == '=') {
-            consumeChar();
+    case '^': {
+        if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::caret_equal);
             return false;
         }
         CurTok.setTokenKind(tok::caret);
         return false;
+    }
 
-    case '|':
-        if (peakChar() == '|') {
-            consumeChar();
+    case '|': {
+        if (ConsumeCharIfEqual('|')) {
             CurTok.setTokenKind(tok::pipe_pipe);
             return false;
         }
-        consumeChar();
-        if (peakChar() == '=') {
+        if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::pipe_equal);
             return false;
         }
         CurTok.setTokenKind(tok::pipe);
         return false;
+    }
 
-    case '&':
-        if (peakChar() == '&') {
-            consumeChar();
+    case '&': {
+        if (ConsumeCharIfEqual('&')) {
             CurTok.setTokenKind(tok::amp_amp);
             return false;
         }
-        if (peakChar() == '=') {
-            consumeChar();
+        if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::amp_equal);
             return false;
         }
         CurTok.setTokenKind(tok::amp);
         return false;
+    }
 
-    case '!':
-        if (peakChar() == '=') {
-            consumeChar();
+    case '!': {
+        if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::exclaim_equal);
             return false;
         }
         CurTok.setTokenKind(tok::exclaim);
         return false;
+    }
 
-    case '=':
-        if (peakChar() == '=') {
-            consumeChar();
+    case '=': {
+        if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::equal_equal);
             return false;
         }
         CurTok.setTokenKind(tok::equal);
         return false;
+    }
 
-    case '<':
-        if (peakChar() == '=') {
-            consumeChar();
+    case '<': {
+        if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::less_equal);
             return false;
         }
         CurTok.setTokenKind(tok::less);
         return false;
+    }
 
-    case '>':
-        if (peakChar() == '=') {
-            consumeChar();
+    case '>': {
+        if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::greater_equal);
             return false;
         }
         CurTok.setTokenKind(tok::greater);
         return false;
+    }
+
     case '#': {
-        if (peakChar() == '#') {
-            consumeChar();
+        if (ConsumeCharIfEqual('#')) {
             CurTok.setTokenKind(tok::pp_hash_hash);
             return false;
         }
@@ -268,6 +305,7 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
     default:
         break;
     }
-    CurTok.setTokenKind(tok::unknown);
+
+    // Default fallthrough — nothing matched here.
     return true;
 }

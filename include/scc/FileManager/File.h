@@ -16,6 +16,7 @@ class File {
   public:
     // mmap the file wr, setup the size and setup the FileStatus
     File(const FileID &FID);
+    File(File &&F);
 
     // unmap the file
     ~File();

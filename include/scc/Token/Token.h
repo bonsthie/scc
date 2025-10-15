@@ -10,7 +10,6 @@ enum TokenKind {
 #define TOK(X) X,
 #include "TokenKinds.def"
 
-
     NUMBER_OF_TOKENS
 };
 
@@ -30,13 +29,17 @@ class Token {
     void setTokenKind(tok::TokenKind T) { TKind = T; };
     void setValue(std::string &&Word) { Value = std::move(Word); };
 
+    bool is(tok::TokenKind Tok) { return TKind == Tok; }
+
     template <typename T, typename... Args> bool is(T Tok, Args... TokTypes) {
-        return TKind == Tok || is(TokTypes...);
+        return is(Tok) || is(TokTypes...);
     }
 };
 
 // use a hash map of all the word is a Keyword and setup the CurTok
-void create_keyword_token(Token &CurTok, std::string Word);
+void create_keyword_token(Token &CurTok, std::string &&Word);
+
+std::string stringify_token_kind(tok::TokenKind Kind);
 
 } // namespace scc
 
