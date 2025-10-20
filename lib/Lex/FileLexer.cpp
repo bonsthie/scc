@@ -9,11 +9,14 @@ using namespace scc;
 
 bool FileLexer::next(Token &CurTok) {
     do {
-        nextRaw(CurTok);
-    } while (CurTok.is(tok::space, tok::comment, tok::eol));
+        // return true if an erro append while parsing a token
+        // manly for comment eof error
+        if (nextRaw(CurTok))
+            return true;
+    } while (CurTok.is(tok::space, tok::comment_line, tok::comment, tok::eol));
     LastToken = CurTok;
-	if (LastToken.is(tok::eof))
-		return true;
+    if (LastToken.is(tok::eof))
+        return true;
     return false;
 }
 
@@ -41,15 +44,6 @@ bool FileLexer::nextRaw(Token &CurTok) {
     return LexSign(CurTok, LastChar);
 }
 
-void FileLexer::consumeChar(void) {
-    if (MemBufferView[BuffPos] == '\n') {
-        ColumnPos = 0;
-        LinePos++;
-    } else
-        ColumnPos++;
-    BuffPos++;
-}
-
 int FileLexer::peakChar(void) { return MemBufferView[BuffPos]; }
 
 int FileLexer::peakChar(int Idx) {
@@ -62,6 +56,24 @@ int FileLexer::getChar(void) {
     int c = MemBufferView[BuffPos];
     consumeChar();
     return c;
+}
+
+void FileLexer::consumeChar(void) {
+    if (MemBufferView[BuffPos] == '\n') {
+        ColumnPos = 0;
+        LinePos++;
+    } else
+        ColumnPos++;
+    BuffPos++;
+}
+
+bool FileLexer::consumeCharUntil(int c) {
+    int nextC;
+
+    do {
+        nextC = getChar();
+    } while (nextC != c && nextC != 0);
+    return nextC == 0;
 }
 
 bool FileLexer::ConsumeCharIfEqual(int c) {
@@ -80,11 +92,23 @@ bool FileLexer::handleSpaceToken(Token &CurTok, int LastChar) {
             break;
         consumeChar();
     }
-	CurTok.setTokenKind(tok::space);
+    CurTok.setTokenKind(tok::space);
     return false;
 }
 
-bool FileLexer::handleNumToken(Token &CurTok, int LastChar) { return true; }
+// ([0-9]*[.])?[0-9]+([eE][-+]?\d+)?
+bool FileLexer::handleNumToken(Token &CurTok, int LastChar) {
+	CurTok.setTokenKind(tok::numeric_constant);
+	std::string Num;
+
+	int tmpChar = peakChar();
+	while (isdigit(tmpChar)) {
+		Num += tmpChar;
+		consumeChar();
+	}
+	// need to do a preparsing of the number even if we consume garbedge just because wee need to see if e+ in float
+
+}
 
 bool FileLexer::handleKeyword(Token &CurTok, int LastChar) {
 
@@ -203,10 +227,17 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
             return false;
         case '/':
             CurTok.setTokenKind(tok::comment_line);
-            return false;
+            return consumeCharUntil('\n');
+
         case '*':
             CurTok.setTokenKind(tok::comment);
-            return false;
+            while (consumeCharUntil('*') == false) {
+                if (peakChar() == '/') {
+                    consumeChar();
+                    return false;
+                }
+            }
+            return true;
         default:
             CurTok.setTokenKind(tok::slash);
             return false;
@@ -306,6 +337,8 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
         break;
     }
 
+    CurTok.setTokenKind(tok::unknown);
+    CurTok.setValue(std::string(1, static_cast<char>(LastChar)));
     // Default fallthrough — nothing matched here.
     return true;
 }

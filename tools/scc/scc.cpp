@@ -69,6 +69,9 @@ int main(int argc, char **argv, char **env) {
         }
         std::cout << std::endl;
     }
+	if (CurTok.is(tok::comment)) {
+		std::cout << "unfinish comment";
+	}
 
     // // Opt.printOpt(std::cout);
     // if (auto a = Args->getArg(Opt_oui))

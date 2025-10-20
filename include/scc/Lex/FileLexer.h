@@ -31,6 +31,9 @@ class FileLexer : public TokenStream {
     int  peakChar(void);
     int  peakChar(int Idx);
     void consumeChar(void);
+	
+	// return true if you found a eof before the char
+	bool consumeCharUntil(int c);
 
     // return the true and consume it only if equal to c
     bool ConsumeCharIfEqual(int c);
