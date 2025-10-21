@@ -56,6 +56,7 @@ add_custom_target(test
 		--output-on-failure ${CMAKE_BUILD_PARALLEL_LEVEL}
 		${verbose_flag}
   DEPENDS
+	LexTests
 	FileManagerTests
 	OptionTests
   USES_TERMINAL
@@ -63,3 +64,4 @@ add_custom_target(test
 
 add_subdirectory(FileManager)
 add_subdirectory(Option)
+add_subdirectory(Lex)

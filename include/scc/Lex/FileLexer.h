@@ -9,31 +9,27 @@ namespace scc {
 
 class FileLexer : public TokenStream {
     MemoryBufferView MemBufferView;
-    unsigned         BuffPos = 0;
-    unsigned         LinePos = 0;
-    unsigned         ColumnPos = 0;
+    FileID           FID;
+    Token::Pos       Pos;
 
     Token LastToken;
     Token NextToken; // if cached with peak
 
   public:
-    FileLexer(File &F) : MemBufferView(F.view()) {}
+    FileLexer(File &F) : MemBufferView(F.view()), FID(F.getFileID()) {}
+    FileLexer(MemoryBufferView &&MBF, FileID &FID) : MemBufferView(MBF), FID(FID) {}
 
     bool next(Token &CurTok);
     bool nextRaw(Token &CurTok);
-
-    bool parseRaw(Token &CurTok);
-
-    bool ParseInclue(Token &CurTok);
 
   private:
     int  getChar(void);
     int  peakChar(void);
     int  peakChar(int Idx);
     void consumeChar(void);
-	
-	// return true if you found a eof before the char
-	bool consumeCharUntil(int c);
+
+    // return true if you found a eof before the char
+    bool consumeCharUntil(int c);
 
     // return the true and consume it only if equal to c
     bool ConsumeCharIfEqual(int c);

@@ -14,4 +14,10 @@ target_include_directories(Lex
     ${CMAKE_SOURCE_DIR}/include
 )
 
+target_link_libraries(Lex
+  PUBLIC
+    Token
+    FileManager
+)
+
 target_compile_features(Lex PUBLIC cxx_std_23)

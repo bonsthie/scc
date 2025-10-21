@@ -28,10 +28,6 @@ static std::vector<const char*> mkArgv(std::initializer_list<const char*> args) 
     return std::vector<const char*>{args};
 }
 
-// -----------------------------------------------------------
-// Tests in your requested style: size(), getArg()->count(), empty()
-// -----------------------------------------------------------
-
 TEST(SccOptionTable, ParsesFlagTest) {
     ErrorManager   EM;
     SccOptionTable Opt(EM);

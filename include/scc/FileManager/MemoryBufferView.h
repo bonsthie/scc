@@ -14,18 +14,13 @@ class MemoryBufferView {
     size_t      Size = 0;
 
   public:
-    explicit MemoryBufferView(const char *Data, size_t Size) : Data(Data), Size(Size) {}
+    explicit MemoryBufferView(const char *Data, size_t Size) noexcept : Data(Data), Size(Size) {}
     MemoryBufferView(MemoryBufferView &&o) noexcept;
     MemoryBufferView(MemoryBufferView &o) noexcept;
     ~MemoryBufferView() = default;
 
-    MemoryBufferView &operator=(MemoryBufferView &&o) noexcept {
-        if (this != &o) {
-            this->~MemoryBufferView();
-            new (this) MemoryBufferView(std::move(o));
-        }
-        return *this;
-    }
+    MemoryBufferView &operator=(MemoryBufferView &o) noexcept;
+    MemoryBufferView &operator=(MemoryBufferView &&o) noexcept;
 
     size_t size() const { return Size; }
 

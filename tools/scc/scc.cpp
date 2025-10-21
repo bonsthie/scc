@@ -54,24 +54,21 @@ int main(int argc, char **argv, char **env) {
     FileManager FM(FF, EM);
 
     File *F = FM.getFile("LexerTest");
-	if (!F) {
-		std::cerr << "File not found\n";
-		return 1;
-	}
+    if (!F) {
+        std::cerr << "File not found\n";
+        return 1;
+    }
 
     FileLexer FL(*F);
 
     Token CurTok;
     while (FL.next(CurTok) == false) {
-        std::cout << "token kind : " << stringify_token_kind(CurTok.getTokenKind());
-        if (CurTok.is(tok::identifier)) {
-            std::cout << " value : " << CurTok.getValue();
-        }
-        std::cout << std::endl;
+        CurTok.print(std::cout);
+		CurTok.flush();
     }
-	if (CurTok.is(tok::comment)) {
-		std::cout << "unfinish comment";
-	}
+    if (CurTok.is(tok::comment)) {
+        std::cout << "unfinish comment";
+    }
 
     // // Opt.printOpt(std::cout);
     // if (auto a = Args->getArg(Opt_oui))

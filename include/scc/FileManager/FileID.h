@@ -18,6 +18,11 @@ class FileID {
     const std::string &getName() const { return Name; };
     const int          getFileFD() const { return ID; };
 
+    std::string getBaseName() {
+        size_t pos = Name.find_last_of("/\\");
+        return (pos == std::string::npos) ? Name : Name.substr(pos + 1);
+    }
+
     bool operator>(const FileID &ID) const { return this->ID > ID.ID; }
     bool operator<(const FileID &ID) const { return this->ID < ID.ID; }
     bool operator>=(const FileID &ID) const { return this->ID >= ID.ID; }

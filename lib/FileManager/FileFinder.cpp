@@ -1,6 +1,5 @@
 #include "scc/FileManager/FileFinder.h"
 #include <filesystem>
-#include <iostream>
 
 using namespace scc;
 

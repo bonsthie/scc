@@ -3,7 +3,9 @@
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include "scc/Token/Token.h"
+#include <cassert>
 #include <cctype>
+#include <iostream>
 
 using namespace scc;
 
@@ -28,43 +30,49 @@ bool FileLexer::nextRaw(Token &CurTok) {
         return false;
     }
 
-    int LastChar = getChar();
+    int  LastChar = getChar();
+	CurTok.setPosBegin(Pos);
+	CurTok.setFileID(&FID);
+    bool eof;
 
     if (LastChar == '\0') {
         CurTok.setTokenKind(tok::eof);
-        return true;
+        eof = true;
     } else if (isspace(LastChar)) {
-        return handleSpaceToken(CurTok, LastChar);
+        eof = handleSpaceToken(CurTok, LastChar);
     } else if (isdigit(LastChar)) {
-        return handleNumToken(CurTok, LastChar);
+        eof = handleNumToken(CurTok, LastChar);
     } else if (isalpha(LastChar) || LastChar == '_') {
-        return handleKeyword(CurTok, LastChar);
+        eof = handleKeyword(CurTok, LastChar);
+    } else {
+        eof = LexSign(CurTok, LastChar);
     }
 
-    return LexSign(CurTok, LastChar);
+	CurTok.setPosEnd(Pos);
+	return eof;
 }
 
-int FileLexer::peakChar(void) { return MemBufferView[BuffPos]; }
+int FileLexer::peakChar(void) { return MemBufferView[Pos.Buff]; }
 
 int FileLexer::peakChar(int Idx) {
-    if (BuffPos + Idx <= MemBufferView.size())
-        return MemBufferView[BuffPos + Idx - 1];
+    if (Pos.Buff + Idx <= MemBufferView.size())
+        return MemBufferView[Pos.Buff + Idx - 1];
     return -1;
 }
 
 int FileLexer::getChar(void) {
-    int c = MemBufferView[BuffPos];
+    int c = MemBufferView[Pos.Buff];
     consumeChar();
     return c;
 }
 
 void FileLexer::consumeChar(void) {
-    if (MemBufferView[BuffPos] == '\n') {
-        ColumnPos = 0;
-        LinePos++;
+    if (MemBufferView[Pos.Buff] == '\n') {
+        Pos.Column = 0;
+        Pos.Line++;
     } else
-        ColumnPos++;
-    BuffPos++;
+        Pos.Column++;
+    Pos.Buff++;
 }
 
 bool FileLexer::consumeCharUntil(int c) {
@@ -96,21 +104,44 @@ bool FileLexer::handleSpaceToken(Token &CurTok, int LastChar) {
     return false;
 }
 
-// ([0-9]*[.])?[0-9]+([eE][-+]?\d+)?
+// for now only basic number before c14 are handle
+// what's work :
+// '123'
+// '123.'
+// '123crampte+ee' work becuse there is  e before the '+'
+// what's don't work :
+// 100_000_000 dosen't work etc....
 bool FileLexer::handleNumToken(Token &CurTok, int LastChar) {
-	CurTok.setTokenKind(tok::numeric_constant);
-	std::string Num;
+    assert(isdigit(LastChar) && "Fist char of a number must be a digit");
+    CurTok.setTokenKind(tok::numeric_constant);
 
-	int tmpChar = peakChar();
-	while (isdigit(tmpChar)) {
-		Num += tmpChar;
-		consumeChar();
-	}
-	// need to do a preparsing of the number even if we consume garbedge just because wee need to see if e+ in float
+    std::string Num;
+    Num += LastChar;
 
+	int eof = false;
+    while (1) {
+        LastChar = peakChar();
+        if (LastChar == 0) {
+			eof = true;
+			break;
+		}
+
+        if (!(isdigit(LastChar) || isalnum(LastChar) || LastChar == '.' || LastChar == '+' || LastChar == '-' ||
+              LastChar == '_'))
+			break;
+        if ((LastChar == '+' || LastChar == '-') && (Num.back() != 'e'))
+			break;
+
+        consumeChar();
+        Num += LastChar;
+    }
+	CurTok.setValue(std::move(Num));
+	return eof;
 }
 
 bool FileLexer::handleKeyword(Token &CurTok, int LastChar) {
+    assert((isalnum(LastChar) || LastChar == '_') &&
+           "Fist char of a keword must be a letter or an underscore");
 
     int         CurrentChar = 0;
     std::string identifyer;
