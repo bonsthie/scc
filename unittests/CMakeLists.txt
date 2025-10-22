@@ -38,7 +38,7 @@ function(scc_create_test)
     PROPERTIES LABELS "${label}"
   )
 
-  add_custom_target("test-${label}"
+  add_custom_target("check-${label}"
     COMMAND ${CMAKE_CTEST_COMMAND}
             --test-dir ${CMAKE_BINARY_DIR}
             -L ${label}
@@ -51,7 +51,7 @@ endfunction()
 
 
 
-add_custom_target(test
+add_custom_target(check
   COMMAND ${CMAKE_CTEST_COMMAND} 
 		--output-on-failure ${CMAKE_BUILD_PARALLEL_LEVEL}
 		${verbose_flag}

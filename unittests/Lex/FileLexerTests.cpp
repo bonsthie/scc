@@ -22,7 +22,5 @@ TEST_F(FileLexTests, BasicTest) {
 
     FL.next(TK);
     EXPECT_EQ(TK.getTokenKind(), tok::t_int);
-    EXPECT_EQ(0, 1);
 }
 
-TEST(FileLexTests, yes) { EXPECT_EQ(1, 0); }

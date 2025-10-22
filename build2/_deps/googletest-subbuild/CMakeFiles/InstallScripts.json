@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/bonsthie/Documents/code/scc/build2/_deps/googletest-subbuild/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
