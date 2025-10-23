@@ -30,9 +30,9 @@ bool FileLexer::nextRaw(Token &CurTok) {
         return false;
     }
 
-    int  LastChar = getChar();
-	CurTok.setPosBegin(Pos);
-	CurTok.setFileID(&FID);
+    CurTok.setPosBegin(Pos);
+    int LastChar = getChar();
+    CurTok.setFileID(&FID);
     bool eof;
 
     if (LastChar == '\0') {
@@ -40,7 +40,7 @@ bool FileLexer::nextRaw(Token &CurTok) {
         eof = true;
     } else if (isspace(LastChar)) {
         eof = handleSpaceToken(CurTok, LastChar);
-    } else if (isdigit(LastChar)) {
+    } else if (isdigit(LastChar) || (LastChar == '.' && isdigit(peakChar()))) {
         eof = handleNumToken(CurTok, LastChar);
     } else if (isalpha(LastChar) || LastChar == '_') {
         eof = handleKeyword(CurTok, LastChar);
@@ -48,8 +48,8 @@ bool FileLexer::nextRaw(Token &CurTok) {
         eof = LexSign(CurTok, LastChar);
     }
 
-	CurTok.setPosEnd(Pos);
-	return eof;
+    CurTok.setPosEnd(Pos);
+    return eof;
 }
 
 int FileLexer::peakChar(void) { return MemBufferView[Pos.Buff]; }
@@ -57,18 +57,18 @@ int FileLexer::peakChar(void) { return MemBufferView[Pos.Buff]; }
 int FileLexer::peakChar(int Idx) {
     if (Pos.Buff + Idx <= MemBufferView.size())
         return MemBufferView[Pos.Buff + Idx - 1];
-    return -1;
+    return 0;
 }
 
 int FileLexer::getChar(void) {
-    int c = MemBufferView[Pos.Buff];
+    int c = peakChar();
     consumeChar();
     return c;
 }
 
 void FileLexer::consumeChar(void) {
     if (MemBufferView[Pos.Buff] == '\n') {
-        Pos.Column = 0;
+        Pos.Column = 1;
         Pos.Line++;
     } else
         Pos.Column++;
@@ -112,31 +112,32 @@ bool FileLexer::handleSpaceToken(Token &CurTok, int LastChar) {
 // what's don't work :
 // 100_000_000 dosen't work etc....
 bool FileLexer::handleNumToken(Token &CurTok, int LastChar) {
-    assert(isdigit(LastChar) && "Fist char of a number must be a digit");
+    assert((isdigit(LastChar) || LastChar == '.') &&
+           "Fist char of a number must be a digit or a dot");
     CurTok.setTokenKind(tok::numeric_constant);
 
     std::string Num;
     Num += LastChar;
 
-	int eof = false;
+    int eof = false;
     while (1) {
         LastChar = peakChar();
         if (LastChar == 0) {
-			eof = true;
-			break;
-		}
+            eof = true;
+            break;
+        }
 
-        if (!(isdigit(LastChar) || isalnum(LastChar) || LastChar == '.' || LastChar == '+' || LastChar == '-' ||
-              LastChar == '_'))
-			break;
-        if ((LastChar == '+' || LastChar == '-') && (Num.back() != 'e'))
-			break;
+        if (!(isdigit(LastChar) || isalnum(LastChar) || LastChar == '.' || LastChar == '+' ||
+              LastChar == '-' || LastChar == '_'))
+            break;
+        if ((LastChar == '+' || LastChar == '-') && !(Num.back() != 'e' || Num.back() != 'E'))
+            break;
 
         consumeChar();
         Num += LastChar;
     }
-	CurTok.setValue(std::move(Num));
-	return eof;
+    CurTok.setValue(std::move(Num));
+    return eof;
 }
 
 bool FileLexer::handleKeyword(Token &CurTok, int LastChar) {
@@ -197,7 +198,9 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
 
     case '.': {
         // Ellipsis: '...'
-        if (ConsumeCharIfEqual('.') && ConsumeCharIfEqual('.')) {
+        if (peakChar() == '.' && peakChar(2) == '.') {
+            consumeChar();
+            consumeChar();
             CurTok.setTokenKind(tok::ellipsis);
             return false;
         }

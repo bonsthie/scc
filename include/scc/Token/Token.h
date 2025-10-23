@@ -40,10 +40,11 @@ class Token {
 
     struct Pos {
         unsigned Buff = 0;
-        unsigned Line = 0;
-        unsigned Column = 0;
+        unsigned Line = 1;
+        unsigned Column = 1;
 
         Pos() = default;
+		Pos(unsigned Line, unsigned Column) : Line(Line), Column(Column) {}
         Pos(Pos &P) { *this = P; }
 
         Pos &operator=(const Pos &P) {

@@ -133,9 +133,11 @@ KEYWORD(sizeof)
 KEYWORD(static)
 KEYWORD(struct)
 KEYWORD(switch)
+KEYWORD(default)
 KEYWORD(typedef)
 KEYWORD(union)
 KEYWORD(volatile)
+KEYWORD(while)
 
 // C11 additional keywords
 KEYWORD(_Alignas)
