@@ -66,6 +66,7 @@ int main(int argc, char **argv, char **env) {
         CurTok.print(std::cout);
 		CurTok.flush();
     }
+	CurTok.print(std::cout);
     if (CurTok.is(tok::comment)) {
         std::cout << "unfinish comment";
     }

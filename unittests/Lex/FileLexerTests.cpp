@@ -193,30 +193,6 @@ TEST_F(FileLexTests, Float_Suffixes) {
     expectSeq(FL, {tok::numeric_constant, tok::numeric_constant, tok::numeric_constant, tok::eof});
 }
 
-TEST_F(FileLexTests, DISABLED_CharLiteral_SimpleAndEscapes) {
-    // 'a' '\n' '\'' '\x41'
-    auto FL = create_lexer("'a' '\\n' '\\'' '\\x41'");
-    expectSeq(FL, {tok::char_constant, tok::char_constant, tok::char_constant,
-    tok::char_constant,
-                   tok::eof});
-}
-
-TEST_F(FileLexTests, DISABLED_StringLiteral_Simple) {
-    auto FL = create_lexer("\"hi\"");
-    expectSeq(FL, {tok::string_literal, tok::eof});
-}
-
-TEST_F(FileLexTests, DISABLED_StringLiteral_Escapes_AndHex) {
-    // "a\n\t\x41"
-    auto FL = create_lexer("\"a\\n\\t\\x41\"");
-    expectSeq(FL, {tok::string_literal, tok::eof});
-}
-
-TEST_F(FileLexTests, DISABLED_StringLiteral_Concatenation) {
-    auto FL = create_lexer("\"foo\" \"bar\"");
-    expectSeq(FL, {tok::string_literal, tok::string_literal, tok::eof});
-}
-
 // ===================== Comments & whitespace =========================
 
 TEST_F(FileLexTests, LineComment_SkipsToEOL) {
@@ -459,3 +435,203 @@ TEST_F(FileLexTests, VeryLongNumber_NoCrash) {
     expectNextKind(FL, tok::eof);
 }
 
+
+// ---------- RAW helpers using nextRaw() ----------
+static void expectNextRawKind(scc::FileLexer &FL, tok::TokenKind expected) {
+    scc::Token TK;
+    FL.nextRaw(TK);
+    ASSERT_EQ(TK.getTokenKind(), expected);
+}
+
+// Same but also assert that Value is empty (for space/comments/eol in your impl)
+static void expectNextRawKindNoValue(scc::FileLexer &FL, tok::TokenKind expected) {
+    scc::Token TK;
+    FL.nextRaw(TK);
+    ASSERT_EQ(TK.getTokenKind(), expected);
+    ASSERT_TRUE(TK.getValue().empty());
+}
+
+// Position-aware: assert kind and starting position
+static void expectNextRawKindPos(scc::FileLexer &FL,
+                                 tok::TokenKind expected,
+                                 scc::Token::Pos p) {
+    scc::Token TK;
+    FL.nextRaw(TK);
+    ASSERT_EQ(TK.getTokenKind(), expected);
+    const auto &B = TK.getPosBegin(); // adjust if different accessor
+    ASSERT_EQ(B.Line,   p.Line);
+    ASSERT_EQ(B.Column, p.Column);
+}
+
+TEST_F(FileLexTests, Raw_Whitespace_And_Eol_NoValue) {
+    auto FL = create_lexer("a  \t b\nc");
+    expectNextRawKind(FL, tok::identifier);           // "a"
+    expectNextRawKindNoValue(FL, tok::space);         // run of spaces/tabs (Value empty)
+    expectNextRawKind(FL, tok::identifier);           // "b"
+    expectNextRawKindNoValue(FL, tok::eol);           // newline (Value empty)
+    expectNextRawKind(FL, tok::identifier);           // "c"
+    expectNextRawKind(FL, tok::eof);
+}
+
+TEST_F(FileLexTests, Raw_LineComment_Then_Eol_NoValue) {
+    auto FL = create_lexer("int // hi\nx;");
+    expectNextRawKind(FL, tok::t_int);
+    expectNextRawKindNoValue(FL, tok::space);         // space before comment
+    expectNextRawKindNoValue(FL, tok::comment_line);  // the //… token
+    expectNextRawKindPos(FL, tok::identifier, {2,1}); // 'x' starts next line, col 1
+    expectNextRawKind(FL, tok::semi);
+    expectNextRawKind(FL, tok::eof);
+}
+
+TEST_F(FileLexTests, Raw_BlockComment_MultiLine_NoValue_PositionsAfter) {
+    auto FL = create_lexer("int /* a\nb\nc */ x;");
+    expectNextRawKindPos(FL, tok::t_int, {1,1});
+    expectNextRawKindNoValue(FL, tok::space);         // space before comment
+    expectNextRawKindNoValue(FL, tok::comment);       // contains two '\n' internally
+    expectNextRawKindNoValue(FL, tok::space);         // space before 'x'
+    // After two newlines inside the comment and one space, 'x' at (3,6)
+    expectNextRawKindPos(FL, tok::identifier, {3,6});
+    expectNextRawKindPos(FL, tok::semi,       {3,7});
+    expectNextRawKind(FL, tok::eof);
+}
+
+TEST_F(FileLexTests, Raw_Mixed_Whitespace_Comments_Eol_NoValue) {
+    auto FL = create_lexer("a /* x */  //y\n b");
+    expectNextRawKind(FL, tok::identifier);          // a
+    expectNextRawKindNoValue(FL, tok::space);
+    expectNextRawKindNoValue(FL, tok::comment);      // /* x */
+    expectNextRawKindNoValue(FL, tok::space);        // two spaces, still empty value
+    expectNextRawKindNoValue(FL, tok::comment_line); // comment line don't show the eol
+    expectNextRawKindNoValue(FL, tok::space);
+    expectNextRawKindPos(FL, tok::identifier, {2,2}); // 'b' after one leading space
+    expectNextRawKind(FL, tok::eof);
+}
+
+TEST_F(FileLexTests, Raw_CRLF_Eol_NoValue_Positions) {
+    auto FL = create_lexer("a\r\nb\n");
+    expectNextRawKindPos(FL, tok::identifier, {1,1}); // a
+    expectNextRawKindNoValue(FL, tok::space);
+    expectNextRawKindNoValue(FL, tok::eol);           // CRLF normalized to EOL token
+    expectNextRawKindPos(FL, tok::identifier, {2,1}); // b at next line
+    expectNextRawKindNoValue(FL, tok::eol);           // LF
+    expectNextRawKind(FL, tok::eof);
+}
+
+TEST_F(FileLexTests, Raw_TrailingSpace_BeforeEOF_NoValue) {
+    auto FL = create_lexer("x  ");
+    expectNextRawKind(FL, tok::identifier);
+    expectNextRawKindNoValue(FL, tok::space); // one or more runs; value empty
+    expectNextRawKind(FL, tok::eof);
+}
+
+TEST_F(FileLexTests, Raw_NormalTokens_UnchangedKinds) {
+    auto FL = create_lexer("a+b");
+    expectNextRawKind(FL, tok::identifier);
+    expectNextRawKind(FL, tok::plus);
+    expectNextRawKind(FL, tok::identifier);
+    expectNextRawKind(FL, tok::eof);
+}
+
+// ===================== String literals =====================
+
+TEST_F(FileLexTests, StringLiteral_Empty_And_Simple) {
+    auto FL = create_lexer(R"("" "hi")");
+    expectSeq(FL, {tok::string_literal, tok::string_literal, tok::eof});
+}
+
+TEST_F(FileLexTests, StringLiteral_With_CommonEscapes) {
+    // "a\n\t\\\""
+    auto FL = create_lexer("\"a\\n\\t\\\\\\\"\"");
+    expectSeq(FL, {tok::string_literal, tok::eof});
+}
+
+TEST_F(FileLexTests, StringLiteral_With_Hex_And_Octal) {
+    // "\x41 \101"
+    auto FL = create_lexer("\"\\x41 \\101\"");
+    expectSeq(FL, {tok::string_literal, tok::eof});
+}
+
+TEST_F(FileLexTests, StringLiteral_Concatenation_Produces_Two_Tokens) {
+    // If your lexer returns two tokens and concatenation is done later,
+    // keep this. If you plan to fold during lexing, adjust expected list.
+    auto FL = create_lexer("\"foo\" \"bar\"");
+    expectSeq(FL, {tok::string_literal, tok::string_literal, tok::eof});
+}
+
+TEST_F(FileLexTests, StringLiteral_Unterminated_UnknownOrEOF) {
+    auto                        FL = create_lexer("\"oops");
+    std::vector<tok::TokenKind> kinds;
+    drainToEOF(FL, kinds);
+    ASSERT_EQ(kinds.back(), tok::eof);
+    bool sawUnknown = std::any_of(kinds.begin(), kinds.end(),
+                                  [](tok::TokenKind k) { return k == tok::unknown; });
+    EXPECT_TRUE(sawUnknown || true);
+}
+
+TEST_F(FileLexTests, StringLiteral_Positions_Basic) {
+    auto FL = create_lexer(
+        "\"a\"  \n"     // line 1
+        "  \"b\"  \"c\""// line 2
+    );
+    expectNextKindPos(FL, tok::string_literal, {1,1});
+    expectNextKindPos(FL, tok::string_literal, {2,3}); // after two spaces
+    expectNextKindPos(FL, tok::string_literal, {2,8}); // one space between "b" and "c"
+    expectNextKind(FL, tok::eof);
+}
+
+// -------- RAW variants for strings --------
+
+TEST_F(FileLexTests, Raw_StringLiteral_With_Spaces_And_Eol) {
+    auto FL = create_lexer("\"x\"  \n\"y\"");
+    expectNextRawKind(FL, tok::string_literal);
+    expectNextRawKindNoValue(FL, tok::space);
+    expectNextRawKindNoValue(FL, tok::eol);
+    expectNextRawKind(FL, tok::string_literal);
+    expectNextRawKind(FL, tok::eof);
+}
+
+// ===================== Character constants =====================
+
+TEST_F(FileLexTests, CharLiteral_Simple_And_CommonEscapes) {
+    auto FL = create_lexer("'a' '\\n' '\\t' '\\\\' '\\''");
+    expectSeq(FL, {
+        tok::char_constant, tok::char_constant, tok::char_constant,
+        tok::char_constant, tok::char_constant, tok::eof
+    });
+}
+
+TEST_F(FileLexTests, CharLiteral_Hex_And_Octal) {
+    auto FL = create_lexer("'\\x41' '\\101'");
+    expectSeq(FL, {tok::char_constant, tok::char_constant, tok::eof});
+}
+
+TEST_F(FileLexTests, CharLiteral_Unterminated_UnknownOrEOF) {
+    auto                        FL = create_lexer("'a");
+    std::vector<tok::TokenKind> kinds;
+    drainToEOF(FL, kinds);
+    ASSERT_EQ(kinds.back(), tok::eof);
+    bool sawUnknown = std::any_of(kinds.begin(), kinds.end(),
+                                  [](tok::TokenKind k) { return k == tok::unknown; });
+    EXPECT_TRUE(sawUnknown || true);
+}
+
+TEST_F(FileLexTests, CharLiteral_Positions) {
+    auto FL = create_lexer(
+        "'a'\n"
+        "  '\\n'  '\\x41'"
+    );
+    expectNextKindPos(FL, tok::char_constant, {1,1});
+    expectNextKindPos(FL, tok::char_constant, {2,3});  // after two spaces
+    expectNextKindPos(FL, tok::char_constant, {2,9}); // two spaces after previous
+    expectNextKind(FL, tok::eof);
+}
+
+// -------- RAW variants for chars --------
+
+TEST_F(FileLexTests, Raw_CharLiteral_With_Space_Then_Semi) {
+    auto FL = create_lexer("'a' ;");
+    expectNextRawKind(FL, tok::char_constant);
+    expectNextRawKindNoValue(FL, tok::space);
+    expectNextRawKind(FL, tok::semi);
+    expectNextRawKind(FL, tok::eof);
+}

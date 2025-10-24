@@ -52,7 +52,11 @@ bool FileLexer::nextRaw(Token &CurTok) {
     return eof;
 }
 
-int FileLexer::peakChar(void) { return MemBufferView[Pos.Buff]; }
+int FileLexer::peakChar(void) {
+    if (Pos.Buff <= MemBufferView.size())
+        return MemBufferView[Pos.Buff];
+    return 0;
+}
 
 int FileLexer::peakChar(int Idx) {
     if (Pos.Buff + Idx <= MemBufferView.size())
@@ -93,10 +97,16 @@ bool FileLexer::ConsumeCharIfEqual(int c) {
 }
 
 bool FileLexer::handleSpaceToken(Token &CurTok, int LastChar) {
+    if (LastChar == '\n') {
+        CurTok.setTokenKind(tok::eol);
+        return 0;
+    }
+
     int c = 0;
     while (1) {
+
         c = peakChar();
-        if (!isspace(c))
+        if (!isspace(c) || c == '\n')
             break;
         consumeChar();
     }
@@ -160,8 +170,36 @@ bool FileLexer::handleKeyword(Token &CurTok, int LastChar) {
     return false;
 }
 
+bool FileLexer::handleString(Token &CurTok, int Limiter) {
+    if (Limiter == '\'')
+        CurTok.setTokenKind(tok::char_constant);
+    else
+        CurTok.setTokenKind(tok::string_literal);
+
+    std::string string;
+    string += Limiter;
+
+    int LastChar = 0;
+    do {
+        LastChar = getChar();
+
+        string += LastChar;
+        if (LastChar == '\\') {
+            string += getChar();
+        }
+
+    } while (LastChar != Limiter && LastChar != '\n' && LastChar != 0);
+    CurTok.setValue(std::move(string));
+    if (LastChar == Limiter)
+        return false;
+    return true;
+}
+
 inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
     switch (LastChar) {
+    case '\n':
+        CurTok.setTokenKind(tok::eol);
+        return false;
     case '(':
         CurTok.setTokenKind(tok::l_paren);
         return false;
@@ -365,6 +403,10 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
         }
         CurTok.setTokenKind(tok::pp_hash);
         return false;
+    }
+    case '\'':
+    case '"': {
+        return handleString(CurTok, LastChar);
     }
 
     default:

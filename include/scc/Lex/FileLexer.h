@@ -45,6 +45,8 @@ class FileLexer : public TokenStream {
     bool handleSpaceToken(Token &CurTok, int LastChar);
     bool handleNumToken(Token &CurTok, int LastChar);
     bool handleKeyword(Token &CurTok, int LastChar);
+    bool handleString(Token &CurTok, int LastChar);
+    bool handleChar(Token &CurTok, int LastChar);
 
     inline size_t LexSign(Token &CurTok, int LastChar);
 };
