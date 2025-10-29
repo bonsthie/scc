@@ -62,6 +62,7 @@ TOK(identifier)
 TOK(numeric_constant)
 TOK(char_constant)
 TOK(string_literal)
+TOK(system_string) // use for system include #include <foo.h>
 
 // Comments
 

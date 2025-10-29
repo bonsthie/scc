@@ -1,0 +1,93 @@
+#include "scc/PreProcessor/PreProcessor.h"
+#include "scc/String/StringUtils.h"
+#include "scc/Token/Token.h"
+#include <cassert>
+
+using namespace scc;
+
+PreProcessor::PreProcessor(File &F, ErrorManager &EM, FileManager &FM) : EM(EM), FM(FM) {
+    addNewTokenStream(F);
+}
+
+bool PreProcessor::nextRaw(Token &Tok) {
+    if (CurrentTokStream == nullptr) {
+        CurrentTokStream = getNextTokenStream();
+        if (CurrentTokStream == nullptr) {
+            Tok.setTokenKind(tok::eof);
+            return true;
+        }
+    }
+
+    bool err = CurrentTokStream->next(Tok);
+
+    if (err) {
+        if (Tok.is(tok::eof)) {
+            popTokenStream();
+            return next(Tok);
+        } else
+            return true;
+    }
+
+    return false;
+}
+
+bool PreProcessor::next(Token &Tok) {
+    if (nextRaw(Tok))
+        return true;
+
+    if (Tok.is(tok::pp_hash)) {
+        if (handlePP(Tok))
+            return true;
+        Tok.flush();
+        return next(Tok);
+    }
+    return false;
+}
+
+bool PreProcessor::handlePP(Token &Tok) {
+    FileLexer *FL = static_cast<FileLexer *>(CurrentTokStream);
+    assert(FL && "handlePP can't be use with other things than FileLexer");
+
+    if (CurrentTokStream->next(Tok))
+        return true;
+
+    if (Tok.is(tok::pp_include)) {
+        if (FL->lexInclude(Tok))
+            return true;
+
+        if (Tok.is(tok::string_literal)) {
+            std::string path = Tok.getValue();
+            path = trim_quote(path);
+            File *F = FM.getFile(path, FL->getFID());
+
+            if (F == nullptr) {
+                // emit error
+                return true;
+            }
+            addNewTokenStream(*F);
+            return false;
+        } else if (Tok.is(tok::system_string)) {
+            std::string path = Tok.getValue();
+            path = trim_quote_system(path);
+            File *F = FM.getSystemFile(path);
+
+            if (F == nullptr) {
+                // emit error
+                return true;
+            }
+            addNewTokenStream(*F);
+            return false;
+        }
+
+        if (Tok.is(tok::eol)) {
+            // emit missing value ...
+            return true;
+        }
+
+        if (Tok.is(tok::unknown)) {
+            // emit unknow value shoudl be "" or <>
+            return true;
+        }
+    }
+    return true;
+}

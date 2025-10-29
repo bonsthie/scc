@@ -1,8 +1,11 @@
 #ifndef SCC_PREPROCESSOR_PREPROCESSOR_H
 #define SCC_PREPROCESSOR_PREPROCESSOR_H
 
+#include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/File.h"
+#include "scc/FileManager/FileManager.h"
 #include "scc/Lex/FileLexer.h"
+#include "scc/Token/Token.h"
 #include "scc/Token/TokenStream.h"
 #include <memory>
 #include <vector>
@@ -14,23 +17,40 @@ namespace scc {
 
 class PreProcessor {
     std::vector<std::unique_ptr<TokenStream>> TSList;
-    std::vector<FileID>                       FileScope;
+    TokenStream                              *CurrentTokStream = nullptr;
+
+    ErrorManager &EM;
+    FileManager  &FM;
 
     // DefineManager                             DM;
     // IfdefManager                              ifdefManager;
     // LineMapper								 Mapper;
 
   public:
-
-    PreProcessor(File &F);
+    PreProcessor(File &F, ErrorManager &EM, FileManager &FM);
 
     bool next(Token &Tok);
+    bool nextRaw(Token &Tok);
 
   private:
     bool handlePP(Token &Tok);
+    bool handleInclude(Token &Tok, FileLexer &FL);
 
-    // TokenStream list utils
-    void addNewTokenStream(File &F) { TSList.push_back(std::make_unique<FileLexer>(F)); }
+    TokenStream *addNewTokenStream(File &F) {
+        TSList.emplace_back(std::make_unique<FileLexer>(F));
+        return (CurrentTokStream = TSList.back().get());
+    }
+
+    TokenStream *getNextTokenStream() {
+        if (TSList.size() == 0)
+            return nullptr;
+        return TSList.back().get();
+    }
+
+    void popTokenStream() {
+        TSList.pop_back();
+        CurrentTokStream = nullptr;
+    }
 };
 } // namespace scc
 

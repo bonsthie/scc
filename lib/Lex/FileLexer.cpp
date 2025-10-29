@@ -52,6 +52,44 @@ bool FileLexer::nextRaw(Token &CurTok) {
     return eof;
 }
 
+bool FileLexer::lexInclude(Token &CurTok) {
+    bool err;
+
+    while (1) {
+
+        if (nextRaw(CurTok))
+            return true;
+
+		// this works for some reason but not with comment line
+		// # include /*
+		// */ "foo.h"
+        if (CurTok.is(tok::space, tok::comment))
+            continue;
+
+        if (CurTok.is(tok::string_literal)) // #include "foo.h"
+            return false;
+
+        if (CurTok.is(tok::comment_line)) { // #include // comment_line
+            CurTok.setTokenKind(tok::eol);
+            return false;
+        }
+
+        if (CurTok.is(tok::less)) { // #include <foo.h>
+            std::string Str(1, '<');
+
+            CurTok.setPosBegin(Pos);
+            bool err = consumeCharUntil('>', Str);
+            CurTok.setValue(std::move(Str));
+            CurTok.setTokenKind(err == false ? tok::system_string : tok::unknown);
+            CurTok.setPosEnd(Pos);
+            return err;
+        }
+
+        CurTok.setTokenKind(tok::unknown);
+        return true;
+    }
+}
+
 int FileLexer::peakChar(void) {
     if (Pos.Buff <= MemBufferView.size())
         return MemBufferView[Pos.Buff];
@@ -84,6 +122,16 @@ bool FileLexer::consumeCharUntil(int c) {
 
     do {
         nextC = getChar();
+    } while (nextC != c && nextC != 0);
+    return nextC == 0;
+}
+
+bool FileLexer::consumeCharUntil(int c, std::string &Str) {
+    int nextC;
+
+    do {
+        nextC = getChar();
+        Str += nextC;
     } while (nextC != c && nextC != 0);
     return nextC == 0;
 }

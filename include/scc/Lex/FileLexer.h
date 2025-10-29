@@ -22,6 +22,10 @@ class FileLexer : public TokenStream {
     bool next(Token &CurTok);
     bool nextRaw(Token &CurTok);
 
+    bool lexInclude(Token &CurTok);
+
+	const FileID &getFID() const { return FID; }
+
   private:
     int  getChar(void);
     int  peakChar(void);
@@ -30,6 +34,7 @@ class FileLexer : public TokenStream {
 
     // return true if you found a eof before the char
     bool consumeCharUntil(int c);
+    bool consumeCharUntil(int c, std::string &Str);
 
     // return the true and consume it only if equal to c
     bool ConsumeCharIfEqual(int c);

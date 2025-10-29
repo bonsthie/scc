@@ -54,7 +54,7 @@ int main(int argc, char **argv, char **env) {
     FileFinder  FF(Inc ? Inc->getValuesList() : std::vector<std::string>{});
     FileManager FM(FF, EM);
 
-    File *F = FM.getFile("LexerTest.c");
+    File *F = FM.getFile("LexerTest");
     if (!F) {
         std::cerr << "File not found\n";
         return 1;
@@ -67,10 +67,10 @@ int main(int argc, char **argv, char **env) {
         CurTok.print(std::cout);
 		CurTok.flush();
     }
-	// CurTok.print(std::cout);
-	//     if (CurTok.is(tok::comment)) {
-	//         std::cout << "unfinish comment";
-	//     }
+	CurTok.print(std::cout);
+    if (CurTok.is(tok::comment)) {
+        std::cout << "unfinish comment";
+    }
 
     // // Opt.printOpt(std::cout);
     // if (auto a = Args->getArg(Opt_oui))

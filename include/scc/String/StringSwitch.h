@@ -5,7 +5,6 @@
 #include <string_view>
 
 namespace scc {
-namespace str {
 
 template <typename T> class StringSwitch {
     std::string_view S;
@@ -25,9 +24,6 @@ template <typename T> class StringSwitch {
     operator T() const { return *Res; }
 };
 
-} // namespace str
-
 } // namespace scc
-//
 
 #endif // SCC_STRING_STRINGSWITCH_H
