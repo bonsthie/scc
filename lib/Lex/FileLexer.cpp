@@ -60,9 +60,9 @@ bool FileLexer::lexInclude(Token &CurTok) {
         if (nextRaw(CurTok))
             return true;
 
-		// this works for some reason but not with comment line
-		// # include /*
-		// */ "foo.h"
+        // this works for some reason but not with comment line
+        // # include /*
+        // */ "foo.h"
         if (CurTok.is(tok::space, tok::comment))
             continue;
 
@@ -82,11 +82,19 @@ bool FileLexer::lexInclude(Token &CurTok) {
             CurTok.setValue(std::move(Str));
             CurTok.setTokenKind(err == false ? tok::system_string : tok::unknown);
             CurTok.setPosEnd(Pos);
+
+            if (err) {
+                EM.report(err::error)
+                    .at(CurTok.posViewEnd())
+                    .msg("include missing closing ")
+                    .Char('>');
+                CurTok.flush();
+            }
             return err;
         }
 
         CurTok.setTokenKind(tok::unknown);
-        return true;
+        return false;
     }
 }
 
@@ -132,8 +140,8 @@ bool FileLexer::consumeCharUntil(int c, std::string &Str) {
     do {
         nextC = getChar();
         Str += nextC;
-    } while (nextC != c && nextC != 0);
-    return nextC == 0;
+    } while (nextC != c && nextC != 0 && nextC != '\n');
+    return nextC != c;
 }
 
 bool FileLexer::ConsumeCharIfEqual(int c) {
@@ -240,6 +248,12 @@ bool FileLexer::handleString(Token &CurTok, int Limiter) {
     CurTok.setValue(std::move(string));
     if (LastChar == Limiter)
         return false;
+
+    EM.report(err::error) //
+        .at(CurTok.posViewEnd())
+        .msg("missing closing ")
+        .Char(Limiter);
+    CurTok.flush();
     return true;
 }
 
@@ -357,6 +371,10 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
                     return false;
                 }
             }
+
+            EM.report(err::error) //
+                .at(CurTok.posViewBegin())
+                .msg("unterminated /* comment");
             return true;
         default:
             CurTok.setTokenKind(tok::slash);

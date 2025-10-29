@@ -14,4 +14,11 @@ target_include_directories(PreProcessor
     ${CMAKE_SOURCE_DIR}/include
 )
 
+target_link_libraries(PreProcessor
+  PUBLIC
+	Error
+	Token
+	FileManager
+)
+
 target_compile_features(PreProcessor PUBLIC cxx_std_23)

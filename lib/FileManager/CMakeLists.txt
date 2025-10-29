@@ -18,4 +18,9 @@ target_include_directories(FileManager
     ${CMAKE_SOURCE_DIR}/include
 )
 
+target_link_libraries(FileManager
+  PUBLIC
+	Error
+)
+
 target_compile_features(FileManager PUBLIC cxx_std_23)

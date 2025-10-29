@@ -1,10 +1,10 @@
 #include "scc/Error/Error.h"
-#include "scc/PreProcessor/PreProcessor.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileFinder.h"
 #include "scc/FileManager/FileManager.h"
 #include "scc/Lex/FileLexer.h"
 #include "scc/Option/OptionTable.h"
+#include "scc/PreProcessor/PreProcessor.h"
 #include "scc/Token/Token.h"
 #include <cstring>
 #include <iostream>
@@ -60,17 +60,21 @@ int main(int argc, char **argv, char **env) {
         return 1;
     }
 
-    PreProcessor FL(*F, EM, FM);
+    PreProcessor PP(*F, EM, FM);
 
     Token CurTok;
-    while (FL.next(CurTok) == false) {
-        CurTok.print(std::cout);
+    do {
 		CurTok.flush();
-    }
-	// CurTok.print(std::cout);
-	//     if (CurTok.is(tok::comment)) {
-	//         std::cout << "unfinish comment";
-	//     }
+        PP.next(CurTok);
+		std::cout << CurTok << std::endl;
+        if (EM.size())
+            EM.emit();
+    } while (!CurTok.is(tok::eof));
+
+    // CurTok.print(std::cout);
+    //     if (CurTok.is(tok::comment)) {
+    //         std::cout << "unfinish comment";
+    //     }
 
     // // Opt.printOpt(std::cout);
     // if (auto a = Args->getArg(Opt_oui))

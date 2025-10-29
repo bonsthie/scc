@@ -3,6 +3,7 @@ add_executable(scc scc.cpp)
 target_link_libraries(scc
 	PRIVATE
 	FileManager
+	Error
 	PreProcessor
 	Option
 	Lex

@@ -30,18 +30,22 @@ class ErrorManager {
         return Errs.back();
     }
 
-    int emit() {
+    Error &last() { return Errs.back(); }
+
+    bool emit() {
         for (auto it = Errs.begin(); it != Errs.end();) {
             int status = it->emit(O);
             it = Errs.erase(it);
             if (status) {
-                return 1;
+                return true;
             }
         }
-        return 0;
+        return false;
     }
 
-	const std::vector<Error> &getErrsList() const { return Errs; }
+    const std::vector<Error> &getErrsList() const { return Errs; }
+
+    int size() { return Errs.size(); }
 
     static FactoryFunc defaultFactory() {
         return [](err::DiagLevel L) { return std::make_unique<Error>(L); };

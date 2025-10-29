@@ -14,4 +14,9 @@ target_include_directories(Option
     ${CMAKE_SOURCE_DIR}/include
 )
 
+target_link_libraries(Option
+  PUBLIC
+	Error
+)
+
 target_compile_features(Option PUBLIC cxx_std_23)

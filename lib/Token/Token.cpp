@@ -43,9 +43,22 @@ void Token::print(std::ostream &OS) const {
         OS << " [StartOfLine]";
 
     std::ostringstream LocStr;
-    LocStr << "Loc=<" << (FID ? FID->getBaseName() : "<stdin>") << ':' << PosBegin.Line << ':'
-           << PosBegin.Column << '>';
+    LocStr << "Loc=<" << posViewBegin() << '>';
     std::string loc = LocStr.str();
 
-    OS << " " << loc << '\n';
+    OS << " " << loc;
+}
+
+std::ostream &scc::operator<<(std::ostream &OS, const Token &T) {
+    T.print(OS);
+    return OS;
+}
+
+void Token::PosView::print(std::ostream &OS) const {
+    OS << (FID ? FID->getBaseName() : "<stdin>") << ':' << P.Line << ':' << P.Column;
+}
+
+std::ostream &scc::operator<<(std::ostream &OS, const Token::PosView &V) {
+    V.print(OS);
+    return OS;
 }

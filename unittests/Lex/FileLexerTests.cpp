@@ -1,3 +1,4 @@
+#include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include "scc/Lex/FileLexer.h"
 #include "scc/Token/Token.h"
@@ -9,13 +10,17 @@ using namespace scc;
 
 class FileLexTests : public ::testing::Test {
   public:
-    std::unique_ptr<FileID> FID;
+    std::unique_ptr<FileID>       FID;
+    std::unique_ptr<ErrorManager> EM;
 
-    void SetUp() override { FID = std::make_unique<FileID>("test File", 1); }
+    void SetUp() override {
+        FID = std::make_unique<FileID>("test File", 1);
+        EM = std::make_unique<ErrorManager>();
+    }
 
     FileLexer create_lexer(const char *str) {
         MemoryBufferView MV(str, strlen(str));
-        return FileLexer(std::move(MV), *FID);
+		return FileLexer(std::move(MV), *FID, *EM);
     }
 
     static void expectSeq(FileLexer &FL, std::initializer_list<tok::TokenKind> kinds) {

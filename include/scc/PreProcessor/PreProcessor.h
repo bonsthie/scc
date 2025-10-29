@@ -37,7 +37,7 @@ class PreProcessor {
     bool handleInclude(Token &Tok, FileLexer &FL);
 
     TokenStream *addNewTokenStream(File &F) {
-        TSList.emplace_back(std::make_unique<FileLexer>(F));
+        TSList.emplace_back(std::make_unique<FileLexer>(F, EM));
         return (CurrentTokStream = TSList.back().get());
     }
 

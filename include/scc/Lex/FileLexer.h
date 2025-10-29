@@ -1,6 +1,7 @@
 #ifndef SCC_LEX_FILELEXER_H
 #define SCC_LEX_FILELEXER_H
 
+#include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include "scc/Token/Token.h"
@@ -8,6 +9,7 @@
 namespace scc {
 
 class FileLexer : public TokenStream {
+    ErrorManager    &EM;
     MemoryBufferView MemBufferView;
     FileID           FID;
     Token::Pos       Pos;
@@ -16,15 +18,15 @@ class FileLexer : public TokenStream {
     Token NextToken; // if cached with peak
 
   public:
-    FileLexer(File &F) : MemBufferView(F.view()), FID(F.getFileID()) {}
-    FileLexer(MemoryBufferView &&MBF, FileID &FID) : MemBufferView(MBF), FID(FID) {}
+	FileLexer(File &F, ErrorManager &EM) : EM(EM), MemBufferView(F.view()), FID(F.getFileID()) {}
+	FileLexer(MemoryBufferView &&MBF, FileID &FID, ErrorManager &EM) : EM(EM), MemBufferView(MBF), FID(FID) {}
 
     bool next(Token &CurTok);
     bool nextRaw(Token &CurTok);
 
     bool lexInclude(Token &CurTok);
 
-	const FileID &getFID() const { return FID; }
+    const FileID &getFID() const { return FID; }
 
   private:
     int  getChar(void);

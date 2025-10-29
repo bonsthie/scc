@@ -70,7 +70,7 @@ bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
         File *F = FM.getFile(path, FL.getFID());
 
         if (F == nullptr) {
-            // emit error
+            EM.last().at(Tok.posViewBegin());
             return true;
         }
         addNewTokenStream(*F);
@@ -83,20 +83,16 @@ bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
         File *F = FM.getSystemFile(path);
 
         if (F == nullptr) {
-            // emit error
+            EM.last().at(Tok.posViewBegin());
             return true;
         }
         addNewTokenStream(*F);
         return false;
     }
 
-    case tok::unknown: {
-        // emit unknow value shoudl be "" or <>
+    default: {
+        EM.report(err::error).at(Tok.posViewBegin()).msg("expected \"FILENAME\" or <FILENAME>");
         return true;
     }
-
-    default:
-        // emit missing value ...
-        return true;
     }
 }

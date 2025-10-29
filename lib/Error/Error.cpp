@@ -5,11 +5,11 @@ using namespace scc;
 // TODO : handle NO_COLOR
 void Error::print(std::ostream &O) const {
     if (Pos)
-        O << Pos.value();
+        O << COL_BOLD << Pos.value() << ": ";
     else
-        O << getProgramNameString();
+        O << getProgramNameString() << ": " COL_BOLD;
 
-    O << ": " COL_BOLD << getPrintLevelString() << COL_BOLD ": " << Msg.str() << COL_RESET "\n";
+    O << getPrintLevelString() << COL_BOLD ": " << Msg.str() << COL_RESET "\n";
 }
 
 int Error::emit(std::ostream &O) const {

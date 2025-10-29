@@ -1,4 +1,5 @@
 add_subdirectory(FileManager)
+add_subdirectory(Error)
 add_subdirectory(PreProcessor)
 add_subdirectory(Lex)
 add_subdirectory(Token)

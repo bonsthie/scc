@@ -19,7 +19,7 @@ enum TokenKind {
 class Token {
     tok::TokenKind TKind;
     std::string    Value;
-    FileID        *FID;
+    FileID        *FID{nullptr};
 
   public:
     explicit Token(tok::TokenKind TKind = tok::not_init) : TKind(TKind) {}
@@ -44,16 +44,16 @@ class Token {
         unsigned Column = 1;
 
         Pos() = default;
-		Pos(unsigned Line, unsigned Column) : Line(Line), Column(Column) {}
-        Pos(Pos &P) { *this = P; }
+        Pos(unsigned Line, unsigned Column) : Line(Line), Column(Column) {}
+        Pos(const Pos &P) { *this = P; }
+        Pos &operator=(const Pos &P) = default;
+    };
 
-        Pos &operator=(const Pos &P) {
-            Buff = P.Buff;
-            Line = P.Line;
-            Column = P.Column;
+    struct PosView {
+        Pos     P;
+        const FileID *FID{nullptr};
 
-            return *this;
-        };
+        void print(std::ostream &OS) const;
     };
 
   private:
@@ -65,6 +65,9 @@ class Token {
     void       setPosBegin(const Pos &P) { PosBegin = P; }
     const Pos &getPosEnd() const { return PosEnd; }
     const Pos &getPosBegin() const { return PosBegin; }
+
+    PosView posViewBegin() const { return {PosBegin, FID}; }
+    PosView posViewEnd() const { return {PosEnd, FID}; }
 
     bool isStartOfLine() const { return PosBegin.Column == 1; }
 
@@ -83,6 +86,11 @@ class Token {
 void create_keyword_token(Token &CurTok, std::string &&Word);
 
 std::string stringify_token_kind(tok::TokenKind Kind);
+
+// ostream utils
+std::ostream &operator<<(std::ostream &OS, const Token &T);
+
+std::ostream &operator<<(std::ostream &OS, const Token::PosView &V);
 
 } // namespace scc
 
