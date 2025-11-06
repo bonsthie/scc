@@ -38,22 +38,29 @@ function(scc_create_test)
     PROPERTIES LABELS "${label}"
   )
 
-  add_custom_target("check-${label}"
-    COMMAND ${CMAKE_CTEST_COMMAND}
-            --test-dir ${CMAKE_BINARY_DIR}
-            -L ${label}
-            --output-on-failure
+	if(NOT TARGET check-${label})
+		add_custom_target(check-${label})
+	endif()
+
+	add_custom_command(
+	TARGET check-${label}
+	COMMAND ${CMAKE_CTEST_COMMAND}
+			--test-dir ${CMAKE_BINARY_DIR}
+			-L ${label}
+			--output-on-failure
+			--progress
 			${verbose_flag}
-    DEPENDS "${exe}"
-    USES_TERMINAL
-  )
+	DEPENDS ${exe}
+	USES_TERMINAL
+	)
 endfunction()
 
 
 
-add_custom_target(check
+add_custom_target(check-gtest
   COMMAND ${CMAKE_CTEST_COMMAND} 
 		--output-on-failure ${CMAKE_BUILD_PARALLEL_LEVEL}
+		--progress
 		${verbose_flag}
   DEPENDS
 	LexTests
@@ -61,6 +68,8 @@ add_custom_target(check
 	OptionTests
   USES_TERMINAL
 )
+
+add_dependencies(check check-gtest)
 
 add_subdirectory(FileManager)
 add_subdirectory(Option)

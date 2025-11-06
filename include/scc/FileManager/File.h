@@ -1,5 +1,5 @@
-#ifndef SCC_FILEMANAGER_FILE
-#define SCC_FILEMANAGER_FILE
+#ifndef SCC_FILE_H
+#define SCC_FILE_H
 
 #include "scc/FileManager/FileID.h"
 #include "scc/FileManager/MemoryBufferView.h"
@@ -36,4 +36,4 @@ class File {
 
 } // namespace scc
 
-#endif // SCC_FILEMANAGER_FILE
+#endif // SCC_FILE_H

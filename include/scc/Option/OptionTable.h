@@ -29,7 +29,7 @@ class OptionTable {
     ErrorManager                       &EM;
 
   public:
-	OptionTable(ErrorManager &EM) : EM(EM) {}
+    OptionTable(ErrorManager &EM) : EM(EM) {}
     ~OptionTable() = default;
 
     ArgsList *parseArgs(const std::vector<const char *> &argv);

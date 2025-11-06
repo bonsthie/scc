@@ -1,5 +1,5 @@
-#ifndef SCC_FILEMANAGER_FILEID
-#define SCC_FILEMANAGER_FILEID
+#ifndef SCC_FILEMANAGER_FILEID_H
+#define SCC_FILEMANAGER_FILEID_H
 
 #include <string>
 
@@ -33,4 +33,4 @@ class FileID {
 
 } // namespace scc
 
-#endif // SCC_FILEMANAGER_FILEID
+#endif // SCC_FILEMANAGER_FILEID_H

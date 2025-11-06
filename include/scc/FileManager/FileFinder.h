@@ -1,5 +1,5 @@
-#ifndef SCC_FILEMANGER_FILEFINDER
-#define SCC_FILEMANGER_FILEFINDER
+#ifndef SCC_FILEMANGER_FILEFINDER_H
+#define SCC_FILEMANGER_FILEFINDER_H
 
 #include <atomic>
 #include <filesystem>
@@ -44,4 +44,4 @@ class FileFinder {
 
 } // namespace scc
 
-#endif // SCC_FILEMANGER_FILEFINDER
+#endif // SCC_FILEMANGER_FILEFINDER_H

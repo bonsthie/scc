@@ -52,6 +52,14 @@ bool PreProcessor::handlePP(Token &Tok) {
 
     if (Tok.is(tok::pp_include)) {
         return handleInclude(Tok, *FL);
+    } else {
+        if (Tok.is(tok::unknown)) {
+            // i now that is dosen't handle the pp range and can be a while token but that just a
+            // place holder
+            EM.report(err::error).msg("unknown preprocessor");
+        } else
+            EM.report(err::error).msg("this preprocessor is not handle yet");
+        return true;
     }
 
     return err;

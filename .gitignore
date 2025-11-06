@@ -32,5 +32,5 @@
 *.app
 
 build/
-.cahce/
+.cache/
 compile_commands.json
