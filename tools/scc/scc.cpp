@@ -35,6 +35,7 @@ class SccOptionTable : public OptionTable {
 int cc1(int argc, char **argv, char **env) { return 1; }
 
 int main(int argc, char **argv, char **env) {
+	std::cout << "crampte\n";
 
     if (argc >= 2 && strcmp(argv[1], "-cc1") == 0)
         return cc1(argc, argv, env);
