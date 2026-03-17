@@ -410,6 +410,24 @@ TEST_F(FileLexTests, SingleCharPunctuators) {
                tok::semi, tok::comma, tok::colon, tok::tilde, tok::percent, tok::eof});
 }
 
+TEST_F(FileLexTests, PreprocessorDefineWithCommentsAndLineSplice) {
+    // Mirrors build/LexerTest.c: block comments surround '#', body uses line continuations.
+    auto FL = create_lexer(R"(/*
+*/ # /*
+*/ defi\
+ne FO\
+O 10\
+20
+)");
+
+    expectNextKind(FL, tok::pp_hash);
+    expectNextKind(FL, tok::pp_define);
+    expectNextKindLexeme(FL, tok::identifier, "FOO");
+    expectNextKindLexeme(FL, tok::numeric_constant, "102");
+    expectNextKindLexeme(FL, tok::numeric_constant, "20");
+    expectNextKind(FL, tok::eof);
+}
+
 // ================ Unknown / illegal symbols =========================
 
 TEST_F(FileLexTests, UnknownSymbol_YieldsUnknownToken) {

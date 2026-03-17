@@ -4,6 +4,7 @@
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/MemoryBufferView.h"
+#include "scc/Lex/SizedChar.h"
 #include "scc/Token/Token.h"
 #include "scc/Token/TokenStream.h"
 namespace scc {
@@ -18,8 +19,11 @@ class FileLexer : public TokenStream {
     Token NextToken; // if cached with peak
 
   public:
-	FileLexer(File &F, ErrorManager &EM) : EM(EM), MemBufferView(F.view()), FID(F.getFileID()) {}
-	FileLexer(MemoryBufferView &&MBF, FileID &FID, ErrorManager &EM) : EM(EM), MemBufferView(MBF), FID(FID) {}
+    FileLexer(File &F, ErrorManager &EM) : EM(EM), MemBufferView(F.view()), FID(F.getFileID()) {}
+    FileLexer(MemoryBufferView &&MBF, FileID &FID, ErrorManager &EM)
+        : EM(EM),
+          MemBufferView(MBF),
+          FID(FID) {}
 
     bool next(Token &CurTok);
     bool nextRaw(Token &CurTok);
@@ -29,10 +33,29 @@ class FileLexer : public TokenStream {
     const FileID &getFID() const { return FID; }
 
   private:
-    int  getChar(void);
-    int  peakChar(void);
-    int  peakChar(int Idx);
-    void consumeChar(void);
+    SizedChar getChar(void);
+    SizedChar peakChar(int Idx = 1);
+    SizedChar peakCharAtIdx(int Idx = 0);
+    void      consumeChar(void);
+    void      consumeChar(SizedChar sc);
+    void      consumeChar(int size);
+
+    template <typename... Args> bool consumeIfIs(int c, Args... chars) {
+        int    expected[] = {c, chars...};
+        size_t offset = 0;
+        size_t total = 0;
+
+        for (int ch : expected) {
+            SizedChar sc = peakCharAtIdx(offset);
+            if (sc.value != ch)
+                return false;
+            offset += sc.size;
+            total += sc.size;
+        }
+
+        consumeChar(total);
+        return true;
+    }
 
     // return true if you found a eof before the char
     bool consumeCharUntil(int c);
@@ -49,13 +72,13 @@ class FileLexer : public TokenStream {
         return getCharIfOneOf(Next...);
     }
 
-    bool handleSpaceToken(Token &CurTok, int LastChar);
-    bool handleNumToken(Token &CurTok, int LastChar);
-    bool handleKeyword(Token &CurTok, int LastChar);
-    bool handleString(Token &CurTok, int LastChar);
-    bool handleChar(Token &CurTok, int LastChar);
+    bool handleSpaceToken(Token &CurTok, SizedChar LastChar);
+    bool handleNumToken(Token &CurTok, SizedChar LastChar);
+    bool handleKeyword(Token &CurTok, SizedChar LastChar);
+    bool handleString(Token &CurTok, SizedChar LastChar);
+    bool handleChar(Token &CurTok, SizedChar LastChar);
 
-    inline size_t LexSign(Token &CurTok, int LastChar);
+    inline size_t LexSign(Token &CurTok, SizedChar LastChar);
 };
 
 } // namespace scc

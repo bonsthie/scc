@@ -44,6 +44,10 @@ class Error {
         return *this;
     }
 
+    std::ostringstream& msg() {
+        return Msg;
+    }
+
 	Error &Char(char c) {
 		Msg << "'" << c << "'";
 		return *this;

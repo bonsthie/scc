@@ -2,6 +2,7 @@
 #include "scc/Lex/FileLexer.h"
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/MemoryBufferView.h"
+#include "scc/Lex/SizedChar.h"
 #include "scc/Token/Token.h"
 #include <cassert>
 #include <cctype>
@@ -31,18 +32,18 @@ bool FileLexer::nextRaw(Token &CurTok) {
     }
 
     CurTok.setPosBegin(Pos);
-    int LastChar = getChar();
+    SizedChar LastChar = getChar();
     CurTok.setFileID(&FID);
     bool eof;
 
     if (LastChar == '\0') {
         CurTok.setTokenKind(tok::eof);
         eof = true;
-    } else if (isspace(LastChar)) {
+    } else if (isspace(LastChar.value)) {
         eof = handleSpaceToken(CurTok, LastChar);
-    } else if (isdigit(LastChar) || (LastChar == '.' && isdigit(peakChar()))) {
+    } else if (isdigit(LastChar.value) || (LastChar == '.' && isdigit(peakChar().value))) {
         eof = handleNumToken(CurTok, LastChar);
-    } else if (isalpha(LastChar) || LastChar == '_') {
+    } else if (isalpha(LastChar.value) || LastChar == '_') {
         eof = handleKeyword(CurTok, LastChar);
     } else {
         eof = LexSign(CurTok, LastChar);
@@ -98,25 +99,47 @@ bool FileLexer::lexInclude(Token &CurTok) {
     }
 }
 
-int FileLexer::peakChar(void) {
-    if (Pos.Buff <= MemBufferView.size())
-        return MemBufferView[Pos.Buff];
-    return 0;
+SizedChar FileLexer::peakCharAtIdx(int Idx) {
+    size_t pos = Pos.Buff + Idx;
+
+    if (pos >= MemBufferView.size())
+        return {};
+
+    int c = MemBufferView[pos];
+    if (c != '\\')
+        return {.value = c, .size = 1};
+
+    if (pos + 1 >= MemBufferView.size())
+        return {.value = c, .size = 1};
+
+    int next_c = MemBufferView[pos + 1];
+    if (next_c != '\n')
+        return {.value = c, .size = 1};
+
+    if (pos + 2 >= MemBufferView.size())
+        return {};
+
+    return {.value = MemBufferView[pos + 2], .size = 3};
 }
 
-int FileLexer::peakChar(int Idx) {
-    if (Pos.Buff + Idx <= MemBufferView.size())
-        return MemBufferView[Pos.Buff + Idx - 1];
-    return 0;
+SizedChar FileLexer::peakChar(int Idx) {
+    int       offset = 0;
+    SizedChar sc;
+
+    for (int i = 0; i < Idx; i++) {
+        sc = peakCharAtIdx(offset);
+        offset += sc.value + 1;
+    }
+    return sc;
 }
 
-int FileLexer::getChar(void) {
-    int c = peakChar();
-    consumeChar();
+SizedChar FileLexer::getChar(void) {
+    SizedChar c = peakChar();
+    consumeChar(c);
     return c;
 }
 
-void FileLexer::consumeChar(void) {
+void FileLexer::consumeChar() {
     if (MemBufferView[Pos.Buff] == '\n') {
         Pos.Column = 1;
         Pos.Line++;
@@ -125,8 +148,18 @@ void FileLexer::consumeChar(void) {
     Pos.Buff++;
 }
 
+void FileLexer::consumeChar(SizedChar sc) {
+    for (int i = 0; i < sc.size; i++)
+        consumeChar();
+}
+
+void FileLexer::consumeChar(int size) {
+    for (int i = 0; i < size; i++)
+        consumeChar();
+}
+
 bool FileLexer::consumeCharUntil(int c) {
-    int nextC;
+    SizedChar nextC;
 
     do {
         nextC = getChar();
@@ -135,34 +168,34 @@ bool FileLexer::consumeCharUntil(int c) {
 }
 
 bool FileLexer::consumeCharUntil(int c, std::string &Str) {
-    int nextC;
+    SizedChar nextC;
 
     do {
         nextC = getChar();
-        Str += nextC;
+        Str += nextC.value;
     } while (nextC != c && nextC != 0 && nextC != '\n');
     return nextC != c;
 }
 
 bool FileLexer::ConsumeCharIfEqual(int c) {
-    int tmpChar = peakChar();
+    SizedChar tmpChar = peakChar();
     if (tmpChar != c)
         return false;
     consumeChar();
     return true;
 }
 
-bool FileLexer::handleSpaceToken(Token &CurTok, int LastChar) {
+bool FileLexer::handleSpaceToken(Token &CurTok, SizedChar LastChar) {
     if (LastChar == '\n') {
         CurTok.setTokenKind(tok::eol);
         return 0;
     }
 
-    int c = 0;
+    SizedChar sc;
     while (1) {
 
-        c = peakChar();
-        if (!isspace(c) || c == '\n')
+        sc = peakChar();
+        if (!isspace(sc.value) || sc.value == '\n')
             break;
         consumeChar();
     }
@@ -177,13 +210,13 @@ bool FileLexer::handleSpaceToken(Token &CurTok, int LastChar) {
 // '123crampte+ee' work becuse there is  e before the '+'
 // what's don't work :
 // 100_000_000 dosen't work etc....
-bool FileLexer::handleNumToken(Token &CurTok, int LastChar) {
-    assert((isdigit(LastChar) || LastChar == '.') &&
+bool FileLexer::handleNumToken(Token &CurTok, SizedChar LastChar) {
+    assert((isdigit(LastChar.value) || LastChar == '.') &&
            "Fist char of a number must be a digit or a dot");
     CurTok.setTokenKind(tok::numeric_constant);
 
     std::string Num;
-    Num += LastChar;
+    Num += LastChar.value;
 
     int eof = false;
     while (1) {
@@ -193,55 +226,55 @@ bool FileLexer::handleNumToken(Token &CurTok, int LastChar) {
             break;
         }
 
-        if (!(isdigit(LastChar) || isalnum(LastChar) || LastChar == '.' || LastChar == '+' ||
-              LastChar == '-' || LastChar == '_'))
+        if (!(isdigit(LastChar.value) || isalnum(LastChar.value) || LastChar == '.' ||
+              LastChar == '+' || LastChar == '-' || LastChar == '_'))
             break;
         if ((LastChar == '+' || LastChar == '-') && !(Num.back() != 'e' || Num.back() != 'E'))
             break;
 
         consumeChar();
-        Num += LastChar;
+        Num += LastChar.value;
     }
     CurTok.setValue(std::move(Num));
     return eof;
 }
 
-bool FileLexer::handleKeyword(Token &CurTok, int LastChar) {
-    assert((isalnum(LastChar) || LastChar == '_') &&
+bool FileLexer::handleKeyword(Token &CurTok, SizedChar LastChar) {
+    assert((isalnum(LastChar.value) || LastChar == '_') &&
            "Fist char of a keword must be a letter or an underscore");
 
-    int         CurrentChar = 0;
+    SizedChar   CurrentChar;
     std::string identifyer;
 
-    identifyer += LastChar;
+    identifyer += LastChar.value;
     while (1) {
         CurrentChar = peakChar();
 
-        if (!(isalnum(CurrentChar) || CurrentChar == '_'))
+        if (!(isalnum(CurrentChar.value) || CurrentChar == '_'))
             break;
-        identifyer += CurrentChar;
-        consumeChar();
+        identifyer += CurrentChar.value;
+        consumeChar(CurrentChar);
     }
     create_keyword_token(CurTok, std::move(identifyer));
     return false;
 }
 
-bool FileLexer::handleString(Token &CurTok, int Limiter) {
+bool FileLexer::handleString(Token &CurTok, SizedChar Limiter) {
     if (Limiter == '\'')
         CurTok.setTokenKind(tok::char_constant);
     else
         CurTok.setTokenKind(tok::string_literal);
 
     std::string string;
-    string += Limiter;
+    string += Limiter.value;
 
-    int LastChar = 0;
+    SizedChar LastChar;
     do {
         LastChar = getChar();
 
-        string += LastChar;
+        string += LastChar.value;
         if (LastChar == '\\') {
-            string += getChar();
+            string += getChar().value;
         }
 
     } while (LastChar != Limiter && LastChar != '\n' && LastChar != 0);
@@ -252,13 +285,13 @@ bool FileLexer::handleString(Token &CurTok, int Limiter) {
     EM.report(err::error) //
         .at(CurTok.posViewEnd())
         .msg("missing closing ")
-        .Char(Limiter);
+        .Char(Limiter.value);
     CurTok.flush();
     return true;
 }
 
-inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
-    switch (LastChar) {
+inline size_t FileLexer::LexSign(Token &CurTok, SizedChar LastChar) {
+    switch (LastChar.value) {
     case '\n':
         CurTok.setTokenKind(tok::eol);
         return false;
@@ -298,9 +331,7 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
 
     case '.': {
         // Ellipsis: '...'
-        if (peakChar() == '.' && peakChar(2) == '.') {
-            consumeChar();
-            consumeChar();
+        if (consumeIfIs('.', '.') == true) {
             CurTok.setTokenKind(tok::ellipsis);
             return false;
         }
@@ -366,8 +397,7 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
         case '*':
             CurTok.setTokenKind(tok::comment);
             while (consumeCharUntil('*') == false) {
-                if (peakChar() == '/') {
-                    consumeChar();
+                if (consumeIfIs('/') == true) {
                     return false;
                 }
             }
@@ -480,7 +510,7 @@ inline size_t FileLexer::LexSign(Token &CurTok, int LastChar) {
     }
 
     CurTok.setTokenKind(tok::unknown);
-    CurTok.setValue(std::string(1, static_cast<char>(LastChar)));
+    CurTok.setValue(std::string(1, static_cast<char>(LastChar.value)));
     // Default fallthrough — nothing matched here.
     return true;
 }
