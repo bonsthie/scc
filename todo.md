@@ -9,6 +9,7 @@ BumpAllocator
 ## Core Infrastructure
 
 * [x] `Token`
+    - [ ] trigraph ???
 * [x] `Lexer`
 * [x] `SourceLoc`
 * [ ] `SourceRange`

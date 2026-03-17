@@ -1,11 +1,13 @@
 
 #include "scc/Lex/FileLexer.h"
+#include "Trigraph.h"
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include "scc/Lex/SizedChar.h"
 #include "scc/Token/Token.h"
 #include <cassert>
 #include <cctype>
+#include <cstdint>
 #include <iostream>
 
 using namespace scc;
@@ -105,21 +107,47 @@ SizedChar FileLexer::peakCharAtIdx(int Idx) {
     if (pos >= MemBufferView.size())
         return {};
 
-    int c = MemBufferView[pos];
-    if (c != '\\')
-        return {.value = c, .size = 1};
+    char    c = MemBufferView[pos];
+    uint8_t consumed = 1;
 
-    if (pos + 1 >= MemBufferView.size())
-        return {.value = c, .size = 1};
+    // Fast path
+    if (c != '\\' && c != '?')
+        return {c, 1};
 
-    int next_c = MemBufferView[pos + 1];
-    if (next_c != '\n')
-        return {.value = c, .size = 1};
+    // Trigraph
+    if (c == '?' && pos + 2 < MemBufferView.size() && MemBufferView[pos + 1] == '?') {
+        int trigraph_value = handle_trigraph(MemBufferView[pos + 2]);
+        if (trigraph_value) {
+            c = static_cast<char>(trigraph_value);
+            consumed = 3;
+        } else {
+            return {'?', 1};
+        }
+    }
 
-    if (pos + 2 >= MemBufferView.size())
-        return {};
+    // Line splicing
+    if (c == '\\') {
+        size_t next_pos = pos + consumed;
 
-    return {.value = MemBufferView[pos + 2], .size = 3};
+        if (next_pos < MemBufferView.size()) {
+            // Unix
+            if (MemBufferView[next_pos] == '\n') {
+                auto next = peakCharAtIdx(Idx + consumed + 1);
+                next.size += consumed + 1;
+                return next;
+            }
+
+            // Windows CRLF
+            if (next_pos + 1 < MemBufferView.size() && MemBufferView[next_pos] == '\r' &&
+                MemBufferView[next_pos + 1] == '\n') {
+                auto next = peakCharAtIdx(Idx + consumed + 2);
+                next.size += consumed + 2;
+                return next;
+            }
+        }
+    }
+
+    return {c, consumed};
 }
 
 SizedChar FileLexer::peakChar(int Idx) {

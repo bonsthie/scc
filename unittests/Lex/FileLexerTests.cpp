@@ -428,6 +428,25 @@ O 10\
     expectNextKind(FL, tok::eof);
 }
 
+TEST_F(FileLexTests, Trigraphs_AllMappingsHandled) {
+    auto FL = create_lexer(R"(??= inclu??/
+de "test.h"
+??' ??( ??) ??! ??< ??> ??-
+)");
+
+    expectNextKind(FL, tok::pp_hash);
+    expectNextKind(FL, tok::pp_include);
+    expectNextKind(FL, tok::string_literal);
+    expectNextKind(FL, tok::caret);      // ??' -> ^
+    expectNextKind(FL, tok::l_square);   // ??( -> [
+    expectNextKind(FL, tok::r_square);   // ??) -> ]
+    expectNextKind(FL, tok::pipe);       // ??! -> |
+    expectNextKind(FL, tok::l_brace);    // ??< -> {
+    expectNextKind(FL, tok::r_brace);    // ??> -> }
+    expectNextKind(FL, tok::tilde);      // ??- -> ~
+    expectNextKind(FL, tok::eof);
+}
+
 // ================ Unknown / illegal symbols =========================
 
 TEST_F(FileLexTests, UnknownSymbol_YieldsUnknownToken) {
