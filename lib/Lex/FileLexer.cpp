@@ -107,7 +107,7 @@ SizedChar FileLexer::peakCharAtIdx(int Idx) {
     if (pos >= MemBufferView.size())
         return {};
 
-    char    c = MemBufferView[pos];
+    int    c = MemBufferView[pos];
     uint8_t consumed = 1;
 
     // Fast path
@@ -118,7 +118,7 @@ SizedChar FileLexer::peakCharAtIdx(int Idx) {
     if (c == '?' && pos + 2 < MemBufferView.size() && MemBufferView[pos + 1] == '?') {
         int trigraph_value = handle_trigraph(MemBufferView[pos + 2]);
         if (trigraph_value) {
-            c = static_cast<char>(trigraph_value);
+            c = trigraph_value;
             consumed = 3;
         } else {
             return {'?', 1};

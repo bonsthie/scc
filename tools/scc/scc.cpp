@@ -65,7 +65,7 @@ int main(int argc, char **argv, char **env) {
     Token CurTok;
     do {
 		CurTok.flush();
-        PP.next(CurTok);
+        PP.nextRaw(CurTok);
 		std::cout << CurTok << std::endl;
         if (EM.size())
             EM.emit();
