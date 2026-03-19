@@ -11,7 +11,7 @@ namespace scc {
 // Compiler behavior (Clang/GCC-like):
 // - Disabled by default in GNU modes (gnu*)
 // - Enabled in strict modes (e.g. -std=c89, sometimes others depending on compiler)
-// - Can be explicitly enabled with -ftrigraphs
+// - Can be explicitly enabled with -ftrigraphs or clang driver style : -Wtrigraphs
 // Maybe do Digraphs for c99+
 
 inline int handle_trigraph(int c) {
