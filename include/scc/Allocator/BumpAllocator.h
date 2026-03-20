@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 namespace scc {
@@ -21,6 +22,16 @@ class BumpAllocator {
         return new (ptr) T(std::forward<Args>(args)...);
     }
 
+    void *copy(const void *data, size_t size, size_t alignment = alignof(std::max_align_t));
+
+    std::string_view allocString(std::string_view str,
+                                 size_t           alignment = alignof(std::max_align_t)) {
+        return {
+            static_cast<const char *>(copy(str.data(), str.size(), alignment)), //
+            str.size()                                                          //
+        };
+    }
+
     void reset() {
         for (auto &chunk : chunks) {
             chunk.offset = 0;
@@ -34,7 +45,7 @@ class BumpAllocator {
         size_t                       offset = 0;
     };
 
-    void *rawAlloc(size_t size, size_t alignment);
+    void *rawAlloc(size_t size, size_t alignment = alignof(std::max_align_t));
     void  allocChunk();
 
     std::vector<Chunk> chunks;

@@ -5,6 +5,7 @@
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/FileManager.h"
 #include "scc/Lex/FileLexer.h"
+#include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
 #include "scc/Token/TokenStream.h"
 #include <memory>
@@ -19,15 +20,16 @@ class PreProcessor {
     std::vector<std::unique_ptr<TokenStream>> TSList;
     TokenStream                              *CurrentTokStream = nullptr;
 
-    ErrorManager &EM;
-    FileManager  &FM;
+    ErrorManager   &EM;
+    FileManager    &FM;
+    StringInterner &SI;
 
     // DefineManager                             DM;
     // IfdefManager                              ifdefManager;
     // LineMapper								 Mapper;
 
   public:
-    PreProcessor(File &F, ErrorManager &EM, FileManager &FM);
+    PreProcessor(File &F, ErrorManager &EM, FileManager &FM, StringInterner &SI);
 
     bool next(Token &Tok);
     bool nextRaw(Token &Tok);
@@ -37,7 +39,7 @@ class PreProcessor {
     bool handleInclude(Token &Tok, FileLexer &FL);
 
     TokenStream *addNewTokenStream(File &F) {
-        TSList.emplace_back(std::make_unique<FileLexer>(F, EM));
+        TSList.emplace_back(std::make_unique<FileLexer>(F, SI, EM));
         return (CurrentTokStream = TSList.back().get());
     }
 

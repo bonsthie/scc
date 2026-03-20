@@ -1,9 +1,11 @@
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include "scc/Lex/FileLexer.h"
+#include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
 #include <algorithm>
 #include <gtest/gtest.h>
+#include <cstring>
 #include <memory>
 
 using namespace scc;
@@ -12,6 +14,7 @@ class FileLexTests : public ::testing::Test {
   public:
     std::unique_ptr<FileID>       FID;
     std::unique_ptr<ErrorManager> EM;
+    StringInterner                SI;
 
     void SetUp() override {
         FID = std::make_unique<FileID>("test File", 1);
@@ -20,7 +23,7 @@ class FileLexTests : public ::testing::Test {
 
     FileLexer create_lexer(const char *str) {
         MemoryBufferView MV(str, strlen(str));
-		return FileLexer(std::move(MV), *FID, *EM);
+		return FileLexer(std::move(MV), SI, *FID, *EM);
     }
 
     static void expectSeq(FileLexer &FL, std::initializer_list<tok::TokenKind> kinds) {
@@ -42,8 +45,14 @@ class FileLexTests : public ::testing::Test {
         Token TK;
         FL.next(TK);
         ASSERT_EQ(TK.getTokenKind(), expected);
-        EXPECT_EQ(std::string(TK.getValue()), dirtyLexeme);
-        EXPECT_EQ(TK.getCleanValue(), cleanLexeme);
+        EXPECT_EQ(TK.getValue(), std::string_view(cleanLexeme));
+
+        if (TK.isDirty()) {
+            EXPECT_EQ(TK.getDirtyValue(), std::string_view(dirtyLexeme));
+        } else {
+            EXPECT_STREQ(dirtyLexeme, cleanLexeme);
+            EXPECT_TRUE(TK.getDirtyValue().empty());
+        }
     }
 
     static void expectNextKindPos(scc::FileLexer &FL, tok::TokenKind expected, MemoryViewPos p) {
@@ -57,12 +66,14 @@ class FileLexTests : public ::testing::Test {
         ASSERT_EQ(B.Column, p.Column);
     }
 
-    static void drainToEOF(scc::FileLexer &FL, std::vector<tok::TokenKind> &out) {
+    static bool drainToEOF(scc::FileLexer &FL, std::vector<tok::TokenKind> &out) {
         Token TK;
+        bool  err = false;
         do {
-            FL.next(TK);
+            err = FL.next(TK) || err;
             out.push_back(TK.getTokenKind());
         } while (TK.getTokenKind() != tok::eof);
+        return err;
     }
 
     // ---------- RAW helpers using nextRaw() ----------
@@ -258,12 +269,9 @@ TEST_F(FileLexTests, NestedBlockComment_Unsupported_ProducesSomeErrorOrTokens) {
 TEST_F(FileLexTests, Unterminated_BlockComment_EmitsErrorOrEOF) {
     auto                        FL = create_lexer("/* oops");
     std::vector<tok::TokenKind> kinds;
-    drainToEOF(FL, kinds);
+    bool                        hadError = drainToEOF(FL, kinds);
     ASSERT_EQ(kinds.back(), tok::eof);
-    bool sawError =
-        std::any_of(kinds.begin(), kinds.end(), [](tok::TokenKind k) { return k == tok::unknown; });
-    EXPECT_TRUE(sawError || true)
-        << "Either emit an unknown token or reach EOF with an unknown flag.";
+    EXPECT_TRUE(hadError) << "Expected an unterminated block comment to raise a lexer error.";
 }
 
 TEST_F(FileLexTests, Whitespace_Newlines_Tabs_Positions) {
@@ -570,11 +578,9 @@ TEST_F(FileLexTests, StringLiteral_Concatenation_Produces_Two_Tokens) {
 TEST_F(FileLexTests, StringLiteral_Unterminated_UnknownOrEOF) {
     auto                        FL = create_lexer("\"oops");
     std::vector<tok::TokenKind> kinds;
-    drainToEOF(FL, kinds);
+    bool                        hadError = drainToEOF(FL, kinds);
     ASSERT_EQ(kinds.back(), tok::eof);
-    bool sawUnknown =
-        std::any_of(kinds.begin(), kinds.end(), [](tok::TokenKind k) { return k == tok::unknown; });
-    EXPECT_TRUE(sawUnknown || true);
+    EXPECT_TRUE(hadError) << "Expected unterminated string literal to signal a lexer error.";
 }
 
 TEST_F(FileLexTests, StringLiteral_Positions_Basic) {
@@ -614,11 +620,9 @@ TEST_F(FileLexTests, CharLiteral_Hex_And_Octal) {
 TEST_F(FileLexTests, CharLiteral_Unterminated_UnknownOrEOF) {
     auto                        FL = create_lexer("'a");
     std::vector<tok::TokenKind> kinds;
-    drainToEOF(FL, kinds);
+    bool                        hadError = drainToEOF(FL, kinds);
     ASSERT_EQ(kinds.back(), tok::eof);
-    bool sawUnknown =
-        std::any_of(kinds.begin(), kinds.end(), [](tok::TokenKind k) { return k == tok::unknown; });
-    EXPECT_TRUE(sawUnknown || true);
+    EXPECT_TRUE(hadError) << "Expected unterminated char literal to signal a lexer error.";
 }
 
 TEST_F(FileLexTests, CharLiteral_Positions) {

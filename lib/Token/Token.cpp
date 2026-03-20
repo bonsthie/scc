@@ -22,17 +22,16 @@ std::string scc::stringify_token_kind(tok::TokenKind Kind) {
     return std::string(str[Kind]);
 }
 
-void scc::create_keyword_token(Token &CurTok, std::string_view Word) {
-    auto KeyWord = TokenMap.find(Word);
+void scc::create_keyword_token(Token &CurTok) {
+    auto KeyWord = TokenMap.find(CurTok.getValue());
     if (KeyWord != TokenMap.end()) {
         CurTok.setTokenKind(KeyWord->second);
         return;
     }
     CurTok.setTokenKind(tok::identifier);
-    CurTok.setValue(Word);
 }
 
-std::string clean_token(std::string_view str) {
+std::string scc::clean_token(std::string_view str) {
     std::string clean;
     clean.reserve(str.size());
 
@@ -48,15 +47,13 @@ std::string clean_token(std::string_view str) {
     return clean;
 }
 
-std::string Token::getCleanValue() const { return clean_token(Value); }
 
 void Token::print(std::ostream &OS) const {
     std::ostringstream KindFormat;
     KindFormat << stringify_token_kind(TKind);
 
     if (!Value.empty()) {
-        std::string v = isDirty() ? getCleanValue() : std::string(Value);
-        KindFormat << " '" << v << "'";
+        KindFormat << " '" << Value << "'";
     }
 
     OS << std::left << std::setw(30) << KindFormat.str();
@@ -65,7 +62,7 @@ void Token::print(std::ostream &OS) const {
         OS << " [StartOfLine]";
 
     if (isDirty())
-        OS << " [Unclean='" << Value << "']";
+        OS << " [Unclean='" << DirtyValue << "']";
 
     OS << " Loc=<" << posViewBegin() << '>';
 }

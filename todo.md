@@ -9,13 +9,12 @@ BumpAllocator
 ## Core Infrastructure
 
 * [x] `Token`
-    - [ ] trigraph ???
 * [x] `Lexer`
 * [x] `SourceLoc`
 * [ ] `SourceRange`
 * [x] `SourceManager`
 * [x] `Diagnostics`
-* [ ] `BumpArena` (slabbed bump allocator)
+* [x] `BumpArena` (slabbed bump allocator)
 * [ ] `StringInterner`
 
 ## AST Ownership / Factories

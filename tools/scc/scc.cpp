@@ -5,6 +5,7 @@
 #include "scc/Lex/FileLexer.h"
 #include "scc/Option/OptionTable.h"
 #include "scc/PreProcessor/PreProcessor.h"
+#include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
 #include <cstring>
 #include <iostream>
@@ -60,7 +61,11 @@ int main(int argc, char **argv, char **env) {
         return 1;
     }
 
-    PreProcessor PP(*F, EM, FM);
+	BumpAllocator BumpAlloca;
+	StringInterner SI;
+
+
+    PreProcessor PP(*F, EM, FM, SI);
 
     Token CurTok;
     do {

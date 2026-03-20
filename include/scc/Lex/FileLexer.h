@@ -5,25 +5,33 @@
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include "scc/Lex/SizedChar.h"
+#include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
 #include "scc/Token/TokenStream.h"
 namespace scc {
 
 class FileLexer : public TokenStream {
     ErrorManager    &EM;
+    StringInterner  &SI;
     MemoryBufferView MemBufferView;
     FileID           FID;
     MemoryViewPos    Pos;
 
     Token LastToken;
     Token NextToken; // if cached with peak
-	
-	bool ParseDirtyToken = false;
+
+    bool ParseDirtyToken = false;
 
   public:
-    FileLexer(File &F, ErrorManager &EM) : EM(EM), MemBufferView(F.view()), FID(F.getFileID()) {}
-    FileLexer(MemoryBufferView &&MBF, FileID &FID, ErrorManager &EM)
+    FileLexer(File &F, StringInterner &SI, ErrorManager &EM)
         : EM(EM),
+          SI(SI),
+          MemBufferView(F.view()),
+          FID(F.getFileID()) {}
+
+    FileLexer(MemoryBufferView &&MBF, StringInterner &SI, FileID &FID, ErrorManager &EM)
+        : EM(EM),
+          SI(SI),
           MemBufferView(MBF),
           FID(FID) {}
 

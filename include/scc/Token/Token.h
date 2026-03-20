@@ -19,8 +19,11 @@ enum TokenKind {
 } // namespace tok
 
 class Token {
-    tok::TokenKind   TKind;
-    std::string_view Value;
+    tok::TokenKind TKind;
+
+    // Value is always clean
+    std::string_view Value;      // TODO remove for a ptr and size and a view() func
+    std::string_view DirtyValue; // TODO remove and find a better way to do that
     FileID          *FID{nullptr};
 
     bool IsDirty = false;
@@ -29,17 +32,18 @@ class Token {
     explicit Token(tok::TokenKind TKind = tok::not_init) : TKind(TKind) {}
     explicit Token(tok::TokenKind TKind, std::string_view Value) : TKind(TKind) { setValue(Value); }
 
-    tok::TokenKind             getTokenKind() const { return TKind; }
-    const std::string_view    &getValue() const { return Value; }
+    tok::TokenKind getTokenKind() const { return TKind; }
+    // Borrowed lexeme view; copy via toOwnedValue() if you need to keep it.
+    const std::string_view &getValue() const { return Value; }
+    const std::string_view &getDirtyValue() const { return DirtyValue; }
 
     void setTokenKind(tok::TokenKind T) { TKind = T; };
     void setValue(std::string_view Word) { Value = Word; };
     void setFileID(FileID *ID) { FID = ID; }
 
-    void setIsDirt(bool value) { IsDirty = value; }
+    void setDirty(bool value) { IsDirty = value; }
     bool isDirty() const { return IsDirty; }
-
-    std::string getCleanValue() const;
+    void setDirtyValue(std::string_view Word) { DirtyValue = Word; };
 
     bool is(tok::TokenKind Tok) { return TKind == Tok; }
 
@@ -74,6 +78,7 @@ class Token {
     void flush() {
         TKind = tok::not_init;
         Value = std::string_view();
+        DirtyValue = std::string_view();
         FID = nullptr;
         PosEnd = MemoryViewPos();
         PosBegin = MemoryViewPos();
@@ -82,7 +87,9 @@ class Token {
 };
 
 // use a hash map of all the word is a Keyword and setup the CurTok
-void create_keyword_token(Token &CurTok, std::string_view Word);
+void create_keyword_token(Token &CurTok);
+
+std::string clean_token(std::string_view str);
 
 std::string stringify_token_kind(tok::TokenKind Kind);
 

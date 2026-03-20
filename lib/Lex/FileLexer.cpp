@@ -1,7 +1,7 @@
 
 #include "scc/Lex/FileLexer.h"
-#include "scc/Lex/DecodeChar.h"
 #include "scc/FileManager/MemoryBufferView.h"
+#include "scc/Lex/DecodeChar.h"
 #include "scc/Lex/SizedChar.h"
 #include "scc/Token/Token.h"
 #include <cassert>
@@ -30,7 +30,6 @@ bool FileLexer::nextRaw(Token &CurTok) {
         return false;
     }
 
-    CurTok.setValue(std::string_view());
     CurTok.setPosBegin(Pos);
     SizedChar LastChar = getChar();
     CurTok.setFileID(&FID);
@@ -49,12 +48,8 @@ bool FileLexer::nextRaw(Token &CurTok) {
         eof = LexSign(CurTok, LastChar);
     }
 
-    if (ParseDirtyToken == true) {
-        CurTok.setIsDirt(true);
-        ParseDirtyToken = false;
-    }
-
     CurTok.setPosEnd(Pos);
+    ParseDirtyToken = false;
     return eof;
 }
 
@@ -115,7 +110,7 @@ SizedChar FileLexer::peakChar(int Idx) {
 
     for (int i = 0; i < Idx; i++) {
         sc = peakCharAtIdx(offset);
-        offset += sc.value + 1;
+        offset += sc.size + 1;
     }
     return sc;
 }
@@ -137,7 +132,7 @@ void FileLexer::consumeChar() {
 
 void FileLexer::consumeChar(SizedChar sc) {
     if (sc.size > 1)
-        ParseDirtyToken  = true;
+        ParseDirtyToken = true;
     for (int i = 0; i < sc.size; i++)
         consumeChar();
 }
@@ -174,12 +169,22 @@ bool FileLexer::ConsumeCharIfEqual(int c) {
     return true;
 }
 
-std::string_view FileLexer::makeStringView(const MemoryViewPos &Begin, const MemoryViewPos &End) const {
+std::string_view FileLexer::makeStringView(const MemoryViewPos &Begin,
+                                           const MemoryViewPos &End) const {
     return MemBufferView.getStringView(Begin, End);
 }
 
 void FileLexer::setTokenValue(Token &CurTok, const MemoryViewPos &End) {
-    CurTok.setValue(makeStringView(CurTok.getPosBegin(), End));
+    if (ParseDirtyToken) {
+		std::string_view baseString = makeStringView(CurTok.getPosBegin(), End);
+        std::string clean = clean_token(baseString);
+        CurTok.setValue(SI.intern(clean));
+		CurTok.setDirtyValue(baseString);
+        CurTok.setDirty(true);
+    } else {
+        std::string_view V = SI.intern(makeStringView(CurTok.getPosBegin(), End));
+        CurTok.setValue(V);
+    }
 }
 
 void FileLexer::setTokenValue(Token &CurTok) { setTokenValue(CurTok, CurTok.getPosEnd()); }
@@ -213,26 +218,24 @@ bool FileLexer::handleNumToken(Token &CurTok, SizedChar LastChar) {
     assert((isdigit(LastChar.value) || LastChar == '.') &&
            "Fist char of a number must be a digit or a dot");
     CurTok.setTokenKind(tok::numeric_constant);
-
-    std::string Num;
-    Num += LastChar.value;
+    SizedChar NextChar;
 
     int eof = false;
     while (1) {
-        LastChar = peakChar();
-        if (LastChar == 0) {
+        NextChar = peakChar();
+        if (NextChar == 0) {
             eof = true;
             break;
         }
 
-        if (!(isdigit(LastChar.value) || isalnum(LastChar.value) || LastChar == '.' ||
-              LastChar == '+' || LastChar == '-' || LastChar == '_'))
+        if (!(isdigit(NextChar.value) || isalnum(NextChar.value) || NextChar == '.' ||
+              NextChar == '+' || NextChar == '-' || NextChar == '_'))
             break;
-        if ((LastChar == '+' || LastChar == '-') && !(Num.back() != 'e' || Num.back() != 'E'))
+        if ((NextChar == '+' || NextChar == '-') && !(LastChar != 'e' || LastChar != 'E'))
             break;
 
-        consumeChar(LastChar);
-        Num += LastChar.value;
+        consumeChar(NextChar);
+        LastChar = NextChar;
     }
     setTokenValue(CurTok, Pos);
     return eof;
@@ -242,21 +245,18 @@ bool FileLexer::handleKeyword(Token &CurTok, SizedChar LastChar) {
     assert((isalnum(LastChar.value) || LastChar == '_') &&
            "Fist char of a keword must be a letter or an underscore");
 
-    SizedChar   CurrentChar;
-    std::string identifyer;
-    identifyer += LastChar.value;
+    SizedChar CurrentChar;
 
     while (1) {
         CurrentChar = peakChar();
 
         if (!(isalnum(CurrentChar.value) || CurrentChar == '_'))
             break;
-        identifyer += CurrentChar.value;
         consumeChar(CurrentChar);
     }
 
-    create_keyword_token(CurTok, identifyer);
     setTokenValue(CurTok, Pos);
+    create_keyword_token(CurTok);
     return false;
 }
 

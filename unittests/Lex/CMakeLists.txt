@@ -5,5 +5,5 @@ add_executable(LexTests
 scc_create_test(
   TARGET lex
   EXECUTABLE LexTests
-  LIBS PRIVATE Lex
+  LIBS PRIVATE Lex Allocator
 )
