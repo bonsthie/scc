@@ -1,12 +1,13 @@
-file(GLOB OPTION_READER_SOURCES
+set(TOKEN_SOURCES
 	Token.cpp
+	${CMAKE_SOURCE_DIR}/lib/Lex/DecodeChar.cpp
 )
 
 add_library(Token STATIC)
 
 target_sources(Token
   PRIVATE
-	${OPTION_READER_SOURCES}
+	${TOKEN_SOURCES}
 )
 
 target_include_directories(Token

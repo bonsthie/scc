@@ -21,3 +21,8 @@ MemoryBufferView &MemoryBufferView::operator=(MemoryBufferView &o) noexcept {
     }
     return *this;
 }
+
+
+std::string_view MemoryBufferView::getStringView(const MemoryViewPos &Begin, const MemoryViewPos &End) const {
+    return std::string_view(Data + Begin.Buff, End.Buff - Begin.Buff);
+}

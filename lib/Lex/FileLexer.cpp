@@ -1,14 +1,11 @@
 
 #include "scc/Lex/FileLexer.h"
-#include "Trigraph.h"
-#include "scc/FileManager/File.h"
+#include "scc/Lex/DecodeChar.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include "scc/Lex/SizedChar.h"
 #include "scc/Token/Token.h"
 #include <cassert>
 #include <cctype>
-#include <cstdint>
-#include <iostream>
 
 using namespace scc;
 
@@ -33,6 +30,7 @@ bool FileLexer::nextRaw(Token &CurTok) {
         return false;
     }
 
+    CurTok.setValue(std::string_view());
     CurTok.setPosBegin(Pos);
     SizedChar LastChar = getChar();
     CurTok.setFileID(&FID);
@@ -49,6 +47,11 @@ bool FileLexer::nextRaw(Token &CurTok) {
         eof = handleKeyword(CurTok, LastChar);
     } else {
         eof = LexSign(CurTok, LastChar);
+    }
+
+    if (ParseDirtyToken == true) {
+        CurTok.setIsDirt(true);
+        ParseDirtyToken = false;
     }
 
     CurTok.setPosEnd(Pos);
@@ -82,9 +85,9 @@ bool FileLexer::lexInclude(Token &CurTok) {
 
             CurTok.setPosBegin(Pos);
             bool err = consumeCharUntil('>', Str);
-            CurTok.setValue(std::move(Str));
             CurTok.setTokenKind(err == false ? tok::system_string : tok::unknown);
             CurTok.setPosEnd(Pos);
+            setTokenValue(CurTok);
 
             if (err) {
                 EM.report(err::error)
@@ -102,52 +105,8 @@ bool FileLexer::lexInclude(Token &CurTok) {
 }
 
 SizedChar FileLexer::peakCharAtIdx(int Idx) {
-    size_t pos = Pos.Buff + Idx;
-
-    if (pos >= MemBufferView.size())
-        return {};
-
-    int    c = MemBufferView[pos];
-    uint8_t consumed = 1;
-
-    // Fast path
-    if (c != '\\' && c != '?')
-        return {c, 1};
-
-    // Trigraph
-    if (c == '?' && pos + 2 < MemBufferView.size() && MemBufferView[pos + 1] == '?') {
-        int trigraph_value = handle_trigraph(MemBufferView[pos + 2]);
-        if (trigraph_value) {
-            c = trigraph_value;
-            consumed = 3;
-        } else {
-            return {'?', 1};
-        }
-    }
-
-    // Line splicing
-    if (c == '\\') {
-        size_t next_pos = pos + consumed;
-
-        if (next_pos < MemBufferView.size()) {
-            // Unix
-            if (MemBufferView[next_pos] == '\n') {
-                auto next = peakCharAtIdx(Idx + consumed + 1);
-                next.size += consumed + 1;
-                return next;
-            }
-
-            // Windows CRLF
-            if (next_pos + 1 < MemBufferView.size() && MemBufferView[next_pos] == '\r' &&
-                MemBufferView[next_pos + 1] == '\n') {
-                auto next = peakCharAtIdx(Idx + consumed + 2);
-                next.size += consumed + 2;
-                return next;
-            }
-        }
-    }
-
-    return {c, consumed};
+    const char *Ptr = MemBufferView.raw() + Pos.Buff + Idx;
+    return decode_logical_char(Ptr, MemBufferView.end());
 }
 
 SizedChar FileLexer::peakChar(int Idx) {
@@ -177,6 +136,8 @@ void FileLexer::consumeChar() {
 }
 
 void FileLexer::consumeChar(SizedChar sc) {
+    if (sc.size > 1)
+        ParseDirtyToken  = true;
     for (int i = 0; i < sc.size; i++)
         consumeChar();
 }
@@ -212,6 +173,16 @@ bool FileLexer::ConsumeCharIfEqual(int c) {
     consumeChar();
     return true;
 }
+
+std::string_view FileLexer::makeStringView(const MemoryViewPos &Begin, const MemoryViewPos &End) const {
+    return MemBufferView.getStringView(Begin, End);
+}
+
+void FileLexer::setTokenValue(Token &CurTok, const MemoryViewPos &End) {
+    CurTok.setValue(makeStringView(CurTok.getPosBegin(), End));
+}
+
+void FileLexer::setTokenValue(Token &CurTok) { setTokenValue(CurTok, CurTok.getPosEnd()); }
 
 bool FileLexer::handleSpaceToken(Token &CurTok, SizedChar LastChar) {
     if (LastChar == '\n') {
@@ -260,10 +231,10 @@ bool FileLexer::handleNumToken(Token &CurTok, SizedChar LastChar) {
         if ((LastChar == '+' || LastChar == '-') && !(Num.back() != 'e' || Num.back() != 'E'))
             break;
 
-        consumeChar();
+        consumeChar(LastChar);
         Num += LastChar.value;
     }
-    CurTok.setValue(std::move(Num));
+    setTokenValue(CurTok, Pos);
     return eof;
 }
 
@@ -273,8 +244,8 @@ bool FileLexer::handleKeyword(Token &CurTok, SizedChar LastChar) {
 
     SizedChar   CurrentChar;
     std::string identifyer;
-
     identifyer += LastChar.value;
+
     while (1) {
         CurrentChar = peakChar();
 
@@ -283,7 +254,9 @@ bool FileLexer::handleKeyword(Token &CurTok, SizedChar LastChar) {
         identifyer += CurrentChar.value;
         consumeChar(CurrentChar);
     }
-    create_keyword_token(CurTok, std::move(identifyer));
+
+    create_keyword_token(CurTok, identifyer);
+    setTokenValue(CurTok, Pos);
     return false;
 }
 
@@ -293,22 +266,19 @@ bool FileLexer::handleString(Token &CurTok, SizedChar Limiter) {
     else
         CurTok.setTokenKind(tok::string_literal);
 
-    std::string string;
-    string += Limiter.value;
-
     SizedChar LastChar;
     do {
         LastChar = getChar();
 
-        string += LastChar.value;
         if (LastChar == '\\') {
-            string += getChar().value;
+            getChar();
         }
 
     } while (LastChar != Limiter && LastChar != '\n' && LastChar != 0);
-    CurTok.setValue(std::move(string));
-    if (LastChar == Limiter)
+    if (LastChar == Limiter) {
+        setTokenValue(CurTok, Pos);
         return false;
+    }
 
     EM.report(err::error) //
         .at(CurTok.posViewEnd())
@@ -319,52 +289,46 @@ bool FileLexer::handleString(Token &CurTok, SizedChar Limiter) {
 }
 
 inline size_t FileLexer::LexSign(Token &CurTok, SizedChar LastChar) {
+    auto setAndReturn = [&](tok::TokenKind Kind) {
+        CurTok.setTokenKind(Kind);
+        setTokenValue(CurTok, Pos);
+        return false;
+    };
+
     switch (LastChar.value) {
     case '\n':
-        CurTok.setTokenKind(tok::eol);
-        return false;
+        return setAndReturn(tok::eol);
     case '(':
-        CurTok.setTokenKind(tok::l_paren);
-        return false;
+        return setAndReturn(tok::l_paren);
     case ')':
-        CurTok.setTokenKind(tok::r_paren);
-        return false;
+        return setAndReturn(tok::r_paren);
     case '{':
-        CurTok.setTokenKind(tok::l_brace);
-        return false;
+        return setAndReturn(tok::l_brace);
     case '}':
-        CurTok.setTokenKind(tok::r_brace);
-        return false;
+        return setAndReturn(tok::r_brace);
     case '[':
-        CurTok.setTokenKind(tok::l_square);
-        return false;
+        return setAndReturn(tok::l_square);
     case ']':
-        CurTok.setTokenKind(tok::r_square);
-        return false;
+        return setAndReturn(tok::r_square);
     case ';':
-        CurTok.setTokenKind(tok::semi);
-        return false;
+        return setAndReturn(tok::semi);
     case ',':
-        CurTok.setTokenKind(tok::comma);
-        return false;
+        return setAndReturn(tok::comma);
     case ':':
-        CurTok.setTokenKind(tok::colon);
-        return false;
+        return setAndReturn(tok::colon);
     case '?':
-        CurTok.setTokenKind(tok::question);
-        return false;
+        return setAndReturn(tok::question);
     case '~':
-        CurTok.setTokenKind(tok::tilde);
-        return false;
+        return setAndReturn(tok::tilde);
 
     case '.': {
         // Ellipsis: '...'
         if (consumeIfIs('.', '.') == true) {
             CurTok.setTokenKind(tok::ellipsis);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::dot);
-        return false;
+        return setAndReturn(tok::dot);
     }
 
     case '-': {
@@ -378,13 +342,14 @@ inline size_t FileLexer::LexSign(Token &CurTok, SizedChar LastChar) {
         switch (t) {
         case '-':
             CurTok.setTokenKind(tok::minus_minus);
+            setTokenValue(CurTok, Pos);
             return false;
         case '=':
             CurTok.setTokenKind(tok::minus_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         default:
-            CurTok.setTokenKind(tok::minus);
-            return false;
+            return setAndReturn(tok::minus);
         }
     }
 
@@ -393,23 +358,24 @@ inline size_t FileLexer::LexSign(Token &CurTok, SizedChar LastChar) {
         switch (t) {
         case '+':
             CurTok.setTokenKind(tok::plus_plus);
+            setTokenValue(CurTok, Pos);
             return false;
         case '=':
             CurTok.setTokenKind(tok::plus_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         default:
-            CurTok.setTokenKind(tok::plus);
-            return false;
+            return setAndReturn(tok::plus);
         }
     }
 
     case '*': {
         if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::star_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::star);
-        return false;
+        return setAndReturn(tok::star);
     }
 
     case '/': {
@@ -417,6 +383,7 @@ inline size_t FileLexer::LexSign(Token &CurTok, SizedChar LastChar) {
         switch (t) {
         case '=':
             CurTok.setTokenKind(tok::slash_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         case '/':
             CurTok.setTokenKind(tok::comment_line);
@@ -435,98 +402,99 @@ inline size_t FileLexer::LexSign(Token &CurTok, SizedChar LastChar) {
                 .msg("unterminated /* comment");
             return true;
         default:
-            CurTok.setTokenKind(tok::slash);
-            return false;
+            return setAndReturn(tok::slash);
         }
     }
 
     case '%': {
         if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::percent_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::percent);
-        return false;
+        return setAndReturn(tok::percent);
     }
 
     case '^': {
         if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::caret_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::caret);
-        return false;
+        return setAndReturn(tok::caret);
     }
 
     case '|': {
         if (ConsumeCharIfEqual('|')) {
             CurTok.setTokenKind(tok::pipe_pipe);
+            setTokenValue(CurTok, Pos);
             return false;
         }
         if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::pipe_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::pipe);
-        return false;
+        return setAndReturn(tok::pipe);
     }
 
     case '&': {
         if (ConsumeCharIfEqual('&')) {
             CurTok.setTokenKind(tok::amp_amp);
+            setTokenValue(CurTok, Pos);
             return false;
         }
         if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::amp_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::amp);
-        return false;
+        return setAndReturn(tok::amp);
     }
 
     case '!': {
         if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::exclaim_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::exclaim);
-        return false;
+        return setAndReturn(tok::exclaim);
     }
 
     case '=': {
         if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::equal_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::equal);
-        return false;
+        return setAndReturn(tok::equal);
     }
 
     case '<': {
         if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::less_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::less);
-        return false;
+        return setAndReturn(tok::less);
     }
 
     case '>': {
         if (ConsumeCharIfEqual('=')) {
             CurTok.setTokenKind(tok::greater_equal);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::greater);
-        return false;
+        return setAndReturn(tok::greater);
     }
 
     case '#': {
         if (ConsumeCharIfEqual('#')) {
             CurTok.setTokenKind(tok::pp_hash_hash);
+            setTokenValue(CurTok, Pos);
             return false;
         }
-        CurTok.setTokenKind(tok::pp_hash);
-        return false;
+        return setAndReturn(tok::pp_hash);
     }
     case '\'':
     case '"': {
@@ -538,7 +506,7 @@ inline size_t FileLexer::LexSign(Token &CurTok, SizedChar LastChar) {
     }
 
     CurTok.setTokenKind(tok::unknown);
-    CurTok.setValue(std::string(1, static_cast<char>(LastChar.value)));
+    setTokenValue(CurTok, Pos);
     // Default fallthrough — nothing matched here.
     return true;
 }

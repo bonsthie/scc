@@ -1,12 +1,12 @@
 #include "scc/Token/Token.h"
-#include "scc/FileManager/FileID.h"
+#include "scc/Lex/DecodeChar.h"
 #include <iomanip>
-#include <ios>
+#include <sstream>
 #include <unordered_map>
 
 using namespace scc;
 
-static std::unordered_map<std::string, tok::TokenKind> TokenMap{
+static std::unordered_map<std::string_view, tok::TokenKind> TokenMap{
 #define KEYWORD_TOKENKIND(id, string) {string, tok::id},
 #include "scc/Token/TokenKinds.def"
 };
@@ -22,31 +22,52 @@ std::string scc::stringify_token_kind(tok::TokenKind Kind) {
     return std::string(str[Kind]);
 }
 
-void scc::create_keyword_token(Token &CurTok, std::string &&Word) {
+void scc::create_keyword_token(Token &CurTok, std::string_view Word) {
     auto KeyWord = TokenMap.find(Word);
     if (KeyWord != TokenMap.end()) {
         CurTok.setTokenKind(KeyWord->second);
         return;
     }
     CurTok.setTokenKind(tok::identifier);
-    CurTok.setValue(std::move(Word));
+    CurTok.setValue(Word);
 }
 
+std::string clean_token(std::string_view str) {
+    std::string clean;
+    clean.reserve(str.size());
+
+    const char *Ptr = str.data();
+    const char *End = str.data() + str.size();
+
+    while (Ptr < End) {
+        SizedChar sc = decode_logical_char(Ptr, End);
+        clean.push_back(sc.value);
+        Ptr += sc.size;
+    }
+
+    return clean;
+}
+
+std::string Token::getCleanValue() const { return clean_token(Value); }
+
 void Token::print(std::ostream &OS) const {
-    std::string kindStr = stringify_token_kind(TKind);
-    kindStr += Value.empty() ? "" : (" '" + Value + "'");
+    std::ostringstream KindFormat;
+    KindFormat << stringify_token_kind(TKind);
 
-    OS << std::left << std::setw(30) << kindStr;
+    if (!Value.empty()) {
+        std::string v = isDirty() ? getCleanValue() : std::string(Value);
+        KindFormat << " '" << v << "'";
+    }
 
-    // Print flag
+    OS << std::left << std::setw(30) << KindFormat.str();
+
     if (isStartOfLine())
         OS << " [StartOfLine]";
 
-    std::ostringstream LocStr;
-    LocStr << "Loc=<" << posViewBegin() << '>';
-    std::string loc = LocStr.str();
+    if (isDirty())
+        OS << " [Unclean='" << Value << "']";
 
-    OS << " " << loc;
+    OS << " Loc=<" << posViewBegin() << '>';
 }
 
 std::ostream &scc::operator<<(std::ostream &OS, const Token &T) {

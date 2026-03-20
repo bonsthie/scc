@@ -31,24 +31,6 @@ class FileLexTests : public ::testing::Test {
         }
     }
 
-    static void expectSeqWithLexemes(scc::FileLexer                            &FL,
-                                     std::initializer_list<scc::tok::TokenKind> kinds,
-                                     std::initializer_list<const char *>        lexemes) {
-        Token TK;
-
-        auto kIt = kinds.begin();
-        auto lIt = lexemes.begin();
-        for (; kIt != kinds.end(); ++kIt, ++lIt) {
-            FL.next(TK);
-            ASSERT_EQ(TK.getTokenKind(), *kIt);
-            ASSERT_TRUE(lIt != lexemes.end());
-            ASSERT_EQ(TK.getValue(), std::string(*lIt));
-        }
-        // make sure we're at eof
-        FL.next(TK);
-        ASSERT_EQ(TK.getTokenKind(), tok::eof);
-    }
-
     static void expectNextKind(scc::FileLexer &FL, tok::TokenKind expected) {
         Token TK;
         FL.next(TK);
@@ -56,14 +38,15 @@ class FileLexTests : public ::testing::Test {
     }
 
     static void expectNextKindLexeme(scc::FileLexer &FL, tok::TokenKind expected,
-                                     const char *lexeme) {
+                                     const char *dirtyLexeme, const char *cleanLexeme) {
         Token TK;
         FL.next(TK);
         ASSERT_EQ(TK.getTokenKind(), expected);
-        ASSERT_EQ(TK.getValue(), std::string(lexeme)); // ← adjust if Value accessor differs
+        EXPECT_EQ(std::string(TK.getValue()), dirtyLexeme);
+        EXPECT_EQ(TK.getCleanValue(), cleanLexeme);
     }
 
-    static void expectNextKindPos(scc::FileLexer &FL, tok::TokenKind expected, Token::Pos p) {
+    static void expectNextKindPos(scc::FileLexer &FL, tok::TokenKind expected, MemoryViewPos p) {
         Token TK;
         FL.next(TK);
         ASSERT_EQ(TK.getTokenKind(), expected);
@@ -195,10 +178,14 @@ TEST_F(FileLexTests, Integer_Hex_Oct_Bin) {
 
 TEST_F(FileLexTests, Integer_Suffixes_LexemePreserved) {
     auto FL = create_lexer("1u 2U 3l 4L 5ul 6ULL");
-    expectSeqWithLexemes(FL,
-                         {tok::numeric_constant, tok::numeric_constant, tok::numeric_constant,
-                          tok::numeric_constant, tok::numeric_constant, tok::numeric_constant},
-                         {"1u", "2U", "3l", "4L", "5ul", "6ULL"});
+
+    expectNextKindLexeme(FL, tok::numeric_constant, "1u", "1u");
+    expectNextKindLexeme(FL, tok::numeric_constant, "2U", "2U");
+    expectNextKindLexeme(FL, tok::numeric_constant, "3l", "3l");
+    expectNextKindLexeme(FL, tok::numeric_constant, "4L", "4L");
+    expectNextKindLexeme(FL, tok::numeric_constant, "5ul", "5ul");
+    expectNextKindLexeme(FL, tok::numeric_constant, "6ULL", "6ULL");
+    expectNextKind(FL, tok::eof);
 }
 
 TEST_F(FileLexTests, Float_Basics) {
@@ -244,7 +231,7 @@ TEST_F(FileLexTests, NestedBlockComment_Unsupported_ProducesTokensAfterInnerClos
     auto FL = create_lexer("/* a /* b */ c */");
     using K = tok::TokenKind;
 
-    expectNextKindLexeme(FL, tok::identifier, "c");
+    expectNextKindLexeme(FL, tok::identifier, "c", "c");
 
     Token TK;
     FL.next(TK);
@@ -422,9 +409,8 @@ O 10\
 
     expectNextKind(FL, tok::pp_hash);
     expectNextKind(FL, tok::pp_define);
-    expectNextKindLexeme(FL, tok::identifier, "FOO");
-    expectNextKindLexeme(FL, tok::numeric_constant, "102");
-    expectNextKindLexeme(FL, tok::numeric_constant, "20");
+    expectNextKindLexeme(FL, tok::identifier, "FO\\\nO", "FOO");
+    expectNextKindLexeme(FL, tok::numeric_constant, "10\\\n20", "1020");
     expectNextKind(FL, tok::eof);
 }
 
@@ -434,16 +420,16 @@ de "test.h"
 ??' ??( ??) ??! ??< ??> ??-
 )");
 
-    expectNextKind(FL, tok::pp_hash);
-    expectNextKind(FL, tok::pp_include);
-    expectNextKind(FL, tok::string_literal);
-    expectNextKind(FL, tok::caret);      // ??' -> ^
-    expectNextKind(FL, tok::l_square);   // ??( -> [
-    expectNextKind(FL, tok::r_square);   // ??) -> ]
-    expectNextKind(FL, tok::pipe);       // ??! -> |
-    expectNextKind(FL, tok::l_brace);    // ??< -> {
-    expectNextKind(FL, tok::r_brace);    // ??> -> }
-    expectNextKind(FL, tok::tilde);      // ??- -> ~
+    expectNextKindLexeme(FL, tok::pp_hash, "\?\?=", "#");
+    expectNextKindLexeme(FL, tok::pp_include, "inclu\?\?/\nde", "include");
+    expectNextKindLexeme(FL, tok::string_literal, "\"test.h\"", "\"test.h\"");
+    expectNextKindLexeme(FL, tok::caret, "\?\?'", "^");
+    expectNextKindLexeme(FL, tok::l_square, "\?\?(", "[");
+    expectNextKindLexeme(FL, tok::r_square, "\?\?)", "]");
+    expectNextKindLexeme(FL, tok::pipe, "\?\?!", "|");
+    expectNextKindLexeme(FL, tok::l_brace, "\?\?<", "{");
+    expectNextKindLexeme(FL, tok::r_brace, "\?\?>", "}");
+    expectNextKindLexeme(FL, tok::tilde, "\?\?-", "~");
     expectNextKind(FL, tok::eof);
 }
 
@@ -477,7 +463,7 @@ TEST_F(FileLexTests, VeryLongNumber_NoCrash) {
 }
 
 // Position-aware: assert kind and starting position
-static void expectNextRawKindPos(scc::FileLexer &FL, tok::TokenKind expected, scc::Token::Pos p) {
+static void expectNextRawKindPos(scc::FileLexer &FL, tok::TokenKind expected, MemoryViewPos p) {
     scc::Token TK;
     FL.nextRaw(TK);
     ASSERT_EQ(TK.getTokenKind(), expected);

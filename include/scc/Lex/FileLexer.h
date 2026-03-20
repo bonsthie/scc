@@ -13,10 +13,12 @@ class FileLexer : public TokenStream {
     ErrorManager    &EM;
     MemoryBufferView MemBufferView;
     FileID           FID;
-    Token::Pos       Pos;
+    MemoryViewPos    Pos;
 
     Token LastToken;
     Token NextToken; // if cached with peak
+	
+	bool ParseDirtyToken = false;
 
   public:
     FileLexer(File &F, ErrorManager &EM) : EM(EM), MemBufferView(F.view()), FID(F.getFileID()) {}
@@ -49,6 +51,8 @@ class FileLexer : public TokenStream {
             SizedChar sc = peakCharAtIdx(offset);
             if (sc.value != ch)
                 return false;
+            if (sc.size > 1)
+                ParseDirtyToken = true;
             offset += sc.size;
             total += sc.size;
         }
@@ -79,6 +83,10 @@ class FileLexer : public TokenStream {
     bool handleChar(Token &CurTok, SizedChar LastChar);
 
     inline size_t LexSign(Token &CurTok, SizedChar LastChar);
+
+    std::string_view makeStringView(const MemoryViewPos &Begin, const MemoryViewPos &End) const;
+    void             setTokenValue(Token &CurTok, const MemoryViewPos &End);
+    void             setTokenValue(Token &CurTok);
 };
 
 } // namespace scc

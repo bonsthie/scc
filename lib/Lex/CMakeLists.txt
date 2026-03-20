@@ -1,4 +1,4 @@
-file(GLOB OPTION_READER_SOURCES
+set(LEX_SOURCES
 	FileLexer.cpp
 )
 
@@ -6,7 +6,7 @@ add_library(Lex STATIC)
 
 target_sources(Lex
   PRIVATE
-	${OPTION_READER_SOURCES}
+	${LEX_SOURCES}
 )
 
 target_include_directories(Lex

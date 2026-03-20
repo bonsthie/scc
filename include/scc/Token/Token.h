@@ -2,7 +2,9 @@
 #define SCCLEXTOKEN_H
 
 #include "scc/FileManager/FileID.h"
+#include "scc/FileManager/MemoryBufferView.h"
 #include <string>
+#include <string_view>
 namespace scc {
 
 namespace tok {
@@ -17,20 +19,27 @@ enum TokenKind {
 } // namespace tok
 
 class Token {
-    tok::TokenKind TKind;
-    std::string    Value;
-    FileID        *FID{nullptr};
+    tok::TokenKind   TKind;
+    std::string_view Value;
+    FileID          *FID{nullptr};
+
+    bool IsDirty = false;
 
   public:
     explicit Token(tok::TokenKind TKind = tok::not_init) : TKind(TKind) {}
-    explicit Token(tok::TokenKind TKind, std::string Value) : TKind(TKind), Value(Value) {}
+    explicit Token(tok::TokenKind TKind, std::string_view Value) : TKind(TKind) { setValue(Value); }
 
-    tok::TokenKind     getTokenKind() const { return TKind; }
-    const std::string &getValue() const { return Value; }
+    tok::TokenKind             getTokenKind() const { return TKind; }
+    const std::string_view    &getValue() const { return Value; }
 
     void setTokenKind(tok::TokenKind T) { TKind = T; };
-    void setValue(std::string &&Word) { Value = std::move(Word); };
+    void setValue(std::string_view Word) { Value = Word; };
     void setFileID(FileID *ID) { FID = ID; }
+
+    void setIsDirt(bool value) { IsDirty = value; }
+    bool isDirty() const { return IsDirty; }
+
+    std::string getCleanValue() const;
 
     bool is(tok::TokenKind Tok) { return TKind == Tok; }
 
@@ -38,33 +47,22 @@ class Token {
         return is(Tok) || is(TokTypes...);
     }
 
-    struct Pos {
-        unsigned Buff = 0;
-        unsigned Line = 1;
-        unsigned Column = 1;
-
-        Pos() = default;
-        Pos(unsigned Line, unsigned Column) : Line(Line), Column(Column) {}
-        Pos(const Pos &P) { *this = P; }
-        Pos &operator=(const Pos &P) = default;
-    };
-
     struct PosView {
-        Pos     P;
+        MemoryViewPos P;
         const FileID *FID{nullptr};
 
         void print(std::ostream &OS) const;
     };
 
   private:
-    Pos PosBegin;
-    Pos PosEnd;
+    MemoryViewPos PosBegin;
+    MemoryViewPos PosEnd;
 
   public:
-    void       setPosEnd(const Pos &P) { PosEnd = P; }
-    void       setPosBegin(const Pos &P) { PosBegin = P; }
-    const Pos &getPosEnd() const { return PosEnd; }
-    const Pos &getPosBegin() const { return PosBegin; }
+    void                 setPosEnd(const MemoryViewPos &P) { PosEnd = P; }
+    void                 setPosBegin(const MemoryViewPos &P) { PosBegin = P; }
+    const MemoryViewPos &getPosEnd() const { return PosEnd; }
+    const MemoryViewPos &getPosBegin() const { return PosBegin; }
 
     PosView posViewBegin() const { return {PosBegin, FID}; }
     PosView posViewEnd() const { return {PosEnd, FID}; }
@@ -75,15 +73,16 @@ class Token {
 
     void flush() {
         TKind = tok::not_init;
-        Value = "";
+        Value = std::string_view();
         FID = nullptr;
-        PosEnd = Pos();
-        PosBegin = Pos();
+        PosEnd = MemoryViewPos();
+        PosBegin = MemoryViewPos();
+        IsDirty = false;
     }
 };
 
 // use a hash map of all the word is a Keyword and setup the CurTok
-void create_keyword_token(Token &CurTok, std::string &&Word);
+void create_keyword_token(Token &CurTok, std::string_view Word);
 
 std::string stringify_token_kind(tok::TokenKind Kind);
 

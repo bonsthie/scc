@@ -2,8 +2,16 @@
 #include "scc/String/StringUtils.h"
 #include "scc/Token/Token.h"
 #include <cassert>
+#include <string>
+#include <string_view>
 
 using namespace scc;
+
+namespace {
+
+std::string to_owned(std::string_view view) { return std::string(view.begin(), view.end()); }
+
+}
 
 PreProcessor::PreProcessor(File &F, ErrorManager &EM, FileManager &FM) : EM(EM), FM(FM) {
     addNewTokenStream(F);
@@ -55,12 +63,15 @@ bool PreProcessor::handlePP(Token &Tok) {
         return handleInclude(Tok, *FL);
 
     case tok::unknown:
-    case tok::identifier:
-        EM.report(err::error).msg("'" + Tok.getValue() + "' Invalid PreProcessing directive");
+    case tok::identifier: {
+        std::string value = to_owned(Tok.getValue());
+        EM.report(err::error).msg("'" + value + "' Invalid PreProcessing directive");
         return true;
+    }
 
     default:
-        EM.report(err::error).msg("'" + stringify_token_kind(Tok.getTokenKind()) + "' This preprocessor is not handle yet");
+        EM.report(err::error)
+            .msg("'" + stringify_token_kind(Tok.getTokenKind()) + "' This preprocessor is not handle yet");
         return true;
     }
 
@@ -75,7 +86,7 @@ bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
     switch (Tok.getTokenKind()) {
 
     case tok::string_literal: {
-        std::string path = Tok.getValue();
+        std::string path = to_owned(Tok.getValue());
         path = trim_quote(path);
         File *F = FM.getFile(path, FL.getFID());
 
@@ -88,7 +99,7 @@ bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
     }
 
     case tok::system_string: {
-        std::string path = Tok.getValue();
+        std::string path = to_owned(Tok.getValue());
         path = trim_quote_system(path);
         File *F = FM.getSystemFile(path);
 
