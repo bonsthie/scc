@@ -132,9 +132,9 @@ TEST(SccOptionTable, SeparateMissingArgumentEmitsWarning) {
     // One (or more) diagnostics expected
     const auto &errs = EM.getErrsList();
     ASSERT_FALSE(errs.empty());
-    EXPECT_EQ(errs.front().getDiagLevel(), err::DiagLevel::error);
-    EXPECT_NE(errs.front().getMsg().find("-L"), std::string::npos);
-    EXPECT_NE(errs.front().getMsg().find("missing"), std::string::npos);
+    EXPECT_EQ(errs.front()->getDiagLevel(), err::DiagLevel::error);
+    EXPECT_NE(errs.front()->getMsg().find("-L"), std::string::npos);
+    EXPECT_NE(errs.front()->getMsg().find("missing"), std::string::npos);
 }
 
 TEST(SccOptionTable, SeparateValueThatLooksLikeFlag_EmitsWarning) {
@@ -150,9 +150,9 @@ TEST(SccOptionTable, SeparateValueThatLooksLikeFlag_EmitsWarning) {
 
     const auto &errs = EM.getErrsList();
     ASSERT_FALSE(errs.empty());
-    EXPECT_EQ(errs.front().getDiagLevel(), err::DiagLevel::error);
-    EXPECT_NE(errs.front().getMsg().find("-L"), std::string::npos);
-    EXPECT_NE(errs.front().getMsg().find("missing"), std::string::npos);
+    EXPECT_EQ(errs.front()->getDiagLevel(), err::DiagLevel::error);
+    EXPECT_NE(errs.front()->getMsg().find("-L"), std::string::npos);
+    EXPECT_NE(errs.front()->getMsg().find("missing"), std::string::npos);
 }
 
 TEST(SccOptionTable, MixedAllOptions) {
@@ -209,9 +209,9 @@ TEST(SccOptionTable, I_MissingThenSeparateValue) {
     // One diagnostic for the first missing value
     const auto &errs = EM.getErrsList();
     ASSERT_FALSE(errs.empty());
-    EXPECT_EQ(errs.front().getDiagLevel(), err::DiagLevel::error);
-    EXPECT_NE(errs.front().getMsg().find("-I"), std::string::npos);
-    EXPECT_NE(errs.front().getMsg().find("missing"), std::string::npos);
+    EXPECT_EQ(errs.front()->getDiagLevel(), err::DiagLevel::error);
+    EXPECT_NE(errs.front()->getMsg().find("-I"), std::string::npos);
+    EXPECT_NE(errs.front()->getMsg().find("missing"), std::string::npos);
 
     // Only the second -I contributes a value
     ASSERT_NE(args->getArg(Opt_I), nullptr);
@@ -299,7 +299,7 @@ TEST(SccOptionTable, I_MissingArgumentEmitsError) {
 
     const auto &errs = EM.getErrsList();
     ASSERT_FALSE(errs.empty());
-    EXPECT_EQ(errs.front().getDiagLevel(), err::DiagLevel::error);
-    EXPECT_NE(errs.front().getMsg().find("-I"), std::string::npos);
-    EXPECT_NE(errs.front().getMsg().find("missing"), std::string::npos);
+    EXPECT_EQ(errs.front()->getDiagLevel(), err::DiagLevel::error);
+    EXPECT_NE(errs.front()->getMsg().find("-I"), std::string::npos);
+    EXPECT_NE(errs.front()->getMsg().find("missing"), std::string::npos);
 }

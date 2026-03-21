@@ -12,8 +12,10 @@
 namespace scc {
 
 class ErrorManager {
-    std::vector<Error> Errs;
-    std::ostream      &O;
+    using ErrorPtr = std::unique_ptr<Error>;
+
+    std::vector<ErrorPtr> Errs;
+    std::ostream         &O;
 
     using FactoryFunc = std::function<std::unique_ptr<Error>(err::DiagLevel)>;
     FactoryFunc Factory;
@@ -24,17 +26,16 @@ class ErrorManager {
           Factory(FF) {}
 
     Error &report(err::DiagLevel Level) {
-        auto  ptr = Factory(Level);
-        auto &ref = *ptr;
-        Errs.push_back(std::move(ref));
-        return Errs.back();
+        auto Ptr = Factory(Level);
+        Errs.emplace_back(std::move(Ptr));
+        return *Errs.back();
     }
 
-    Error &last() { return Errs.back(); }
+    Error &last() { return *Errs.back(); }
 
     bool emit() {
         for (auto it = Errs.begin(); it != Errs.end();) {
-            int status = it->emit(O);
+            int status = (*it)->emit(O);
             it = Errs.erase(it);
             if (status) {
                 return true;
@@ -43,7 +44,7 @@ class ErrorManager {
         return false;
     }
 
-    const std::vector<Error> &getErrsList() const { return Errs; }
+    const std::vector<ErrorPtr> &getErrsList() const { return Errs; }
 
     int size() { return Errs.size(); }
 

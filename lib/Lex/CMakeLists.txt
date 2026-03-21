@@ -18,6 +18,7 @@ target_link_libraries(Lex
   PUBLIC
     Token
     FileManager
+    Allocator
 )
 
 target_compile_features(Lex PUBLIC cxx_std_23)

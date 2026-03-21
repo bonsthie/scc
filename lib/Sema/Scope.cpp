@@ -20,8 +20,8 @@ Decl *Scope::lookup(std::string_view Name) {
 bool ScopeMgr::addDecl(std::string_view Name, Decl *D) { return Scopes.back().addDecl(Name, D); }
 
 Decl *ScopeMgr::lookup(std::string_view Name) {
-    for (auto &Scope : Scopes) {
-        if (Decl *D = Scope.lookup(Name))
+    for (auto It = Scopes.rbegin(); It != Scopes.rend(); ++It) {
+        if (Decl *D = It->lookup(Name))
             return D;
     }
     return nullptr;

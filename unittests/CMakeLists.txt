@@ -66,6 +66,12 @@ add_custom_target(check-gtest
 	LexTests
 	FileManagerTests
 	OptionTests
+	SemaTests
+	AllocatorTests
+	StringTests
+	ErrorTests
+	TokenTests
+	PreProcessorTests
   USES_TERMINAL
 )
 
@@ -74,3 +80,9 @@ add_dependencies(check check-gtest)
 add_subdirectory(FileManager)
 add_subdirectory(Option)
 add_subdirectory(Lex)
+add_subdirectory(Sema)
+add_subdirectory(Allocator)
+add_subdirectory(String)
+add_subdirectory(Error)
+add_subdirectory(Token)
+add_subdirectory(PreProcessor)

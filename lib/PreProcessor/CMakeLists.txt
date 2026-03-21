@@ -19,6 +19,8 @@ target_link_libraries(PreProcessor
 	Error
 	Token
 	FileManager
+	Lex
+	Allocator
 )
 
 target_compile_features(PreProcessor PUBLIC cxx_std_23)
