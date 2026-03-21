@@ -1,5 +1,7 @@
 #include "scc/Sema/Scope.h"
 
+using namespace scc;
+
 bool Scope::addDecl(std::string_view Name, Decl *D) {
     if (SymbolTable.find(Name) != SymbolTable.end())
         return false;

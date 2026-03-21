@@ -7,6 +7,8 @@
 
 #include "scc/AST/Decl.h"
 
+namespace scc {
+
 class Scope {
     std::unordered_map<std::string_view, Decl *> SymbolTable;
 
@@ -29,5 +31,7 @@ class ScopeMgr {
 
     Decl *lookup(std::string_view Name);
 };
+
+} // namespace scc
 
 #endif // SCC_SEMA_SCOPE_H
