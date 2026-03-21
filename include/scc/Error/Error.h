@@ -30,7 +30,7 @@ enum EmitionLeveL {
 class Error {
     err::DiagLevel                Level;
     std::ostringstream            Msg;
-    std::optional<Token::PosView> Pos;
+    std::optional<PosView> Pos;
 
   public:
     explicit Error(err::DiagLevel Level) : Level(Level) {}
@@ -53,7 +53,7 @@ class Error {
 		return *this;
 	}
 
-    Error &at(Token::PosView P) {
+    Error &at(PosView P) {
         Pos = P;
         return *this;
     }

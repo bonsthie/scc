@@ -24,9 +24,9 @@ class Token {
     // Value is always clean
     std::string_view Value;      // TODO remove for a ptr and size and a view() func
     std::string_view DirtyValue; // TODO remove and find a better way to do that
-    FileID          *FID{nullptr};
 
-    bool IsDirty = false;
+    bool        IsDirty = false;
+    SourceRange Range;
 
   public:
     explicit Token(tok::TokenKind TKind = tok::not_init) : TKind(TKind) {}
@@ -39,7 +39,7 @@ class Token {
 
     void setTokenKind(tok::TokenKind T) { TKind = T; };
     void setValue(std::string_view Word) { Value = Word; };
-    void setFileID(FileID *ID) { FID = ID; }
+    void setFileID(FileID *ID) { Range.FID = ID; }
 
     void setDirty(bool value) { IsDirty = value; }
     bool isDirty() const { return IsDirty; }
@@ -51,27 +51,19 @@ class Token {
         return is(Tok) || is(TokTypes...);
     }
 
-    struct PosView {
-        MemoryViewPos P;
-        const FileID *FID{nullptr};
-
-        void print(std::ostream &OS) const;
-    };
-
-  private:
-    MemoryViewPos PosBegin;
-    MemoryViewPos PosEnd;
-
   public:
-    void                 setPosEnd(const MemoryViewPos &P) { PosEnd = P; }
-    void                 setPosBegin(const MemoryViewPos &P) { PosBegin = P; }
-    const MemoryViewPos &getPosEnd() const { return PosEnd; }
-    const MemoryViewPos &getPosBegin() const { return PosBegin; }
+    void setPosBegin(const MemoryViewPos &P) { Range.Begin = P; }
+    void setPosEnd(const MemoryViewPos &P) { Range.End = P; }
+    void setRange(const SourceRange &R) { Range = R; }
 
-    PosView posViewBegin() const { return {PosBegin, FID}; }
-    PosView posViewEnd() const { return {PosEnd, FID}; }
+    const MemoryViewPos &getPosBegin() const { return Range.Begin; }
+    const MemoryViewPos &getPosEnd() const { return Range.End; }
+    const SourceRange   &getRange() const { return Range; }
 
-    bool isStartOfLine() const { return PosBegin.Column == 1; }
+    PosView posViewBegin() const { return Range.posViewBegin(); }
+    PosView posViewEnd() const { return Range.posViewEnd(); }
+
+    bool isStartOfLine() const { return Range.Begin.Column == 1; }
 
     void print(std::ostream &OS) const;
 
@@ -79,9 +71,7 @@ class Token {
         TKind = tok::not_init;
         Value = std::string_view();
         DirtyValue = std::string_view();
-        FID = nullptr;
-        PosEnd = MemoryViewPos();
-        PosBegin = MemoryViewPos();
+		Range = SourceRange();
         IsDirty = false;
     }
 };
@@ -95,8 +85,6 @@ std::string stringify_token_kind(tok::TokenKind Kind);
 
 // ostream utils
 std::ostream &operator<<(std::ostream &OS, const Token &T);
-
-std::ostream &operator<<(std::ostream &OS, const Token::PosView &V);
 
 } // namespace scc
 

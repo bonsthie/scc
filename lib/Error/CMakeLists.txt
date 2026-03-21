@@ -17,6 +17,7 @@ target_include_directories(Error
 target_link_libraries(Error
   PUBLIC
     Token
+	FileManager
 )
 
 target_compile_features(Error PUBLIC cxx_std_23)
