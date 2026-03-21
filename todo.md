@@ -1,21 +1,18 @@
-
-
-
-BumpAllocator 
- - mmap like 2G mmprotect so the memory is not allocated but will always be contigu
- - mmprotect block when needed
-
-
 ## Core Infrastructure
 
 * [x] `Token`
 * [x] `Lexer`
 * [x] `SourceLoc`
-* [ ] `SourceRange`
+* [x] `SourceRange`
 * [x] `SourceManager`
 * [x] `Diagnostics`
 * [x] `BumpArena` (slabbed bump allocator)
-* [ ] `StringInterner`
+* [x] `StringInterner`
+* [x] `Args Manager`
+* [x] `Error Manger`
+* [x] `FileManager`
+* [ ] `PreProcessor` (base is done)
+
 
 ## AST Ownership / Factories
 
@@ -25,8 +22,8 @@ BumpAllocator
 
 ## Types
 
-* [ ] `QualType` (Type* + qualifier bits)
 * [ ] `Type` (base)
+* [ ] `QualType` (Type* + qualifier bits)
 * [ ] `BuiltinType`
 * [ ] `PointerType`
 * [ ] `ArrayType`
