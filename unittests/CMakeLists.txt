@@ -21,6 +21,11 @@ function(scc_create_test)
     message(FATAL_ERROR "scc_create_test: test executable '${exe}' not found")
   endif()
 
+  set_target_properties("${exe}"
+    PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/test"
+  )
+
   set(label "${SCC_LABEL}")
   if(NOT label)
     set(label "${SCC_TARGET}")
@@ -72,6 +77,7 @@ add_custom_target(check-gtest
 	ErrorTests
 	TokenTests
 	PreProcessorTests
+	ASTTests
   USES_TERMINAL
 )
 
@@ -86,3 +92,4 @@ add_subdirectory(String)
 add_subdirectory(Error)
 add_subdirectory(Token)
 add_subdirectory(PreProcessor)
+add_subdirectory(AST)

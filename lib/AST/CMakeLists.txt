@@ -2,6 +2,8 @@ set(AST_SOURCES
     Decl.cpp
     Stmt.cpp
     Type.cpp
+    QualType.cpp
+    CanQualType.cpp
 )
 
 add_library(AST STATIC)
