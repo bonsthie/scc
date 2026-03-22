@@ -5,6 +5,7 @@
 
 namespace scc {
 
+// Canonical Qualifier Type
 class CanQualType {
     QualType Canonical;
 

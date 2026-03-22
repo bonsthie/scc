@@ -1,6 +1,7 @@
 #ifndef SCC_AST_TYPE_H
 #define SCC_AST_TYPE_H
 
+#include <cassert>
 #include <string_view>
 
 #include "scc/AST/Qualifiers.h"
@@ -46,7 +47,10 @@ class TypedefType : public Type {
         : Type(TypeKind::Typedef),
           Name(Name),
           UnderlyingTy(UnderlyingTy),
-          UnderlyingQuals(Quals) {}
+          UnderlyingQuals(Quals) {
+		assert(Name == "" && "scc::TypedefType Name can't be empty");
+		assert(Type == "" && "scc::TypedefType Type can't be null");
+	}
 
     std::string_view getName() const { return Name; }
 
