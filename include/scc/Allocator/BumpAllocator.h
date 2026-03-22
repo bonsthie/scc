@@ -3,12 +3,13 @@
 
 #include <cstddef>
 #include <memory>
-#include <string_view>
 #include <vector>
+
+#include "scc/Allocator/Allocator.h"
 
 namespace scc {
 
-class BumpAllocator {
+class BumpAllocator : public Allocator {
   public:
     explicit BumpAllocator(size_t chunk_size = 1024 * 1024) : chunkSize(chunk_size) {
         allocChunk();
@@ -17,22 +18,7 @@ class BumpAllocator {
     BumpAllocator(const BumpAllocator &) = delete;
     BumpAllocator &operator=(const BumpAllocator &) = delete;
 
-    template <typename T, typename... Args> T *alloc(Args &&...args) {
-        void *ptr = rawAlloc(sizeof(T), alignof(T));
-        return new (ptr) T(std::forward<Args>(args)...);
-    }
-
-    void *copy(const void *data, size_t size, size_t alignment = alignof(std::max_align_t));
-
-    std::string_view allocString(std::string_view str,
-                                 size_t           alignment = alignof(std::max_align_t)) {
-        return {
-            static_cast<const char *>(copy(str.data(), str.size(), alignment)), //
-            str.size()                                                          //
-        };
-    }
-
-    void reset() {
+    void reset() override {
         for (auto &chunk : chunks) {
             chunk.offset = 0;
         }
@@ -45,7 +31,7 @@ class BumpAllocator {
         size_t                       offset = 0;
     };
 
-    void *rawAlloc(size_t size, size_t alignment = alignof(std::max_align_t));
+    void *rawAlloc(size_t size, size_t alignment = alignof(std::max_align_t)) override;
     void  allocChunk();
 
     std::vector<Chunk> chunks;

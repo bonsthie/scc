@@ -1,7 +1,6 @@
 
 #include "scc/Allocator/BumpAllocator.h"
 #include <cstddef>
-#include <cstring>
 #include <memory>
 
 using namespace scc;
@@ -31,9 +30,4 @@ void BumpAllocator::allocChunk() {
     auto data = std::make_unique<std::byte[]>(chunkSize);
     chunks.push_back({.data = std::move(data), .offset = 0});
     currentChunkIdx = chunks.size() - 1;
-}
-
-void *BumpAllocator::copy(const void *data, size_t size, size_t aligment) {
-    void *newData = rawAlloc(size, aligment);
-    return memcpy(newData, data, size);
 }
