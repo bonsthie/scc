@@ -1,7 +1,6 @@
 #ifndef SCC_LEX_DECODECHAR_H
 #define SCC_LEX_DECODECHAR_H
 
-
 #include "scc/Lex/SizedChar.h"
 namespace scc {
 

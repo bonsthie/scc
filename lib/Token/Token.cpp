@@ -47,7 +47,6 @@ std::string scc::clean_token(std::string_view str) {
     return clean;
 }
 
-
 void Token::print(std::ostream &OS) const {
     std::ostringstream KindFormat;
     KindFormat << stringify_token_kind(TKind);

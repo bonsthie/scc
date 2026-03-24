@@ -14,7 +14,7 @@ class Sema {
     void pushScope() { SM.newScope(); }
     void popScope() { SM.popScope(); }
 
-    bool addDecl(std::string_view Name, Decl *D) { return SM.addDecl(Name, D); }
+    bool  addDecl(std::string_view Name, Decl *D) { return SM.addDecl(Name, D); }
     Decl *lookup(std::string_view Name) { return SM.lookup(Name); }
 };
 

@@ -14,9 +14,7 @@ bool CanQualType::operator==(const CanQualType &Other) const {
     return Canonical == Other.Canonical;
 }
 
-bool CanQualType::operator!=(const CanQualType &Other) const {
-    return !(*this == Other);
-}
+bool CanQualType::operator!=(const CanQualType &Other) const { return !(*this == Other); }
 
 CanQualType CanQualType::create(QualType QT) {
     while (QT.kind() == TypeKind::Typedef)

@@ -3,9 +3,7 @@
 
 namespace scc {
 
-class Decl {
-
-};
+class Decl {};
 
 } // namespace scc
 

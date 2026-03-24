@@ -17,7 +17,7 @@ class HaltingError : public Error {
         return static_cast<err::EmitionLeveL>(err::Emit | err::Stop);
     }
 };
-}
+} // namespace
 
 TEST(ErrorManagerTest, ReportsAndClearsDiagnostics) {
     std::ostringstream Out;
@@ -35,8 +35,8 @@ TEST(ErrorManagerTest, ReportsAndClearsDiagnostics) {
 
 TEST(ErrorManagerTest, CustomFactoryControlsEmission) {
     std::ostringstream Out;
-    ErrorManager       EM(
-        [](err::DiagLevel Level) { return std::make_unique<HaltingError>(Level); }, Out);
+    ErrorManager EM([](err::DiagLevel Level) { return std::make_unique<HaltingError>(Level); },
+                    Out);
 
     Error &E = EM.report(err::warning);
     E.msg("stop here");

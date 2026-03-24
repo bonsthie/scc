@@ -1,3 +1,3 @@
 
-// build DefineTokenStream 
+// build DefineTokenStream
 // Keep the Define List

@@ -13,19 +13,37 @@ namespace {
 // - Can be explicitly enabled with -ftrigraphs or clang driver style : -Wtrigraphs
 // Maybe do Digraphs for c99+
 int handle_trigraph(int c) {
-	char decoded = 0;
+    char decoded = 0;
 
-	switch (c) {
-		case '=': decoded = '#'; break;
-		case '/': decoded = '\\'; break;
-		case '\'': decoded = '^'; break;
-		case '(': decoded = '['; break;
-		case ')': decoded = ']'; break;
-		case '!': decoded = '|'; break;
-		case '<': decoded = '{'; break;
-		case '>': decoded = '}'; break;
-		case '-': decoded = '~'; break;
-	}
+    switch (c) {
+    case '=':
+        decoded = '#';
+        break;
+    case '/':
+        decoded = '\\';
+        break;
+    case '\'':
+        decoded = '^';
+        break;
+    case '(':
+        decoded = '[';
+        break;
+    case ')':
+        decoded = ']';
+        break;
+    case '!':
+        decoded = '|';
+        break;
+    case '<':
+        decoded = '{';
+        break;
+    case '>':
+        decoded = '}';
+        break;
+    case '-':
+        decoded = '~';
+        break;
+    }
 
     return decoded;
 }
@@ -37,7 +55,7 @@ SizedChar decode_logical_char(const char *Ptr, const char *End) {
     if (Ptr >= End)
         return {0, 0};
 
-    int c = *Ptr;
+    int     c = *Ptr;
     uint8_t consumed = 1;
 
     // Fast path for 99% of characters

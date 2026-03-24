@@ -28,8 +28,8 @@ enum EmitionLeveL {
 #define WARN_MSG
 
 class Error {
-    err::DiagLevel                Level;
-    std::ostringstream            Msg;
+    err::DiagLevel         Level;
+    std::ostringstream     Msg;
     std::optional<PosView> Pos;
 
   public:
@@ -44,14 +44,12 @@ class Error {
         return *this;
     }
 
-    std::ostringstream& msg() {
-        return Msg;
-    }
+    std::ostringstream &msg() { return Msg; }
 
-	Error &Char(char c) {
-		Msg << "'" << c << "'";
-		return *this;
-	}
+    Error &Char(char c) {
+        Msg << "'" << c << "'";
+        return *this;
+    }
 
     Error &at(PosView P) {
         Pos = P;

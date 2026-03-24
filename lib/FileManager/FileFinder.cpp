@@ -17,8 +17,8 @@ FileID *FileFinder::getFileID(const std::string &Name, const FileID &BaseFile) {
 }
 
 FileID *FileFinder::getFileID(const std::string &Name, const std::string &BasePath) {
-	if (Name.empty())
-		return nullptr;
+    if (Name.empty())
+        return nullptr;
     const std::string AbsPathFile = absolutePath(BasePath + Name);
 
     if (AbsPathFile.empty())
@@ -32,8 +32,8 @@ FileID *FileFinder::getFileID(const std::string &Name, const std::string &BasePa
 }
 
 FileID *FileFinder::getSystemFileID(const std::string &Name) {
-	if (Name.empty())
-		return nullptr;
+    if (Name.empty())
+        return nullptr;
 
     auto FID = SystemPathFiles.find(Name);
     if (FID == SystemPathFiles.end())
@@ -43,22 +43,21 @@ FileID *FileFinder::getSystemFileID(const std::string &Name) {
 
 void FileFinder::addSystemPaths(const std::vector<std::string> &SysPaths) {
     for (auto Path : SysPaths) {
-		addSystemPath(Path);
-
+        addSystemPath(Path);
     }
 }
 
 void FileFinder::addSystemPath(const std::string &SysPath) {
-        std::error_code ec;
+    std::error_code ec;
 
-        auto abs = std::filesystem::absolute(SysPath, ec);
-        if (ec)
-            return;
+    auto abs = std::filesystem::absolute(SysPath, ec);
+    if (ec)
+        return;
 
-        auto c = std::filesystem::weakly_canonical(abs, ec);
-        if (ec)
-            return;
-        SystemPaths.push_back(c);
+    auto c = std::filesystem::weakly_canonical(abs, ec);
+    if (ec)
+        return;
+    SystemPaths.push_back(c);
 }
 
 FileID *FileFinder::openNewSystemFile(const std::string &Name) {
@@ -106,8 +105,8 @@ std::string FileFinder::absolutePath(const std::string &path) {
     if (ec)
         return "";
 
-	if (!std::filesystem::exists(abs))
-		return "";
+    if (!std::filesystem::exists(abs))
+        return "";
 
     return c.string();
 }

@@ -27,7 +27,6 @@ struct SizedChar {
     bool operator>(int c) { return value > c; }
 };
 
-}
-
+} // namespace scc
 
 #endif // SCC_LEX_SIZEDCHAR

@@ -61,17 +61,16 @@ int main(int argc, char **argv, char **env) {
         return 1;
     }
 
-	BumpAllocator BumpAlloca;
-	StringInterner SI;
-
+    BumpAllocator  BumpAlloca;
+    StringInterner SI;
 
     PreProcessor PP(*F, EM, FM, SI);
 
     Token CurTok;
     do {
-		CurTok.flush();
+        CurTok.flush();
         PP.nextRaw(CurTok);
-		std::cout << CurTok << std::endl;
+        std::cout << CurTok << std::endl;
         if (EM.size())
             EM.emit();
     } while (!CurTok.is(tok::eof));

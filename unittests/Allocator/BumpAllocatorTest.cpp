@@ -40,7 +40,7 @@ TEST(BumpAllocatorTest, CopyAndAllocStringProduceIndependentStorage) {
     EXPECT_EQ(Interned, "sample");
 
     // Mutate the source buffer and make sure interned data is unaffected.
-    std::string Source = "mutate";
+    std::string      Source = "mutate";
     std::string_view View = Alloc.allocString(Source);
     Source[0] = 'x';
     EXPECT_EQ(View, "mutate");

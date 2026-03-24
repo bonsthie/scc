@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 
-#include "scc/Option/OptionTable.h"
-#include "scc/Option/Args.h"
 #include "scc/Error/ErrorManager.h"
+#include "scc/Option/Args.h"
+#include "scc/Option/OptionTable.h"
 
 using namespace scc;
 
@@ -13,19 +13,20 @@ enum SccOptionIndex { Opt_none, Opt_test, Opt_oui, Opt_L, Opt_I };
 
 class SccOptionTable : public OptionTable {
     static constexpr OptionSpec opt[] = {
-        {Opt_test, "-test", OptKind::Flag,              ValType::None,    "this is a test",          false},
-        {Opt_oui,  "--oui=", OptKind::Equal,            ValType::Str,     "oui oui baguette",        false},
-        {Opt_L,    "-L",     OptKind::Separate,         ValType::StrList, "L is for losser",         false},
-        {Opt_I,    "-I",     OptKind::JoinedOrSeparate, ValType::StrList, "system include folder",   false},
+        {Opt_test, "-test", OptKind::Flag, ValType::None, "this is a test", false},
+        {Opt_oui, "--oui=", OptKind::Equal, ValType::Str, "oui oui baguette", false},
+        {Opt_L, "-L", OptKind::Separate, ValType::StrList, "L is for losser", false},
+        {Opt_I, "-I", OptKind::JoinedOrSeparate, ValType::StrList, "system include folder", false},
     };
-public:
+
+  public:
     explicit SccOptionTable(ErrorManager &EM) : OptionTable(EM) {}
     std::span<const OptionSpec> specs() const override { return opt; }
 };
 
 // Convenience: build argv vector (already skipping argv[0])
-static std::vector<const char*> mkArgv(std::initializer_list<const char*> args) {
-    return std::vector<const char*>{args};
+static std::vector<const char *> mkArgv(std::initializer_list<const char *> args) {
+    return std::vector<const char *>{args};
 }
 
 TEST(SccOptionTable, ParsesFlagTest) {
@@ -74,7 +75,7 @@ TEST(SccOptionTable, ParsesSeparateOption) {
 
     auto *A = args->getArg(Opt_L);
     ASSERT_FALSE(A->empty());
-	ASSERT_EQ(A->getValuesList().size(), 1u);
+    ASSERT_EQ(A->getValuesList().size(), 1u);
     EXPECT_EQ(A->getValuesList()[0], "lib");
 
     EXPECT_TRUE(EM.getErrsList().empty());
@@ -111,9 +112,9 @@ TEST(SccOptionTable, ParsesJoinedOrSeparate_I_Separate) {
     EXPECT_EQ(args->getArg(Opt_I)->count(), 2u);
 
     auto *A = args->getArg(Opt_I);
-	ASSERT_EQ(A->getValuesList().size(), 2u);
+    ASSERT_EQ(A->getValuesList().size(), 2u);
     EXPECT_EQ(A->getValuesList()[0], "inc1");
-	EXPECT_EQ(A->getValuesList()[1], "inc2");
+    EXPECT_EQ(A->getValuesList()[1], "inc2");
 
     EXPECT_TRUE(EM.getErrsList().empty());
 }
@@ -159,13 +160,7 @@ TEST(SccOptionTable, MixedAllOptions) {
     ErrorManager   EM;
     SccOptionTable Opt(EM);
 
-    auto argv = mkArgv({
-        "-test",
-        "--oui=croissant",
-        "-L", "lib",
-        "-Iinc1",
-        "-I", "inc2"
-    });
+    auto argv = mkArgv({"-test", "--oui=croissant", "-L", "lib", "-Iinc1", "-I", "inc2"});
     auto args = Opt.parseArgs(argv);
 
     ASSERT_TRUE(args);
@@ -183,14 +178,14 @@ TEST(SccOptionTable, MixedAllOptions) {
     // -L
     ASSERT_NE(args->getArg(Opt_L), nullptr);
     EXPECT_EQ(args->getArg(Opt_L)->count(), 1u);
-	ASSERT_EQ(args->getArg(Opt_L)->getValuesList().size(), 1u);
-	EXPECT_EQ(args->getArg(Opt_L)->getValuesList()[0], "lib");
+    ASSERT_EQ(args->getArg(Opt_L)->getValuesList().size(), 1u);
+    EXPECT_EQ(args->getArg(Opt_L)->getValuesList()[0], "lib");
 
     // -I (joined + separate)
     ASSERT_NE(args->getArg(Opt_I), nullptr);
     EXPECT_EQ(args->getArg(Opt_I)->count(), 2u);
-	ASSERT_EQ(args->getArg(Opt_I)->getValuesList().size(), 2u);
-	EXPECT_EQ(args->getArg(Opt_I)->getValuesList()[0], "inc1");
+    ASSERT_EQ(args->getArg(Opt_I)->getValuesList().size(), 2u);
+    EXPECT_EQ(args->getArg(Opt_I)->getValuesList()[0], "inc1");
     EXPECT_EQ(args->getArg(Opt_I)->getValuesList()[1], "inc2");
 
     EXPECT_TRUE(EM.getErrsList().empty());

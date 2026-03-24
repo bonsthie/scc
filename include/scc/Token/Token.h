@@ -47,7 +47,8 @@ class Token {
 
     bool is(tok::TokenKind Tok) { return TKind == Tok; }
 
-    template <typename T, typename... Args> bool is(T Tok, Args... TokTypes) {
+    template <typename T, typename... Args>
+    bool is(T Tok, Args... TokTypes) {
         return is(Tok) || is(TokTypes...);
     }
 
@@ -71,7 +72,7 @@ class Token {
         TKind = tok::not_init;
         Value = std::string_view();
         DirtyValue = std::string_view();
-		Range = SourceRange();
+        Range = SourceRange();
         IsDirty = false;
     }
 };

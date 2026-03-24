@@ -176,10 +176,10 @@ std::string_view FileLexer::makeStringView(const MemoryViewPos &Begin,
 
 void FileLexer::setTokenValue(Token &CurTok, const MemoryViewPos &End) {
     if (ParseDirtyToken) {
-		std::string_view baseString = makeStringView(CurTok.getPosBegin(), End);
-        std::string clean = clean_token(baseString);
+        std::string_view baseString = makeStringView(CurTok.getPosBegin(), End);
+        std::string      clean = clean_token(baseString);
         CurTok.setValue(SI.intern(clean));
-		CurTok.setDirtyValue(baseString);
+        CurTok.setDirtyValue(baseString);
         CurTok.setDirty(true);
     } else {
         std::string_view V = SI.intern(makeStringView(CurTok.getPosBegin(), End));

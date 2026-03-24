@@ -21,18 +21,21 @@ namespace {
 class TempDir {
   public:
     TempDir() {
-        auto base = std::filesystem::temp_directory_path();
+        auto               base = std::filesystem::temp_directory_path();
         std::random_device rd;
         Path = base / ("scc_pp_" + std::to_string(rd()));
         std::filesystem::create_directories(Path);
     }
 
-    ~TempDir() { std::error_code ec; std::filesystem::remove_all(Path, ec); }
+    ~TempDir() {
+        std::error_code ec;
+        std::filesystem::remove_all(Path, ec);
+    }
 
     const std::filesystem::path &path() const { return Path; }
 
     std::filesystem::path makeFile(const std::string &Name, std::string_view Contents) {
-        auto FilePath = Path / Name;
+        auto          FilePath = Path / Name;
         std::ofstream OS(FilePath);
         OS << Contents;
         OS.close();
@@ -45,7 +48,7 @@ class TempDir {
 
 std::vector<tok::TokenKind> lexAllTokens(PreProcessor &PP) {
     std::vector<tok::TokenKind> Kinds;
-    Token                        Tok;
+    Token                       Tok;
 
     while (true) {
         bool ShouldStop = PP.next(Tok);
@@ -82,9 +85,8 @@ TEST(PreProcessorTest, HandlesLocalIncludes) {
     PreProcessor PP(*MainFile, EM, FM, SI);
     auto         Kinds = lexAllTokens(PP);
 
-    std::vector<tok::TokenKind> Expected = {
-        tok::t_int, tok::identifier, tok::semi, // from header
-        tok::t_int, tok::identifier, tok::semi, tok::eof};
+    std::vector<tok::TokenKind> Expected = {tok::t_int, tok::identifier, tok::semi, // from header
+                                            tok::t_int, tok::identifier, tok::semi, tok::eof};
 
     EXPECT_EQ(Kinds, Expected);
     EXPECT_TRUE(EM.getErrsList().empty());

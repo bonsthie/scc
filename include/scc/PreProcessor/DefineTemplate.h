@@ -2,7 +2,8 @@
 // keep the definition of a template
 // #define FOO(x, ...) printf(x, __VA_ARGS__)
 //
-// NOTE : you need to expend the entire chain of define at once to avoid recursion in define and also to work with the bait of recurrsion
+// NOTE : you need to expend the entire chain of define at once to avoid recursion in define and
+// also to work with the bait of recurrsion
 //
 //	ex : this don't work
 //	#define FOO(x) BAR(X)

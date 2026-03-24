@@ -8,8 +8,8 @@
 using namespace scc;
 
 TEST(TokenTest, TracksRangeAndDirtyState) {
-    FileID FID("/tmp/file.c", 1);
-    Token  T(tok::identifier, "foo");
+    FileID        FID("/tmp/file.c", 1);
+    Token         T(tok::identifier, "foo");
     MemoryViewPos Begin{1, 1};
     MemoryViewPos End{1, 4};
 

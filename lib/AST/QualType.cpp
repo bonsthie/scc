@@ -6,7 +6,7 @@ QualType QualType::desugarOnce() const {
     if (!Ty || !Ty->isTypedefType())
         return *this;
 
-    auto *TT = static_cast<TypedefType *>(Ty);
+    auto    *TT = static_cast<TypedefType *>(Ty);
     QualType Under = TT->getUnderlyingType();
     Under.addQualifiers(Quals);
     return Under;

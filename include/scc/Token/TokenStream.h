@@ -10,7 +10,7 @@ namespace scc {
 class TokenStream {
   public:
     virtual ~TokenStream() = default;
-    virtual  bool next(Token &CurTok) = 0;
+    virtual bool next(Token &CurTok) = 0;
 };
 
 } // namespace scc

@@ -18,11 +18,11 @@ TEST(TypeTest, BuiltinTypeKindAndQuery) {
 
 TEST(TypeTest, TypedefUnderlyingTypePreservesPointerAndQualifiers) {
     BuiltinType IntTy(TYint);
-    Qualifiers UnderQuals{};
+    Qualifiers  UnderQuals{};
     UnderQuals.IsConst = true;
 
     TypedefType Alias("MyInt", &IntTy, UnderQuals);
-    QualType Under = Alias.getUnderlyingType();
+    QualType    Under = Alias.getUnderlyingType();
 
     EXPECT_EQ(&IntTy, Under.getType());
     EXPECT_TRUE(Under.isConstQualified());
@@ -80,7 +80,7 @@ TEST(CanQualTypeTest, CreateStripsTypedefChainAndMergesQualifiers) {
     AliasQuals.IsRestrict = true;
     QualType Alias(&Middle, AliasQuals);
 
-    CanQualType Canon = CanQualType::create(Alias);
+    CanQualType     Canon = CanQualType::create(Alias);
     const QualType &Result = Canon.asQualType();
 
     EXPECT_EQ(&IntTy, Result.getType());

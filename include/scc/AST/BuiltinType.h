@@ -14,10 +14,10 @@ enum BuiltinTypeKind {
 class BuiltinType : public Type {
     BuiltinTypeKind BKind;
 
-public:
-	BuiltinType(BuiltinTypeKind BKind) : Type(TypeKind::Builtin), BKind(BKind) {}
+  public:
+    BuiltinType(BuiltinTypeKind BKind) : Type(TypeKind::Builtin), BKind(BKind) {}
 
-	BuiltinTypeKind getBuiltinKind() const { return BKind; }
+    BuiltinTypeKind getBuiltinKind() const { return BKind; }
 };
 
 } // namespace scc

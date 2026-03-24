@@ -20,7 +20,8 @@ class Allocator {
 
     virtual void reset() {}
 
-    template <typename T, typename... Args> T *alloc(Args &&...args) {
+    template <typename T, typename... Args>
+    T *alloc(Args &&...args) {
         void *ptr = rawAlloc(sizeof(T), alignof(T));
         return new (ptr) T(std::forward<Args>(args)...);
     }

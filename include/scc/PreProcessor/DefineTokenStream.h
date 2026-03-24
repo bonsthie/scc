@@ -7,16 +7,16 @@
 namespace scc {
 
 class DefineTokenStack : public TokenStream {
-	std::stack<Token> TokenStack;
+    std::stack<Token> TokenStack;
 
   public:
     DefineTokenStack(std::stack<Token> &&TokenStack) : TokenStack(std::move(TokenStack)) {}
 
     Token next() {
-		Token &next = TokenStack.top();
-		TokenStack.pop();
-		return std::move(next);
-	}
+        Token &next = TokenStack.top();
+        TokenStack.pop();
+        return std::move(next);
+    }
 };
 } // namespace scc
 

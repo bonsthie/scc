@@ -22,9 +22,7 @@ fs::path MakeUniqueTempDir(const std::string &prefix) {
     throw std::runtime_error("MakeUniqueTempDir: failed to create a unique directory");
 }
 
-
 void write_file(const fs::path &p, std::string_view content) {
     std::ofstream ofs(p);
     ofs << content;
 }
-

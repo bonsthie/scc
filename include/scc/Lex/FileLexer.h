@@ -50,7 +50,8 @@ class FileLexer : public TokenStream {
     void      consumeChar(SizedChar sc);
     void      consumeChar(int size);
 
-    template <typename... Args> bool consumeIfIs(int c, Args... chars) {
+    template <typename... Args>
+    bool consumeIfIs(int c, Args... chars) {
         int    expected[] = {c, chars...};
         size_t offset = 0;
         size_t total = 0;
@@ -78,7 +79,8 @@ class FileLexer : public TokenStream {
 
     inline int getCharIfOneOf(int c) { return ConsumeCharIfEqual(c) ? c : 0; }
 
-    template <typename... Args> int getCharIfOneOf(int c, Args... Next) {
+    template <typename... Args>
+    int getCharIfOneOf(int c, Args... Next) {
         if (ConsumeCharIfEqual(c))
             return c;
         return getCharIfOneOf(Next...);

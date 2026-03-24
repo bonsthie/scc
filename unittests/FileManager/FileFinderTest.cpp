@@ -1,9 +1,9 @@
 #include "scc/FileManager/FileFinder.h"
 
+#include "FMUtils.h"
 #include <filesystem>
 #include <gtest/gtest.h>
 #include <memory>
-#include "FMUtils.h"
 
 namespace fs = std::filesystem;
 using namespace scc;

@@ -6,7 +6,8 @@
 
 namespace scc {
 
-template <typename T> class StringSwitch {
+template <typename T>
+class StringSwitch {
     std::string_view S;
     std::optional<T> Res;
 

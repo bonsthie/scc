@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "scc/Sema/Scope.h"
 #include "scc/AST/Decl.h"
+#include "scc/Sema/Scope.h"
 
 using namespace scc;
 
@@ -13,7 +13,7 @@ struct DummyDecl : Decl {};
 
 TEST(ScopeTest, RejectsDuplicateSymbols) {
     DummyDecl First, Second;
-    Scope S;
+    Scope     S;
 
     EXPECT_TRUE(S.addDecl("foo", &First));
     EXPECT_FALSE(S.addDecl("foo", &Second));
@@ -23,7 +23,7 @@ TEST(ScopeTest, RejectsDuplicateSymbols) {
 
 TEST(ScopeMgrTest, PrefersInnermostScope) {
     DummyDecl Outer, Inner;
-    ScopeMgr SM;
+    ScopeMgr  SM;
 
     SM.newScope();
     ASSERT_TRUE(SM.addDecl("value", &Outer));

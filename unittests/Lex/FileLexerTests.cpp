@@ -4,8 +4,8 @@
 #include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
 #include <algorithm>
-#include <gtest/gtest.h>
 #include <cstring>
+#include <gtest/gtest.h>
 #include <memory>
 
 using namespace scc;
@@ -23,7 +23,7 @@ class FileLexTests : public ::testing::Test {
 
     FileLexer create_lexer(const char *str) {
         MemoryBufferView MV(str, strlen(str));
-		return FileLexer(std::move(MV), SI, *FID, *EM);
+        return FileLexer(std::move(MV), SI, *FID, *EM);
     }
 
     static void expectSeq(FileLexer &FL, std::initializer_list<tok::TokenKind> kinds) {

@@ -36,7 +36,10 @@ struct SourceRange {
     MemoryViewPos End;
 
     SourceRange() = default;
-    SourceRange(FileID *FID, MemoryViewPos Begin, MemoryViewPos End) : FID(FID), Begin(Begin), End(End) {}
+    SourceRange(FileID *FID, MemoryViewPos Begin, MemoryViewPos End)
+        : FID(FID),
+          Begin(Begin),
+          End(End) {}
 
     PosView posViewBegin() const { return {Begin, FID}; }
     PosView posViewEnd() const { return {End, FID}; }
