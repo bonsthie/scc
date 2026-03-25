@@ -10,7 +10,7 @@ namespace scc {
 
 class BasicAllocator : public Allocator {
   public:
-    void *allocate_bytes(size_t size, size_t alignment = alignof(std::max_align_t)) override {
+    static void *allocateRaw(size_t size, size_t alignment = alignof(std::max_align_t)) {
         void *ptr = nullptr;
 #if __cpp_aligned_new
         ptr = ::operator new(size, std::align_val_t(alignment));
@@ -20,7 +20,7 @@ class BasicAllocator : public Allocator {
         return ptr;
     }
 
-    void deallocate_bytes(void *ptr, size_t size, size_t alignment = alignof(std::max_align_t)) override {
+    static void deallocateRaw(void *ptr, size_t size, size_t alignment = alignof(std::max_align_t)) {
         (void)size;
         if (!ptr)
             return;
@@ -29,6 +29,14 @@ class BasicAllocator : public Allocator {
 #else
         ::operator delete(ptr);
 #endif
+    }
+
+    void *allocate_bytes(size_t size, size_t alignment = alignof(std::max_align_t)) override {
+        return allocateRaw(size, alignment);
+    }
+
+    void deallocate_bytes(void *ptr, size_t size, size_t alignment = alignof(std::max_align_t)) override {
+        deallocateRaw(ptr, size, alignment);
     }
 };
 

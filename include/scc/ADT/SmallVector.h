@@ -1,12 +1,29 @@
-#ifndef SCC_STRING_STRINGINTERNER
-#define SCC_STRING_STRINGINTERNER
+#ifndef SCC_ADT_SMALLVECTOR_H
+#define SCC_ADT_SMALLVECTOR_H
 
+#include "scc/ADT/BaseVector.h"
+#include "scc/Allocator/BasicAllocator.h"
+#include "scc/Allocator/StackGrowAllocator.h"
 #include <cstddef>
+
 namespace scc {
 
-template <typename Type, size_t Size = 16>
-class SmallVector {};
+template <typename T, size_t StackSize = 16, typename Alloc = StackGrowAllocator>
+class SmallVector : public BaseVector<T, StackSize, Alloc> {
+    using Base = BaseVector<T, StackSize, Alloc>;
+
+  public:
+    using Base::Base;
+};
+
+template <typename T, size_t StackSize = 16, typename Alloc = BasicAllocator>
+class vector : public BaseVector<T, StackSize, Alloc> {
+    using Base = BaseVector<T, StackSize, Alloc>;
+
+  public:
+    using Base::Base;
+};
 
 } // namespace scc
 
-#endif // SCC_STRING_STRINGINTERNER
+#endif // SCC_ADT_SMALLVECTOR_H

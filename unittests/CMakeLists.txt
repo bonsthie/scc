@@ -78,6 +78,7 @@ add_custom_target(check-gtest
 	TokenTests
 	PreProcessorTests
 	ASTTests
+	ADTTests
   USES_TERMINAL
 )
 
@@ -93,3 +94,4 @@ add_subdirectory(Error)
 add_subdirectory(Token)
 add_subdirectory(PreProcessor)
 add_subdirectory(AST)
+add_subdirectory(ADT)

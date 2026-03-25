@@ -1,4 +1,4 @@
 4.928350e-02 test.c
 4.531860e-02 1/test.c
 5.187845e-02 2/test2.c
-5.449724e-02 Lex/test.c
+5.574250e-02 Lex/test.c

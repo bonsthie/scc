@@ -1,5 +1,6 @@
 file(GLOB OPTION_READER_SOURCES
 	BumpAllocator.cpp
+	StackGrowAllocator.cpp
 )
 
 add_library(Allocator STATIC)

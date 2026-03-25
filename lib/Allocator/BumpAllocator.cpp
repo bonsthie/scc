@@ -5,7 +5,7 @@
 
 using namespace scc;
 
-void *BumpAllocator::rawAlloc(size_t size, size_t alignment) {
+void *BumpAllocator::allocate_bytes(size_t size, size_t alignment) {
     auto  &chunk = chunks[currentChunkIdx];
     void  *ptr = chunk.data.get() + chunk.offset;
     size_t space = chunkSize - chunk.offset;
@@ -17,7 +17,7 @@ void *BumpAllocator::rawAlloc(size_t size, size_t alignment) {
 
     // If it doesn't fit, allocate a new chunk and try again
     allocChunk();
-    return rawAlloc(size, alignment);
+    return allocate_bytes(size, alignment);
 }
 
 void BumpAllocator::allocChunk() {
