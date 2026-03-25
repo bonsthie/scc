@@ -17,8 +17,8 @@ TEST(BumpAllocatorTest, HonorsAlignmentAndRollsOverChunks) {
     // Force chunk rollover by using a tiny allocator.
     BumpAllocator Alloc(/*chunk_size=*/64);
 
-    auto *First = Alloc.alloc<WideType>();
-    auto *Second = Alloc.alloc<WideType>();
+    auto *First = Alloc.allocateArray<WideType>();
+    auto *Second = Alloc.allocateArray<WideType>();
 
     ASSERT_NE(First, nullptr);
     ASSERT_NE(Second, nullptr);
@@ -32,7 +32,7 @@ TEST(BumpAllocatorTest, CopyAndAllocStringProduceIndependentStorage) {
     BumpAllocator Alloc(128);
 
     const char *Text = "hello world";
-    void       *CopyPtr = Alloc.copy(Text, std::strlen(Text) + 1);
+    void       *CopyPtr = Alloc.copyBytes(Text, std::strlen(Text) + 1);
     ASSERT_NE(CopyPtr, nullptr);
     EXPECT_STREQ(static_cast<const char *>(CopyPtr), Text);
 
@@ -49,13 +49,13 @@ TEST(BumpAllocatorTest, CopyAndAllocStringProduceIndependentStorage) {
 TEST(BumpAllocatorTest, ResetReusesExistingChunks) {
     BumpAllocator Alloc(64);
 
-    int *First = Alloc.alloc<int>(42);
+    int *First = Alloc.construct<int>(42);
     ASSERT_NE(First, nullptr);
     uintptr_t FirstAddr = reinterpret_cast<uintptr_t>(First);
 
     Alloc.reset();
 
-    int *Second = Alloc.alloc<int>(7);
+    int *Second = Alloc.construct<int>(7);
     ASSERT_NE(Second, nullptr);
     uintptr_t SecondAddr = reinterpret_cast<uintptr_t>(Second);
 

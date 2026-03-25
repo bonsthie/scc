@@ -31,7 +31,7 @@ class BumpAllocator : public Allocator {
         size_t                       offset = 0;
     };
 
-    void *rawAlloc(size_t size, size_t alignment = alignof(std::max_align_t)) override;
+    void *allocate_bytes(size_t size, size_t alignment = alignof(std::max_align_t)) override;
     void  allocChunk();
 
     std::vector<Chunk> chunks;
