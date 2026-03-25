@@ -3,8 +3,8 @@
 
 #include <cstddef>
 #include <memory>
-#include <vector>
 
+#include "scc/ADT/vector.h"
 #include "scc/Allocator/Allocator.h"
 
 namespace scc {
@@ -34,7 +34,7 @@ class BumpAllocator : public Allocator {
     void *allocate_bytes(size_t size, size_t alignment = alignof(std::max_align_t)) override;
     void  allocChunk();
 
-    std::vector<Chunk> chunks;
+    scc::vector<Chunk> chunks;
     size_t             currentChunkIdx = 0;
     size_t             chunkSize;
 };

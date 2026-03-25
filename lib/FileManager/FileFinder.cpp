@@ -3,7 +3,7 @@
 
 using namespace scc;
 
-FileFinder::FileFinder(const std::vector<std::string> &SysPaths) { addSystemPaths(SysPaths); };
+FileFinder::FileFinder(const scc::vector<std::string> &SysPaths) { addSystemPaths(SysPaths); };
 
 FileID *FileFinder::getFileID(const std::string &Name, const FileID &BaseFile) {
     if (Name.empty())
@@ -41,7 +41,7 @@ FileID *FileFinder::getSystemFileID(const std::string &Name) {
     return &FID->second;
 }
 
-void FileFinder::addSystemPaths(const std::vector<std::string> &SysPaths) {
+void FileFinder::addSystemPaths(const scc::vector<std::string> &SysPaths) {
     for (auto Path : SysPaths) {
         addSystemPath(Path);
     }

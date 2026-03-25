@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "scc/ADT/vector.h"
 #include "scc/PreProcessor/PreProcessor.h"
 
 #include "scc/Error/ErrorManager.h"
@@ -13,7 +14,6 @@
 #include <random>
 #include <string>
 #include <string_view>
-#include <vector>
 
 using namespace scc;
 
@@ -46,8 +46,8 @@ class TempDir {
     std::filesystem::path Path;
 };
 
-std::vector<tok::TokenKind> lexAllTokens(PreProcessor &PP) {
-    std::vector<tok::TokenKind> Kinds;
+scc::vector<tok::TokenKind> lexAllTokens(PreProcessor &PP) {
+    scc::vector<tok::TokenKind> Kinds;
     Token                       Tok;
 
     while (true) {
@@ -85,7 +85,7 @@ TEST(PreProcessorTest, HandlesLocalIncludes) {
     PreProcessor PP(*MainFile, EM, FM, SI);
     auto         Kinds = lexAllTokens(PP);
 
-    std::vector<tok::TokenKind> Expected = {tok::t_int, tok::identifier, tok::semi, // from header
+    scc::vector<tok::TokenKind> Expected = {tok::t_int, tok::identifier, tok::semi, // from header
                                             tok::t_int, tok::identifier, tok::semi, tok::eof};
 
     EXPECT_EQ(Kinds, Expected);

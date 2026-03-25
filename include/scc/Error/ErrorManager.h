@@ -7,14 +7,15 @@
 #include <iostream>
 #include <memory>
 #include <ostream>
-#include <vector>
+
+#include "scc/ADT/vector.h"
 
 namespace scc {
 
 class ErrorManager {
     using ErrorPtr = std::unique_ptr<Error>;
 
-    std::vector<ErrorPtr> Errs;
+    scc::vector<ErrorPtr> Errs;
     std::ostream         &O;
 
     using FactoryFunc = std::function<std::unique_ptr<Error>(err::DiagLevel)>;
@@ -44,7 +45,7 @@ class ErrorManager {
         return false;
     }
 
-    const std::vector<ErrorPtr> &getErrsList() const { return Errs; }
+    const scc::vector<ErrorPtr> &getErrsList() const { return Errs; }
 
     int size() { return Errs.size(); }
 

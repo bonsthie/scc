@@ -1,3 +1,4 @@
+#include "scc/ADT/vector.h"
 #include "scc/FileManager/FileFinder.h"
 
 #include "FMUtils.h"
@@ -45,7 +46,7 @@ class FileFinderTest : public ::testing::Test {
         ASSERT_EQ(fs::current_path(), tempDir);
 
         // System include path points to tempDir/foo
-        std::vector<std::string> paths = {(tempDir / "foo").string()};
+        scc::vector<std::string> paths = {(tempDir / "foo").string()};
         FF = std::make_unique<FileFinder>(paths);
     }
 

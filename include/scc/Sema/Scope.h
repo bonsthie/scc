@@ -3,7 +3,8 @@
 
 #include <string_view>
 #include <unordered_map>
-#include <vector>
+
+#include "scc/ADT/vector.h"
 
 #include "scc/AST/Decl.h"
 
@@ -21,7 +22,7 @@ class Scope {
 };
 
 class ScopeMgr {
-    std::vector<Scope> Scopes;
+    scc::vector<Scope> Scopes;
 
   public:
     void popScope() { Scopes.pop_back(); }

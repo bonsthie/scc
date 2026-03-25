@@ -1,6 +1,7 @@
 #ifndef SCC_PREPROCESSOR_PREPROCESSOR_H
 #define SCC_PREPROCESSOR_PREPROCESSOR_H
 
+#include "scc/ADT/vector.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/FileManager.h"
@@ -9,7 +10,6 @@
 #include "scc/Token/Token.h"
 #include "scc/Token/TokenStream.h"
 #include <memory>
-#include <vector>
 
 // class DefineManager;
 // class IfdefManager;
@@ -17,7 +17,7 @@
 namespace scc {
 
 class PreProcessor {
-    std::vector<std::unique_ptr<TokenStream>> TSList;
+    scc::vector<std::unique_ptr<TokenStream>> TSList;
     TokenStream                              *CurrentTokStream = nullptr;
 
     ErrorManager   &EM;

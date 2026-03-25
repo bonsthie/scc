@@ -1,7 +1,8 @@
 // File: SccOptionTableTest.cpp
 #include <gtest/gtest.h>
 #include <string>
-#include <vector>
+
+#include "scc/ADT/vector.h"
 
 #include "scc/Error/ErrorManager.h"
 #include "scc/Option/Args.h"
@@ -25,8 +26,8 @@ class SccOptionTable : public OptionTable {
 };
 
 // Convenience: build argv vector (already skipping argv[0])
-static std::vector<const char *> mkArgv(std::initializer_list<const char *> args) {
-    return std::vector<const char *>{args};
+static scc::vector<const char *> mkArgv(std::initializer_list<const char *> args) {
+    return scc::vector<const char *>{args};
 }
 
 TEST(SccOptionTable, ParsesFlagTest) {

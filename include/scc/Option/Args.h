@@ -15,7 +15,8 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <vector>
+
+#include "scc/ADT/vector.h"
 
 namespace scc {
 
@@ -25,10 +26,10 @@ class Arg {
     enum valueType { None, Str, StrList };
 
   private:
-    const int                Type;
-    std::vector<std::string> Value;
-    Arg::valueType           ValueType;
-    bool                     Claim = false;
+    const int              Type;
+    scc::vector<std::string> Value;
+    Arg::valueType         ValueType;
+    bool              Claim = false;
 
   public:
     explicit Arg(const int type) : Type(type), ValueType(None) {}
@@ -36,7 +37,7 @@ class Arg {
         : Type(type),
           ValueType(VType),
           Value{str} {}
-    explicit Arg(const int type, const std::vector<std::string> &strs)
+    explicit Arg(const int type, const scc::vector<std::string> &strs)
         : Type(type),
           ValueType(StrList),
           Value(strs) {}
@@ -56,7 +57,7 @@ class Arg {
         return Value[0];
     }
 
-    const std::vector<std::string> &getValuesList() {
+    const scc::vector<std::string> &getValuesList() {
         assert(isMulti() && "getValueList Should be Use only for Arg With Multiple Value");
         return Value;
     }
@@ -70,7 +71,7 @@ class Arg {
         return false;
     }
 
-    bool addValuesToList(const std::vector<std::string> &strs) {
+    bool addValuesToList(const scc::vector<std::string> &strs) {
         assert(isMulti() && "addValuesToList Should be Use only for Arg With Multiple Value");
         for (auto s : strs) {
             if (addValueToList(s) == true)

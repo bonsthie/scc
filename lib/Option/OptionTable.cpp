@@ -9,9 +9,7 @@
 
 using namespace scc;
 
-using ArgvIt = std::vector<const char *>::const_iterator;
-
-ArgsList *OptionTable::parseArgs(const std::vector<const char *> &argv) {
+ArgsList *OptionTable::parseArgs(const scc::vector<const char *> &argv) {
     auto   Args = new ArgsList;
     ArgvIt it = argv.begin(), end = argv.end();
 

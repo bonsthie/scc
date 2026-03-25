@@ -1,4 +1,5 @@
 add_executable(ADTTests
+    BaseVectorTest.cpp
     SmallVectorTest.cpp
 )
 

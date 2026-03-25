@@ -5,7 +5,8 @@
 #include <filesystem>
 #include <string>
 #include <unordered_map>
-#include <vector>
+
+#include "scc/ADT/vector.h"
 
 #include "FileID.h"
 
@@ -14,7 +15,7 @@ namespace scc {
 class FileFinder {
 
     // use for system path include <foo.h> or -internal-isystem
-    std::vector<std::filesystem::path>        SystemPaths;
+    scc::vector<std::filesystem::path>        SystemPaths;
     std::unordered_map<std::string, FileID &> SystemPathFiles;
 
     std::unordered_map<std::string, FileID> AbsPathFiles;
@@ -22,7 +23,7 @@ class FileFinder {
     std::atomic_int ID = 0;
 
   public:
-    FileFinder(const std::vector<std::string> &SysPaths);
+    FileFinder(const scc::vector<std::string> &SysPaths);
 
     /// return the FileID for the Name file from the BaseFile or the System path
     FileID *getFileID(const std::string &Name, const FileID &BaseFile);
@@ -32,7 +33,7 @@ class FileFinder {
     FileID *getSystemFileID(const std::string &Name);
 
     void addSystemPath(const std::string &SysPath);
-    void addSystemPaths(const std::vector<std::string> &SysPaths);
+    void addSystemPaths(const scc::vector<std::string> &SysPaths);
 
   private:
     FileID *openNewSystemFile(const std::string &Name);

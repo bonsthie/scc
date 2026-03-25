@@ -1,3 +1,4 @@
+#include "scc/ADT/vector.h"
 #include "scc/Error/Error.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileFinder.h"
@@ -45,14 +46,14 @@ int main(int argc, char **argv, char **env) {
     ErrorManager   EM;
     SccOptionTable Opt(EM);
 
-    std::unique_ptr<ArgsList> Args(Opt.parseArgs(std::vector<const char *>(argv + 1, argv + argc)));
+    std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::vector<const char *>(argv + 1, argv + argc)));
     if (!Args)
         return 10;
     EM.emit();
     // return 1;
 
     auto        Inc = Args->getArg(Opt_I);
-    FileFinder  FF(Inc ? Inc->getValuesList() : std::vector<std::string>{});
+    FileFinder  FF(Inc ? Inc->getValuesList() : scc::vector<std::string>{});
     FileManager FM(FF, EM);
 
     File *F = FM.getFile("LexerTest.c");

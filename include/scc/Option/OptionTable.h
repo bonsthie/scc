@@ -1,6 +1,7 @@
 #ifndef SCC_OPTION_OPTIONTABLE_H
 #define SCC_OPTION_OPTIONTABLE_H
 
+#include "scc/ADT/vector.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/Option/Args.h"
 #include <memory>
@@ -13,7 +14,7 @@ namespace scc {
 enum class OptKind { Flag, Joined, Separate, JoinedOrSeparate, Equal };
 enum class ValType { None, Str, StrList };
 
-using ArgvIt = std::vector<const char *>::const_iterator;
+using ArgvIt = scc::vector<const char *>::const_iterator;
 
 struct OptionSpec {
     int         key;      // Opt_target, Opt_inc, Opt_o
@@ -32,7 +33,7 @@ class OptionTable {
     OptionTable(ErrorManager &EM) : EM(EM) {}
     ~OptionTable() = default;
 
-    ArgsList *parseArgs(const std::vector<const char *> &argv);
+    ArgsList *parseArgs(const scc::vector<const char *> &argv);
 
     void printOpt(std::ostream &O);
 
