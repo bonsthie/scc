@@ -1,0 +1,10 @@
+load("//bazel:scc.bzl", "scc_cc_lib")
+
+scc_cc_lib(
+    name = "Token",
+    srcs = glob(["*.cpp"]),
+    deps = [
+        "//lib/FileManager",
+        "//lib/Lex:DecodeChar",
+    ],
+)

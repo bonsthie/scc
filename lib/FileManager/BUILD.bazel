@@ -1,0 +1,23 @@
+load("//bazel:scc.bzl", "scc_cc_lib")
+
+scc_cc_lib(
+    name = "FileSupport",
+    srcs = [
+        "FileID.cpp",
+        "MemoryBuffer.cpp",
+    ],
+    deps = [],
+)
+
+scc_cc_lib(
+    name = "FileManager",
+    srcs = [
+        "File.cpp",
+        "FileFinder.cpp",
+        "FileManager.cpp",
+    ],
+    deps = [
+        "//lib/Error",
+        "//lib/FileManager:FileSupport",
+    ],
+)

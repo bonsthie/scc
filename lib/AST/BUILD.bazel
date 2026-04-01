@@ -1,0 +1,7 @@
+load("//bazel:scc.bzl", "scc_cc_lib")
+
+scc_cc_lib(
+    name = "AST",
+    srcs = glob(["*.cpp"]),
+    deps = [],
+)

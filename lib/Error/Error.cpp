@@ -26,4 +26,5 @@ std::string Error::getPrintLevelString() const {
     case err::DiagLevel::warning:
         return COL_MAGENTA "warning" COL_RESET;
     }
-};
+    return "";
+}

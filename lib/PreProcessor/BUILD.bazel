@@ -1,0 +1,13 @@
+load("//bazel:scc.bzl", "scc_cc_lib")
+
+scc_cc_lib(
+    name = "PreProcessor",
+    srcs = glob(["*.cpp"]),
+    deps = [
+        "//lib/Allocator",
+        "//lib/Error",
+        "//lib/FileManager",
+        "//lib/Lex",
+        "//lib/Token",
+    ],
+)

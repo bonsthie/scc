@@ -1,0 +1,9 @@
+load("//bazel:scc.bzl", "scc_cc_lib")
+
+scc_cc_lib(
+    name = "Option",
+    srcs = glob(["*.cpp"]),
+    deps = [
+        "//lib/Error",
+    ],
+)

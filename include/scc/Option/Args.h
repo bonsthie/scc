@@ -35,12 +35,12 @@ class Arg {
     explicit Arg(const int type) : Type(type), ValueType(None) {}
     explicit Arg(const int type, valueType VType, const std::string &str)
         : Type(type),
-          ValueType(VType),
-          Value{str} {}
+          Value{str},
+          ValueType(VType) {}
     explicit Arg(const int type, const scc::vector<std::string> &strs)
         : Type(type),
-          ValueType(StrList),
-          Value(strs) {}
+          Value(strs),
+          ValueType(StrList) {}
 
     bool isFlag() const { return ValueType == None; }
     bool isSingle() const { return ValueType == Str; }

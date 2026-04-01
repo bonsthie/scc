@@ -1,0 +1,72 @@
+load("//bazel:scc.bzl", "scc_test_group")
+
+package(default_visibility = ["//visibility:public"])
+
+scc_test_group(
+    name = "adt",
+    gtest = "//test/gtest:adt",
+)
+
+scc_test_group(
+    name = "allocator",
+    gtest = "//test/gtest:allocator",
+)
+
+scc_test_group(
+    name = "ast",
+    gtest = "//test/gtest:ast",
+)
+
+scc_test_group(
+    name = "error",
+    gtest = "//test/gtest:error",
+)
+
+scc_test_group(
+    name = "file-manager",
+    gtest = "//test/gtest:file-manager",
+)
+
+scc_test_group(
+    name = "lex",
+    lit = "//test/lit:lex",
+    gtest = "//test/gtest:lex",
+)
+
+scc_test_group(
+    name = "lit",
+    lit = "//test/lit:lit",
+)
+
+scc_test_group(
+    name = "option",
+    gtest = "//test/gtest:option",
+)
+
+scc_test_group(
+    name = "preprocessor",
+    gtest = "//test/gtest:preprocessor",
+)
+
+scc_test_group(
+    name = "sema",
+    gtest = "//test/gtest:sema",
+)
+
+scc_test_group(
+    name = "string",
+    gtest = "//test/gtest:string",
+)
+
+scc_test_group(
+    name = "token",
+    gtest = "//test/gtest:token",
+)
+
+scc_test_group(
+    name = "all",
+    tests = [
+        "//test/lit:lit",
+        "//test/gtest:all",
+    ],
+)

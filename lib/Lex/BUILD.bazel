@@ -1,0 +1,18 @@
+load("//bazel:scc.bzl", "scc_cc_lib")
+
+scc_cc_lib(
+    name = "DecodeChar",
+    srcs = ["DecodeChar.cpp"],
+    deps = [],
+)
+
+scc_cc_lib(
+    name = "Lex",
+    srcs = glob(["*.cpp"], exclude = ["DecodeChar.cpp"]),
+    deps = [
+        "//lib/Allocator",
+        "//lib/FileManager",
+        "//lib/Lex:DecodeChar",
+        "//lib/Token",
+    ],
+)

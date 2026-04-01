@@ -1,0 +1,15 @@
+load("//bazel:scc.bzl", "scc_cc_binary")
+
+scc_cc_binary(
+    name = "scc",
+    srcs = ["scc.cpp", "scc.h"],
+    deps = [
+		"//lib/Allocator:Allocator",
+		"//lib/FileManager:FileManager",
+		"//lib/Error:Error",
+		"//lib/PreProcessor:PreProcessor",
+		"//lib/Option:Option",
+		"//lib/Lex:Lex",
+		"//lib/Token:Token",
+    ],
+)

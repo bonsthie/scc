@@ -3,6 +3,7 @@
 
 #include "scc/FileManager/FileID.h"
 #include <fcntl.h>
+#include <ostream>
 #include <string_view>
 #include <sys/mman.h>
 #include <sys/stat.h>

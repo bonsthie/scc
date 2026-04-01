@@ -1,0 +1,90 @@
+load("//bazel:scc.bzl", "scc_cc_gtest", "scc_test_group")
+
+package(default_visibility = ["//visibility:public"])
+
+scc_cc_gtest(
+    name = "adt",
+    root = "ADT",
+    deps = ["//lib/Allocator"],
+)
+
+scc_cc_gtest(
+    name = "allocator",
+    root = "Allocator",
+    deps = ["//lib/Allocator"],
+)
+
+scc_cc_gtest(
+    name = "ast",
+    root = "AST",
+    deps = ["//lib/AST"],
+)
+
+scc_cc_gtest(
+    name = "error",
+    root = "Error",
+    deps = ["//lib/Error"],
+)
+
+scc_cc_gtest(
+    name = "file-manager",
+    root = "FileManager",
+    deps = ["//lib/FileManager"],
+    includes = ["FileManager"],
+)
+
+scc_cc_gtest(
+    name = "lex",
+    root = "Lex",
+    deps = [
+        "//lib/Allocator",
+        "//lib/Lex",
+    ],
+)
+
+scc_cc_gtest(
+    name = "option",
+    root = "Option",
+    deps = ["//lib/Option"],
+)
+
+scc_cc_gtest(
+    name = "preprocessor",
+    root = "PreProcessor",
+    deps = ["//lib/PreProcessor"],
+)
+
+scc_cc_gtest(
+    name = "sema",
+    root = "Sema",
+    deps = ["//lib/Sema"],
+)
+
+scc_cc_gtest(
+    name = "string",
+    root = "String",
+    deps = ["//lib/Allocator"],
+)
+
+scc_cc_gtest(
+    name = "token",
+    root = "Token",
+    deps = ["//lib/Token"],
+)
+
+scc_test_group(
+    name = "all",
+    tests = [
+        ":adt",
+        ":allocator",
+        ":ast",
+        ":error",
+        ":file-manager",
+        ":lex",
+        ":option",
+        ":preprocessor",
+        ":sema",
+        ":string",
+        ":token",
+    ],
+)

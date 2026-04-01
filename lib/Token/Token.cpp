@@ -11,7 +11,9 @@ static std::unordered_map<std::string_view, tok::TokenKind> TokenMap{
 #include "scc/Token/TokenKinds.def"
 };
 
+#ifdef __clang__
 #pragma clang diagnostic ignored "-Wc99-designator"
+#endif
 std::string scc::stringify_token_kind(tok::TokenKind Kind) {
     static const char *str[] = {
 #define TOK(id) [tok::id] = #id,

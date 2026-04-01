@@ -2,7 +2,7 @@
 #define SCC_ERROR_ERROR_H
 
 #include "scc/Error/ErrorColors.h"
-#include "scc/Token/Token.h"
+#include "scc/FileManager/MemoryBufferView.h"
 #include <optional>
 #include <ostream>
 #include <sstream>
