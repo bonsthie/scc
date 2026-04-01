@@ -1,0 +1,20 @@
+alias(
+    name = "refresh_compile_commands",
+    actual = "@wolfd_bazel_compile_commands//:generate_compile_commands",
+)
+
+alias(
+    name = "compile_commands",
+    actual = "@wolfd_bazel_compile_commands//:generate_compile_commands",
+)
+
+alias(
+	name = "scc",
+	actual = "//tools/scc:scc"
+)
+
+test_suite(
+      name = "all",
+      tests = ["//test:all"],
+  )
+
