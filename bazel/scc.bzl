@@ -28,7 +28,7 @@ def scc_cc_binary(name, srcs = [], deps = [], visibility = ["//visibility:public
         **kwargs
     )
 
-def scc_cc_test(name, srcs = [], deps = [], data = [], visibility = ["//visibility:public"], **kwargs):
+def scc_cc_gtest(name, root = "", srcs = None, hdrs = None, deps = [], data = [], visibility = ["//visibility:public"], **kwargs):
     """Define a gtest-backed C++ test plus a same-name suite target."""
 
     env = {
@@ -42,9 +42,24 @@ def scc_cc_test(name, srcs = [], deps = [], data = [], visibility = ["//visibili
         "@googletest//:gtest_main",
     ]
 
+    if root and not root.endswith("/"):
+        root += "/"
+
+    if srcs == None:
+        srcs = native.glob([root + "*.cpp"], allow_empty = True)
+    else:
+        srcs = [root + f for f in srcs]
+
+    if hdrs == None:
+        hdrs = native.glob([root + "*.h", root + "*.def"], allow_empty = True)
+    else:
+        hdrs = [root + f for f in hdrs]
+
+    test_srcs = srcs + hdrs
+
     cc_test(
         name = name + "_gtest",
-        srcs = srcs,
+        srcs = test_srcs,
         data = data,
         deps = scc_deps,
         env = env,

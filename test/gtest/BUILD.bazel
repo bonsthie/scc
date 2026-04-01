@@ -1,86 +1,74 @@
-load("//bazel:scc.bzl", "scc_cc_test", "scc_test_group")
+load("//bazel:scc.bzl", "scc_cc_gtest", "scc_test_group")
 
 package(default_visibility = ["//visibility:public"])
 
-scc_cc_test(
+scc_cc_gtest(
     name = "adt",
-    srcs = [
-        "ADT/BaseVectorTest.cpp",
-        "ADT/SmallVectorTest.cpp",
-    ],
+    root = "ADT",
     deps = ["//lib/Allocator"],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "allocator",
-    srcs = [
-        "Allocator/BumpAllocatorTest.cpp",
-        "Allocator/StackGrowAllocatorTest.cpp",
-    ],
+    root = "Allocator",
     deps = ["//lib/Allocator"],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "ast",
-    srcs = ["AST/TypeTests.cpp"],
+    root = "AST",
     deps = ["//lib/AST"],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "error",
-    srcs = ["Error/ErrorManagerTest.cpp"],
+    root = "Error",
     deps = ["//lib/Error"],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "file-manager",
-    srcs = [
-        "FileManager/FMUtils.h",
-        "FileManager/FMUtils.cpp",
-        "FileManager/FileFinderTest.cpp",
-        "FileManager/FileManagerTest.cpp",
-        "FileManager/FileTest.cpp",
-    ],
+    root = "FileManager",
     deps = ["//lib/FileManager"],
     includes = ["FileManager"],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "lex",
-    srcs = ["Lex/FileLexerTests.cpp"],
+    root = "Lex",
     deps = [
         "//lib/Allocator",
         "//lib/Lex",
     ],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "option",
-    srcs = ["Option/OptionTableTest.cpp"],
+    root = "Option",
     deps = ["//lib/Option"],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "preprocessor",
-    srcs = ["PreProcessor/PreProcessorTest.cpp"],
+    root = "PreProcessor",
     deps = ["//lib/PreProcessor"],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "sema",
-    srcs = ["Sema/ScopeTests.cpp"],
+    root = "Sema",
     deps = ["//lib/Sema"],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "string",
-    srcs = ["String/StringHelpersTest.cpp"],
+    root = "String",
     deps = ["//lib/Allocator"],
 )
 
-scc_cc_test(
+scc_cc_gtest(
     name = "token",
-    srcs = ["Token/TokenTest.cpp"],
+    root = "Token",
     deps = ["//lib/Token"],
 )
 
