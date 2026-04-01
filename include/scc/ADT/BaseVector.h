@@ -54,14 +54,16 @@ class BaseVector : public Span<T, BaseSize>, protected Alloc {
 
     BaseVector(const BaseVector &Other)
         requires std::copy_constructible<Alloc>
-        : Alloc(static_cast<const Alloc &>(Other)) {
+        : Base(),
+          Alloc(static_cast<const Alloc &>(Other)) {
         initializeStorage();
         copyFrom(Other);
     }
 
     BaseVector(BaseVector &&Other) noexcept(std::is_nothrow_move_constructible_v<Alloc>)
         requires std::movable<Alloc>
-        : Alloc(std::move(static_cast<Alloc &>(Other))) {
+        : Base(),
+          Alloc(std::move(static_cast<Alloc &>(Other))) {
         initializeStorage();
         moveFrom(std::move(Other));
     }

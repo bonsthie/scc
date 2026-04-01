@@ -25,7 +25,7 @@ bool FileLexer::next(Token &CurTok) {
 bool FileLexer::nextRaw(Token &CurTok) {
     // if the token is already consume by peak();
     if (NextToken.is(tok::not_init) == false) {
-        Token t = NextToken;
+        CurTok = NextToken;
         NextToken.setTokenKind(tok::not_init);
         return false;
     }
@@ -54,8 +54,6 @@ bool FileLexer::nextRaw(Token &CurTok) {
 }
 
 bool FileLexer::lexInclude(Token &CurTok) {
-    bool err;
-
     while (1) {
 
         if (nextRaw(CurTok))

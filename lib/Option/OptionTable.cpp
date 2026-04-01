@@ -47,6 +47,7 @@ std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end) {
             if (Opt.kind == OptKind::Joined)
                 return nullptr;
             // fall back on separate
+            [[fallthrough]];
         }
         case OptKind::Separate: {
             // e.g., "-o output" where spelling is "-o"

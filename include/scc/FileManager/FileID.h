@@ -16,7 +16,7 @@ class FileID {
     const FileID &operator=(const FileID &FID);
 
     const std::string &getName() const { return Name; };
-    const int          getFileFD() const { return ID; };
+    int                getFileFD() const { return ID; };
 
     std::string getBaseName() const {
         size_t pos = Name.find_last_of("/\\");

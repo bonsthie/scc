@@ -1,0 +1,18 @@
+load("//bazel:scc.bzl", "scc_lit_test")
+
+package(default_visibility = ["//visibility:public"])
+
+scc_lit_test(
+    name = "lit",
+    dir = ".",
+    data = ["//tools/scc:scc"],
+)
+
+scc_lit_test(
+    name = "lex",
+    dir = "Lex",
+    data = [
+        "lit.cfg.py",
+        "//tools/scc:scc",
+    ],
+)

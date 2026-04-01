@@ -34,7 +34,7 @@ class SccOptionTable : public OptionTable {
 
 } // namespace scc
 
-int cc1(int argc, char **argv, char **env) { return 1; }
+int cc1(int /*argc*/, char ** /*argv*/, char ** /*env*/) { return 1; }
 
 int main(int argc, char **argv, char **env) {
 
