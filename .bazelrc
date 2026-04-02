@@ -15,3 +15,7 @@ build:asan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine_instrumentation=libfuzz
 build:asan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine_sanitizer=asan
 
 common --enable_bzlmod
+
+
+test --cxxopt=-Wno-error=character-conversion
+test --cxxopt=-Wno-character-conversion

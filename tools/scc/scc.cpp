@@ -7,6 +7,7 @@
 #include "scc/Option/OptionTable.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/String/StringInterner.h"
+#include "scc/AST/RecordType.h"
 #include "scc/Token/Token.h"
 #include <cstring>
 #include <iostream>

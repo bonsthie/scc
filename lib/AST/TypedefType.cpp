@@ -1,5 +1,4 @@
-#include "scc/AST/Type.h"
-#include "scc/AST/QualType.h"
+#include "scc/AST/TypedefType.h"
 
 using namespace scc;
 
