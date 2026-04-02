@@ -1,0 +1,12 @@
+load("//bazel:fuzz.bzl", "scc_cc_fuzz")
+
+package(default_visibility = ["//visibility:public"])
+
+scc_cc_fuzz(
+    name = "lex",
+    srcs = ["test.cpp"],
+    deps = [
+        "//lib/Allocator",
+        "//lib/Lex",
+    ],
+)

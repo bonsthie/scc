@@ -1,0 +1,9 @@
+alias(
+    name = "lex",
+    actual = "//fuzz/lex:run",
+)
+
+alias(
+    name = "lex_bin",
+    actual = "//fuzz/lex:bin",
+)

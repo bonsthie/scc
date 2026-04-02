@@ -8,8 +8,12 @@ alias(
 	actual = "//tools/scc:scc"
 )
 
+alias(
+    name = "lexer_fuzz",
+    actual = "//fuzz:lexer_fuzz_test_run",
+)
+
 test_suite(
       name = "all",
       tests = ["//test:all"],
 )
-
