@@ -35,7 +35,6 @@ build/
 .cache/
 compile_commands.json
 
-bazel-*/
-external/
-out/
-
+/bazel-*
+/external
+/out
