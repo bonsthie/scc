@@ -38,13 +38,13 @@
 
 * [x] `Decl` (base)
     * [ ] `StaticAssertDecl`
-    * [ ] `NamedDecl`
-        * [ ] `TypeDecl`
-            * [ ] `TypedefDecl`
+    * [x] `NamedDecl`
+        * [x] `TypeDecl`
+            * [x] `TypedefDecl`
             * [x] `TagDecl` (base for struct/union/enum)
                 * [x] `RecordDecl` (struct/union)
                 * [x] `EnumDecl`
-        * [ ] `ValueDecl`
+        * [x] `ValueDecl`
             * [ ] `VarDecl`
             * [ ] `ParmVarDecl`
             * [ ] `FunctionDecl`
@@ -105,7 +105,7 @@
 
 * [ ] `Attr` hierarchy (C23/GNU/MSVC)
 * [ ] `SymbolTable`
-* [ ] `Scope`
+* [x] `Scope`
 * [ ] `Sema` (ActOn* hooks, typedef-name tracking, constant-eval)
 * [ ] `ASTVisitor`
 * [ ] `ASTPrinter` / `ASTDumper`

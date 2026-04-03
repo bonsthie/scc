@@ -22,14 +22,17 @@ TEST(TypeTest, TypedefUnderlyingTypePreservesPointerAndQualifiers) {
     BuiltinType IntTy(TYint);
     Qualifiers  UnderQuals{};
     UnderQuals.IsConst = true;
+    TypedefDecl AliasDecl("MyInt", QualType(&IntTy, UnderQuals));
 
-    TypedefType Alias("MyInt", &IntTy, UnderQuals);
+    TypedefType Alias(&AliasDecl);
     QualType    Under = Alias.getUnderlyingType();
 
     EXPECT_EQ(&IntTy, Under.getType());
     EXPECT_TRUE(Under.isConstQualified());
     EXPECT_FALSE(Under.isVolatileQualified());
     EXPECT_FALSE(Under.isRestrictQualified());
+    ASSERT_TRUE(Alias.getDecl()->getName().has_value());
+    EXPECT_EQ(*Alias.getDecl()->getName(), "MyInt");
 }
 
 TEST(QualTypeTest, DesugarOnceMergesQualifiers) {
@@ -37,7 +40,8 @@ TEST(QualTypeTest, DesugarOnceMergesQualifiers) {
 
     Qualifiers UnderQuals{};
     UnderQuals.IsVolatile = true;
-    TypedefType Alias("VolatileInt", &IntTy, UnderQuals);
+    TypedefDecl AliasDecl("VolatileInt", QualType(&IntTy, UnderQuals));
+    TypedefType Alias(&AliasDecl);
 
     Qualifiers AliasQuals{};
     AliasQuals.IsConst = true;
@@ -72,11 +76,13 @@ TEST(CanQualTypeTest, CreateStripsTypedefChainAndMergesQualifiers) {
 
     Qualifiers InnerQuals{};
     InnerQuals.IsVolatile = true;
-    TypedefType Inner("Inner", &IntTy, InnerQuals);
+    TypedefDecl InnerDecl("Inner", QualType(&IntTy, InnerQuals));
+    TypedefType Inner(&InnerDecl);
 
     Qualifiers MiddleQuals{};
     MiddleQuals.IsConst = true;
-    TypedefType Middle("Middle", &Inner, MiddleQuals);
+    TypedefDecl MiddleDecl("Middle", QualType(&Inner, MiddleQuals));
+    TypedefType Middle(&MiddleDecl);
 
     Qualifiers AliasQuals{};
     AliasQuals.IsRestrict = true;

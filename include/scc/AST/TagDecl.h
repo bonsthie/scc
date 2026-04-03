@@ -4,54 +4,35 @@
 #include "scc/ADT/Span.h"
 #include "scc/AST/Decl.h"
 #include "scc/AST/QualType.h"
-#include <optional>
-#include <string_view>
 
 namespace scc {
 
 enum TagDeclKind { Enum, Struct, Union };
 
-class TagDecl : public Decl {
+class TagDecl : public TypeDecl {
   public:
-    using NameType = std::optional<std::string_view>;
+    using NameType = TypeDecl::NameType;
 
   private:
     TagDeclKind TKind;
-    NameType    Name;
 
   public:
-    TagDecl(TagDeclKind TKind, NameType Name) : Decl(Tag), TKind(TKind), Name(Name) {}
+    TagDecl(TagDeclKind TKind, NameType Name) : TypeDecl(Tag, Name), TKind(TKind) {}
 
-    TagDeclKind     getTagDeclKind() const { return TKind; }
-    const NameType &getName() const { return Name; }
-    void            setName(NameType NewName) { Name = NewName; }
-
-    bool isAnonymous() const { return !Name.has_value(); }
-    bool isEnum() const { return TKind == Enum; }
-    bool isStruct() const { return TKind == Struct; }
-    bool isUnion() const { return TKind == Union; }
-    bool isRecord() const { return isStruct() || isUnion(); }
+    TagDeclKind getTagDeclKind() const { return TKind; }
+    bool        isEnum() const { return TKind == Enum; }
+    bool        isStruct() const { return TKind == Struct; }
+    bool        isUnion() const { return TKind == Union; }
+    bool        isRecord() const { return isStruct() || isUnion(); }
 };
 
-class RecordFieldDecl : public Decl {
+class RecordFieldDecl : public ValueDecl {
   public:
-    using NameType = TagDecl::NameType;
-
-  private:
-    QualType Ty;
-    NameType Name;
+    using NameType = ValueDecl::NameType;
 
   public:
     RecordFieldDecl(QualType Ty, NameType Name = std::nullopt)
-        : Decl(RecordField),
-          Ty(Ty),
-          Name(Name) {}
-
-    QualType        getType() const { return Ty; }
-    const NameType &getName() const { return Name; }
-    void            setType(QualType NewTy) { Ty = NewTy; }
-    void            setName(NameType NewName) { Name = NewName; }
-    bool            isAnonymous() const { return !Name.has_value(); }
+        : ValueDecl(RecordField, Name, Ty) {}
 };
 
 class RecordDecl : public TagDecl {
@@ -89,19 +70,12 @@ class RecordDecl : public TagDecl {
     size_t size() const { return FieldCount; }
 };
 
-class EnumFieldDecl : public Decl {
+class EnumFieldDecl : public NamedDecl {
   public:
-    using NameType = TagDecl::NameType;
-
-  private:
-    NameType Name;
+    using NameType = NamedDecl::NameType;
 
   public:
-    explicit EnumFieldDecl(NameType Name) : Decl(EnumField), Name(Name) {}
-
-    const NameType &getName() const { return Name; }
-    void            setName(NameType NewName) { Name = NewName; }
-    bool            isAnonymous() const { return !Name.has_value(); }
+    explicit EnumFieldDecl(NameType Name) : NamedDecl(EnumField, Name) {}
 };
 
 class EnumDecl : public TagDecl {

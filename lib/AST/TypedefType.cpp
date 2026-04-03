@@ -2,4 +2,6 @@
 
 using namespace scc;
 
-QualType TypedefType::getUnderlyingType() const { return QualType(UnderlyingTy, UnderlyingQuals); }
+QualType TypedefType::getUnderlyingType() const {
+    return Decl ? Decl->getUnderlyingType() : QualType();
+}
