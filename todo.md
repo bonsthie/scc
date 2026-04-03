@@ -22,28 +22,34 @@
 
 ## Types
 
-* [ ] `Type` (base)
-* [ ] `QualType` (Type* + qualifier bits)
-* [ ] `BuiltinType`
-* [ ] `PointerType`
-* [ ] `ArrayType`
-* [ ] `FunctionType`
-* [ ] `RecordType` (struct/union)
-* [ ] `EnumType`
-* [ ] `AtomicType`
+* [x] `Type` (base)
+    * [x] `BuiltinType`
+    * [ ] `PointerType`
+    * [x] `ArrayType`
+    * [ ] `FunctionType`
+    * [x] `TagType` (base for tag-backed types)
+        * [x] `RecordType` (struct/union)
+        * [x] `EnumType`
+    * [x] `TypedefType` (sugar / alias type)
+    * [ ] `AtomicType`
+* [x] `QualType` (wrapper: `Type*` + qualifier bits)
 
 ## Declarations
 
-* [ ] `Decl` (base)
-* [ ] `VarDecl`
-* [ ] `ParmVarDecl`
-* [ ] `FunctionDecl`
-* [ ] `TypedefDecl`
-* [ ] `RecordDecl` (struct/union)
-* [ ] `FieldDecl`
-* [ ] `EnumDecl`
-* [ ] `EnumeratorDecl`
-* [ ] `StaticAssertDecl`
+* [x] `Decl` (base)
+    * [ ] `StaticAssertDecl`
+    * [ ] `NamedDecl`
+        * [ ] `TypeDecl`
+            * [ ] `TypedefDecl`
+            * [x] `TagDecl` (base for struct/union/enum)
+                * [x] `RecordDecl` (struct/union)
+                * [x] `EnumDecl`
+        * [ ] `ValueDecl`
+            * [ ] `VarDecl`
+            * [ ] `ParmVarDecl`
+            * [ ] `FunctionDecl`
+            * [ ] `FieldDecl`
+            * [ ] `EnumeratorDecl`
 
 ## Statements & Expressions (starter set)
 

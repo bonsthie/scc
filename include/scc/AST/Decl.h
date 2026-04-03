@@ -3,7 +3,23 @@
 
 namespace scc {
 
-class Decl {};
+enum DeclKind {
+    None,
+    Type,
+    Tag,
+    Typedef,
+    RecordField,
+    EnumField,
+};
+
+class Decl {
+    DeclKind Kind;
+
+  public:
+    Decl(DeclKind Kind) : Kind(Kind) {}
+
+    DeclKind kind() const { return Kind; }
+};
 
 } // namespace scc
 

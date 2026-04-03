@@ -17,5 +17,5 @@ build:asan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine_sanitizer=asan
 common --enable_bzlmod
 
 
-test --cxxopt=-Wno-error=character-conversion
+# gtest cast error
 test --cxxopt=-Wno-character-conversion

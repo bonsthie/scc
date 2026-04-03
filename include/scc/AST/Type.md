@@ -3,7 +3,8 @@ Type*
  ├── PointerType     (T*)
  ├── FunctionType    (T(...))
  ├── ArrayType       (T[N])
- └── RecordType      (struct / union / class)
+ ├── EnumType        (enum E)
+ └── RecordType      (struct / union)
 
 Qualifiers
  ├── const

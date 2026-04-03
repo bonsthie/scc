@@ -7,7 +7,9 @@ using namespace scc;
 
 namespace {
 
-struct DummyDecl : Decl {};
+struct DummyDecl : Decl {
+    DummyDecl() : Decl(None) {}
+};
 
 } // namespace
 

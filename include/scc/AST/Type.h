@@ -9,6 +9,7 @@ enum class TypeKind {
     Pointer,  // int*
     Array,    // int[10]
     Function, // int(int, float)
+    Enum,     // enum E
     Record,   // struct { ... } union { ... }
     Typedef,  // typedef
 };
@@ -24,6 +25,7 @@ class Type {
     bool isBuiltinType() const { return Kind == TypeKind::Builtin; }
     bool isPointerType() const { return Kind == TypeKind::Pointer; }
     bool isArrayType() const { return Kind == TypeKind::Array; }
+    bool isEnumType() const { return Kind == TypeKind::Enum; }
     bool isRecordType() const { return Kind == TypeKind::Record; }
     bool isTypedefType() const { return Kind == TypeKind::Typedef; }
     bool isVoidType() const { return false; }; // TODO by checking if builtin type
