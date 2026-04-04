@@ -15,7 +15,8 @@ class FileLexTests : public ::testing::Test {
   public:
     std::unique_ptr<FileID>       FID;
     std::unique_ptr<ErrorManager> EM;
-    StringInterner                SI;
+    BumpAllocator                 Arena;
+    StringInterner                SI{Arena};
 
     void SetUp() override {
         FID = std::make_unique<FileID>("test File", 1);

@@ -38,3 +38,5 @@ compile_commands.json
 /bazel-*
 /external
 /out
+
+/*.c

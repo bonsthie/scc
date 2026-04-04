@@ -53,7 +53,7 @@ class BaseVector : public Span<T, BaseSize>, protected Alloc {
     }
 
     BaseVector(const BaseVector &Other)
-        requires std::copy_constructible<Alloc>
+        requires(std::copy_constructible<Alloc> && std::copy_constructible<T>)
         : Base(),
           Alloc(static_cast<const Alloc &>(Other)) {
         initializeStorage();
@@ -69,7 +69,8 @@ class BaseVector : public Span<T, BaseSize>, protected Alloc {
     }
 
     BaseVector &operator=(const BaseVector &Other)
-        requires(std::is_copy_assignable_v<Alloc> && std::copy_constructible<Alloc>) {
+        requires(std::is_copy_assignable_v<Alloc> && std::copy_constructible<Alloc> &&
+                 std::copy_constructible<T>) {
         if (this == &Other)
             return *this;
         static_cast<Alloc &>(*this) = static_cast<const Alloc &>(Other);

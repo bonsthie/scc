@@ -12,6 +12,12 @@ class Parser {
 
   public:
     Parser(PreProcessor &PP, Sema &Action) : PP(PP), Action(Action) {}
+
+    PreProcessor &getPreprocessor() { return PP; }
+    const PreProcessor &getPreprocessor() const { return PP; }
+
+    Sema &getSema() { return Action; }
+    const Sema &getSema() const { return Action; }
 };
 
 } // namespace scc

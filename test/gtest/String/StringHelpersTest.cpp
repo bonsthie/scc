@@ -10,7 +10,8 @@
 using namespace scc;
 
 TEST(StringInternerTest, DeduplicatesStringsAndKeepsStorageStable) {
-    StringInterner SI;
+    BumpAllocator  Arena;
+    StringInterner SI(Arena);
 
     std::string_view Hello = SI.intern("hello");
     std::string_view HelloAgain = SI.intern(std::string("hello"));

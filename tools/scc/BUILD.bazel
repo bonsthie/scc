@@ -11,5 +11,6 @@ scc_cc_binary(
 		"//lib/Option:Option",
 		"//lib/Lex:Lex",
 		"//lib/Token:Token",
+		"//lib/Frontend:Frontend"
     ],
 )

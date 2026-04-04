@@ -16,7 +16,8 @@ volatile std::size_t gTokenSink = 0;
 
 extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t *data, std::size_t size) {
     scc::ErrorManager   errorManager;
-    scc::StringInterner stringInterner;
+    scc::BumpAllocator  arena;
+    scc::StringInterner stringInterner(arena);
     scc::FileID         fileId("<fuzz-input>", 1);
 
     scc::MemoryBufferView buffer(reinterpret_cast<const char *>(data), size);

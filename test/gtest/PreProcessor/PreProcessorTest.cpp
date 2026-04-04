@@ -77,7 +77,8 @@ TEST(PreProcessorTest, HandlesLocalIncludes) {
     ErrorManager   EM;
     FileFinder     Finder({});
     FileManager    FM(Finder, EM);
-    StringInterner SI;
+    BumpAllocator  Arena;
+    StringInterner SI(Arena);
 
     File *MainFile = openFile(FM, MainPath);
     ASSERT_NE(MainFile, nullptr);
@@ -99,7 +100,8 @@ TEST(PreProcessorTest, ReportsMissingInclude) {
     ErrorManager   EM;
     FileFinder     Finder({});
     FileManager    FM(Finder, EM);
-    StringInterner SI;
+    BumpAllocator  Arena;
+    StringInterner SI(Arena);
 
     File *MainFile = openFile(FM, MainPath);
     ASSERT_NE(MainFile, nullptr);

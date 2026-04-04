@@ -10,13 +10,12 @@
 namespace scc {
 
 class StringInterner {
-    BumpAllocator Arena;
+    BumpAllocator &Arena;
 
     std::unordered_set<std::string_view> Pool;
 
   public:
-    StringInterner() = default;
-    StringInterner(size_t BumpAllocatorSize) : Arena(BumpAllocatorSize) {}
+    StringInterner(BumpAllocator &Arena) : Arena(Arena) {}
 
     std::string_view intern(std::string_view Str) {
         if (Str.empty())

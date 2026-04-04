@@ -1,9 +1,9 @@
 #include "scc/ADT/vector.h"
-#include "scc/Error/Error.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileFinder.h"
 #include "scc/FileManager/FileManager.h"
-#include "scc/Lex/FileLexer.h"
+#include "scc/Frontend/CompilerBuilder.h"
+#include "scc/Frontend/CompilerInstance.h"
 #include "scc/Option/OptionTable.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/String/StringInterner.h"
@@ -15,7 +15,7 @@
 using namespace scc;
 
 namespace scc {
-enum SccOptionIndex { Opt_none, Opt_test, Opt_oui, Opt_L, Opt_I };
+enum SccOptionIndex { Opt_none, Opt_test, Opt_oui, Opt_L, Opt_I, Opt_cc1};
 
 class SccOptionTable : public OptionTable {
 
@@ -34,14 +34,34 @@ class SccOptionTable : public OptionTable {
 
 } // namespace scc
 
-int cc1(int /*argc*/, char ** /*argv*/, char ** /*env*/) { return 1; }
+bool cc1(int argc, char **argv, char **) {
+    ErrorManager   EM;
+    SccOptionTable Opt(EM);
+
+    std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::vector<const char *>(argv + 2, argv + argc)));
+    if (EM.emit() || !Args)
+        return 1;
+
+    BumpAllocator  BumpAlloca;
+    StringInterner SI(BumpAlloca);
+
+    auto        Inc = Args->getArg(Opt_I);
+    FileFinder  FF(Inc ? Inc->getValuesList() : scc::vector<std::string>{});
+    FileManager FM(FF, EM);
+
+    CompilerBuilder                   Builder(FM, EM, *Args);
+    std::unique_ptr<CompilerInstance> CI(Builder.create());
+    if (CI == nullptr) {
+        return EM.emit();
+    }
+
+    return CI->Execute();
+}
 
 int main(int argc, char **argv, char **env) {
 
     if (argc >= 2 && strcmp(argv[1], "-cc1") == 0)
         return cc1(argc, argv, env);
-
-    // FileManager FM;
 
     ErrorManager   EM;
     SccOptionTable Opt(EM);
@@ -63,7 +83,7 @@ int main(int argc, char **argv, char **env) {
     }
 
     BumpAllocator  BumpAlloca;
-    StringInterner SI;
+    StringInterner SI(BumpAlloca);
 
     PreProcessor PP(*F, EM, FM, SI);
 
@@ -75,11 +95,6 @@ int main(int argc, char **argv, char **env) {
         if (EM.size())
             EM.emit();
     } while (!CurTok.is(tok::eof));
-
-    // CurTok.print(std::cout);
-    //     if (CurTok.is(tok::comment)) {
-    //         std::cout << "unfinish comment";
-    //     }
 
     // // Opt.printOpt(std::cout);
     // if (auto a = Args->getArg(Opt_oui))

@@ -1,23 +1,40 @@
 #ifndef SCC_COMPILERBUILDER_H
 #define SCC_COMPILERBUILDER_H
 
-#include "CompilerInstance.h"
+#include <string>
+
+#include "scc/Allocator/BumpAllocator.h"
 #include "scc/Error/ErrorManager.h"
+#include "scc/FileManager/File.h"
 #include "scc/FileManager/FileManager.h"
+#include "scc/Frontend/CompilerInstance.h"
+#include "scc/Frontend/FrontendAction.h"
 #include "scc/Option/Args.h"
+
 namespace scc {
 
 class CompilerBuilder {
-    FileManager  &FM;
-    ErrorManager &EM;
-    ArgsList     &Args;
+    BumpAllocator  Arena;
+    StringInterner SI;
+    FileManager   &FM;
+    ErrorManager  &EM;
+    ArgsList      &Args;
 
+  public:
     CompilerBuilder(FileManager &FM, ErrorManager &EM, ArgsList &Args)
-        : FM(FM),
+        : Arena(),
+          SI(Arena),
+          FM(FM),
           EM(EM),
           Args(Args) {}
 
+
     CompilerInstance *create();
+    CompilerInstance *create(File *MainFile);
+    CompilerInstance *create(const std::string &MainFileName);
+
+  private:
+    FrontendAction *selectForntendAction();
 };
 
 } // namespace scc
