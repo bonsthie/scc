@@ -35,15 +35,10 @@ class EnumType : public TagType {
 };
 
 class RecordType : public TagType {
-    bool IsInlineRecord = false;
-
-  protected:
-    explicit RecordType(RecordDecl *Decl, bool IsInlineRecord)
-        : TagType(TypeKind::Record, Decl),
-          IsInlineRecord(IsInlineRecord) {}
-
   public:
-    explicit RecordType(RecordDecl *Decl) : RecordType(Decl, false) {}
+    explicit RecordType(RecordDecl *Decl)
+        : TagType(TypeKind::Record, Decl) {}
+
 
     RecordDecl       *getDecl() { return static_cast<RecordDecl *>(TagType::getDecl()); }
     const RecordDecl *getDecl() const {
@@ -51,12 +46,14 @@ class RecordType : public TagType {
     }
     void setDecl(RecordDecl *NewDecl) { TagType::setDecl(NewDecl); }
 
-    bool isInlineRecordType() const { return IsInlineRecord; }
+    virtual bool isInlineRecordType() const { return false; }
 };
 
 class InlineRecordType : public RecordType {
   public:
-    explicit InlineRecordType(RecordDecl *Decl) : RecordType(Decl, true) {}
+    explicit InlineRecordType(RecordDecl *Decl) : RecordType(Decl) {}
+
+    bool isInlineRecordType() const { return true; }
 };
 
 } // namespace scc

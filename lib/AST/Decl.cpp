@@ -94,6 +94,7 @@ void print_indent(std::ostream &O, size_t IndentLevel) {
 void print_type(std::ostream &O, const class scc::Type *Ty);
 void print_record_field(std::ostream &O, const RecordFieldDecl &Field, size_t IndentLevel);
 void print_record_fields(std::ostream &O, const RecordDecl &Decl, size_t IndentLevel);
+void print_record_decl(std::ostream &O, const char *DeclName, const RecordDecl &Decl, size_t IndentLevel);
 
 void print_tag_type(std::ostream &O, const TagDecl *Decl) {
     if (!Decl) {
@@ -156,9 +157,13 @@ void print_type(std::ostream &O, const class scc::Type *Ty) {
         return;
     }
     case TypeKind::Enum:
-    case TypeKind::Record:
         print_tag_type(O, static_cast<const TagType *>(Ty)->getDecl());
         return;
+    case TypeKind::Record: {
+        auto *RT = static_cast<const RecordType *>(Ty);
+        print_tag_type(O, RT->getDecl());
+        return;
+    }
     case TypeKind::Typedef: {
         auto *TT = static_cast<const TypedefType *>(Ty);
         if (const TypedefDecl *Decl = TT->getDecl(); Decl && Decl->getName().has_value()) {
@@ -206,7 +211,17 @@ void print_qual_type(std::ostream &O, QualType Ty) {
     print_type(O, Ty.getType());
 }
 
-void print_inline_record_body(std::ostream &O, const RecordDecl &Decl, size_t IndentLevel) {
+void print_record_decl(std::ostream &O, const char *DeclName, const RecordDecl &Decl, size_t IndentLevel) {
+    print_indent(O, IndentLevel);
+    O << DeclName << ' ' << &Decl << " tag=" << tag_decl_kind_name(Decl.getTagDeclKind()) << " name=";
+    print_name(O, Decl.getName());
+    O << " fields=" << Decl.size();
+
+    if (Decl.empty()) {
+        O << '\n';
+        return;
+    }
+
     O << " {\n";
     print_record_fields(O, Decl, IndentLevel + 1);
     print_indent(O, IndentLevel);
@@ -221,7 +236,8 @@ void print_record_field(std::ostream &O, const RecordFieldDecl &Field, size_t In
     print_qual_type(O, Field.getType());
 
     if (const RecordDecl *InlineRecord = get_inline_record_decl(Field.getType())) {
-        print_inline_record_body(O, *InlineRecord, IndentLevel);
+        O << '\n';
+        print_record_decl(O, "InlineRecordDecl", *InlineRecord, IndentLevel);
         return;
     }
 
@@ -266,7 +282,8 @@ void TypedefDecl::print(std::ostream &O) const {
     print_qual_type(O, getUnderlyingType());
 
     if (const RecordDecl *InlineRecord = get_inline_record_decl(getUnderlyingType())) {
-        print_inline_record_body(O, *InlineRecord, 0);
+        O << '\n';
+        print_record_decl(O, "InlineRecordDecl", *InlineRecord, 0);
         return;
     }
 
@@ -292,18 +309,7 @@ void RecordFieldDecl::print(std::ostream &O) const {
 }
 
 void RecordDecl::print(std::ostream &O) const {
-    O << "RecordDecl " << this << " tag=" << tag_decl_kind_name(getTagDeclKind()) << " name=";
-    print_name(O, getName());
-    O << " fields=" << size();
-
-    if (empty()) {
-        O << '\n';
-        return;
-    }
-
-    O << " {\n";
-    print_record_fields(O, *this, 1);
-    O << "}\n";
+    print_record_decl(O, "RecordDecl", *this, 0);
 }
 
 void EnumFieldDecl::print(std::ostream &O) const {
