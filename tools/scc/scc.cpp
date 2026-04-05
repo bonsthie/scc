@@ -1,4 +1,5 @@
 #include "scc/ADT/vector.h"
+#include "scc/Error/Error.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileFinder.h"
 #include "scc/FileManager/FileManager.h"
@@ -58,9 +59,19 @@ bool cc1(int argc, char **argv, char **) {
     auto            Files = Args->getFiles();
 
     std::unique_ptr<CompilerInstance> CI;
-    if (!Files.empty())
-        CI.reset(Builder.create(std::string(Files.front())));
-    else
+
+    if (!Files.empty()) {
+        std::string F(Files.back());
+        if (Files.size() != 1) {
+            EM.report(err::warning)
+                .msg("multiple input files specified; using ")
+                .quote(F)
+                .msg(" and ignoring previous inputs");
+            if (EM.emit())
+                return 1;
+        }
+        CI.reset(Builder.create(F));
+    } else
         CI.reset(Builder.create());
 
     if (CI == nullptr) {

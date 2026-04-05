@@ -12,6 +12,15 @@ scc_lit_test(
 )
 
 scc_lit_test(
+    name = "cc1_driver",
+    dir = "CC1Driver",
+    data = [
+        "lit.cfg.py",
+		"//tools/scc:scc"
+	],
+)
+
+scc_lit_test(
     name = "lex",
     dir = "Lex",
     data = [
@@ -23,6 +32,7 @@ scc_lit_test(
 test_suite(
     name = "lit",
     tests = [
+		":cc1_driver_lit",
         ":driver_lit",
         ":lex_lit",
     ],
