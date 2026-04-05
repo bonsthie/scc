@@ -2,6 +2,7 @@
 #define SCC_AST_ASTCONSUMER
 
 #include "scc/AST/Decl.h"
+#include <iostream>
 
 namespace scc {
 
@@ -14,7 +15,13 @@ class ASTConsumer {
 
 class DumpASTConsumer final : public ASTConsumer {
 
-    bool HandleTopLevelDecl(Decl *) { return false; }
+    bool HandleTopLevelDecl(Decl *D) {
+        if (!D)
+            return false;
+
+        D->print();
+        return false;
+    }
 };
 
 } // namespace scc

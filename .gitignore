@@ -31,6 +31,8 @@
 *.out
 *.app
 
+.codex
+
 build/
 .cache/
 compile_commands.json

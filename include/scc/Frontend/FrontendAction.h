@@ -48,6 +48,7 @@ class DumpRawToken : public FrontendAction {
     }
 };
 
+
 class ASTFrontendAction : public FrontendAction {
   public:
     bool Execute(CompilerInstance &CI) final {

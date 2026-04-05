@@ -41,6 +41,11 @@ class Error {
         return *this;
     }
 
+    Error &quote(const std::string &msg) {
+        Msg << "\"" << msg << "\"";
+        return *this;
+    }
+
     std::ostringstream &msg() { return Msg; }
 
     Error &Char(char c) {

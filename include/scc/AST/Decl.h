@@ -1,8 +1,11 @@
 #ifndef SCC_AST_DECL_H
 #define SCC_AST_DECL_H
 
+#include <iostream>
 #include <optional>
+#include <ostream>
 #include <string_view>
+#include <utility>
 
 #include "scc/AST/QualType.h"
 
@@ -25,6 +28,8 @@ class Decl {
     Decl(DeclKind Kind) : Kind(Kind) {}
 
     DeclKind kind() const { return Kind; }
+
+    virtual void print(std::ostream &o = std::cout) const;
 };
 
 class NamedDecl : public Decl {
@@ -40,6 +45,8 @@ class NamedDecl : public Decl {
     const NameType &getName() const { return Name; }
     void            setName(NameType NewName) { Name = NewName; }
     bool            isAnonymous() const { return !Name.has_value(); }
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 class TypeDecl : public NamedDecl {
@@ -47,6 +54,8 @@ class TypeDecl : public NamedDecl {
     using NameType = NamedDecl::NameType;
 
     TypeDecl(DeclKind Kind, NameType Name) : NamedDecl(Kind, Name) {}
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 class ValueDecl : public NamedDecl {
@@ -59,6 +68,8 @@ class ValueDecl : public NamedDecl {
 
     QualType getType() const { return Ty; }
     void     setType(QualType NewTy) { Ty = NewTy; }
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 class TypedefDecl : public TypeDecl {
@@ -71,6 +82,8 @@ class TypedefDecl : public TypeDecl {
 
     QualType getUnderlyingType() const { return UnderlyingType; }
     void     setUnderlyingType(QualType NewUnderlyingType) { UnderlyingType = NewUnderlyingType; }
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 class VarDecl : public ValueDecl {
@@ -78,6 +91,8 @@ class VarDecl : public ValueDecl {
     using NameType = ValueDecl::NameType;
 
     VarDecl(NameType Name, QualType Ty) : ValueDecl(Var, Name, Ty) {}
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 } // namespace scc

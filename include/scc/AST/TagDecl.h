@@ -24,6 +24,8 @@ class TagDecl : public TypeDecl {
     bool        isStruct() const { return TKind == Struct; }
     bool        isUnion() const { return TKind == Union; }
     bool        isRecord() const { return isStruct() || isUnion(); }
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 class RecordFieldDecl : public ValueDecl {
@@ -33,6 +35,8 @@ class RecordFieldDecl : public ValueDecl {
   public:
     RecordFieldDecl(QualType Ty, NameType Name = std::nullopt)
         : ValueDecl(RecordField, Name, Ty) {}
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 class RecordDecl : public TagDecl {
@@ -68,6 +72,8 @@ class RecordDecl : public TagDecl {
 
     bool   empty() const { return FieldCount == 0; }
     size_t size() const { return FieldCount; }
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 class EnumFieldDecl : public NamedDecl {
@@ -76,6 +82,8 @@ class EnumFieldDecl : public NamedDecl {
 
   public:
     explicit EnumFieldDecl(NameType Name) : NamedDecl(EnumField, Name) {}
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 class EnumDecl : public TagDecl {
@@ -111,6 +119,8 @@ class EnumDecl : public TagDecl {
 
     bool   empty() const { return FieldCount == 0; }
     size_t size() const { return FieldCount; }
+
+    void print(std::ostream &o = std::cout) const override;
 };
 
 } // namespace scc

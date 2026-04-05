@@ -5,7 +5,7 @@
 
 using namespace scc;
 
-CompilerInstance *CompilerBuilder::create() { return create("test.c"); }
+CompilerInstance *CompilerBuilder::create() { /* TODO replace by stdin */ return create("test.c"); }
 
 CompilerInstance *CompilerBuilder::create(File *MainFile) {
 
