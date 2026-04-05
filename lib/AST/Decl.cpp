@@ -1,6 +1,7 @@
 #include "scc/AST/Decl.h"
 #include "scc/AST/ArrayType.h"
 #include "scc/AST/BuiltinType.h"
+#include "scc/AST/PointerType.h"
 #include "scc/AST/TagDecl.h"
 #include "scc/AST/TagType.h"
 #include "scc/AST/TypedefType.h"
@@ -92,9 +93,11 @@ void print_indent(std::ostream &O, size_t IndentLevel) {
 }
 
 void print_type(std::ostream &O, const class scc::Type *Ty);
-void print_record_field(std::ostream &O, const RecordFieldDecl &Field, size_t IndentLevel);
+void print_field_decl(std::ostream &O, const RecordFieldDecl &Field, size_t IndentLevel);
+void print_inline_record_body(std::ostream &O, const RecordDecl &Decl, size_t IndentLevel);
 void print_record_fields(std::ostream &O, const RecordDecl &Decl, size_t IndentLevel);
 void print_record_decl(std::ostream &O, const char *DeclName, const RecordDecl &Decl, size_t IndentLevel);
+const void *get_type_address(QualType Ty);
 
 void print_tag_type(std::ostream &O, const TagDecl *Decl) {
     if (!Decl) {
@@ -125,7 +128,13 @@ void print_array_suffix(std::ostream &O, uint64_t Size) {
 }
 
 const RecordDecl *get_inline_record_decl(QualType Ty) {
-    if (Ty.isNull() || Ty.kind() != TypeKind::Record)
+    if (Ty.isNull())
+        return nullptr;
+
+    while (Ty.kind() == TypeKind::Typedef)
+        Ty = Ty.desugarOnce();
+
+    if (Ty.kind() != TypeKind::Record)
         return nullptr;
 
     auto *RT = static_cast<const RecordType *>(Ty.getType());
@@ -137,6 +146,37 @@ const RecordDecl *get_inline_record_decl(QualType Ty) {
         return nullptr;
 
     return Decl;
+}
+
+const char *get_field_decl_name(const RecordFieldDecl &Field) {
+    QualType Ty = Field.getType();
+    if (Ty.isNull() || Ty.kind() != TypeKind::Record)
+        return "FieldDecl";
+    const RecordType *RT = static_cast<const RecordType *>(Ty.getType());
+    if (RT->isInlineRecordType())
+        return "InlineRecordDecl";
+    return "RecordDecl";
+}
+
+const void *get_type_address(QualType Ty) {
+    if (Ty.isNull())
+        return nullptr;
+
+    switch (Ty.kind()) {
+    case TypeKind::Enum:
+    case TypeKind::Record:
+        return static_cast<const TagType *>(Ty.getType())->getDecl();
+    case TypeKind::Typedef:
+        return static_cast<const TypedefType *>(Ty.getType())->getDecl();
+    case TypeKind::Builtin:
+    case TypeKind::Pointer:
+    case TypeKind::Array:
+    case TypeKind::Function:
+    case TypeKind::Uninitialized:
+        return Ty.getType();
+    }
+
+    return Ty.getType();
 }
 
 void print_type(std::ostream &O, const class scc::Type *Ty) {
@@ -156,6 +196,12 @@ void print_type(std::ostream &O, const class scc::Type *Ty) {
         print_array_suffix(O, AT->getSize());
         return;
     }
+    case TypeKind::Pointer: {
+        auto *PT = static_cast<const PointerType *>(Ty);
+        print_type(O, PT->getPointeeType());
+        O << " *";
+        return;
+    }
     case TypeKind::Enum:
         print_tag_type(O, static_cast<const TagType *>(Ty)->getDecl());
         return;
@@ -173,9 +219,6 @@ void print_type(std::ostream &O, const class scc::Type *Ty) {
         O << "<anonymous-typedef>";
         return;
     }
-    case TypeKind::Pointer:
-        O << "<pointer-type>";
-        return;
     case TypeKind::Function:
         O << "<function-type>";
         return;
@@ -228,16 +271,24 @@ void print_record_decl(std::ostream &O, const char *DeclName, const RecordDecl &
     O << "}\n";
 }
 
-void print_record_field(std::ostream &O, const RecordFieldDecl &Field, size_t IndentLevel) {
+void print_inline_record_body(std::ostream &O, const RecordDecl &Decl, size_t IndentLevel) {
+    O << " {\n";
+    print_record_fields(O, Decl, IndentLevel + 1);
     print_indent(O, IndentLevel);
-    O << "RecordFieldDecl " << &Field << " name=";
+    O << "}\n";
+}
+
+void print_field_decl(std::ostream &O, const RecordFieldDecl &Field, size_t IndentLevel) {
+    const RecordDecl *InlineRecord = get_inline_record_decl(Field.getType());
+
+    print_indent(O, IndentLevel);
+    O << get_field_decl_name(Field) << ' ' << &Field << " name=";
     print_name(O, Field.getName());
     O << " type=";
     print_qual_type(O, Field.getType());
 
-    if (const RecordDecl *InlineRecord = get_inline_record_decl(Field.getType())) {
-        O << '\n';
-        print_record_decl(O, "InlineRecordDecl", *InlineRecord, IndentLevel);
+    if (InlineRecord) {
+        print_inline_record_body(O, *InlineRecord, IndentLevel);
         return;
     }
 
@@ -246,7 +297,7 @@ void print_record_field(std::ostream &O, const RecordFieldDecl &Field, size_t In
 
 void print_record_fields(std::ostream &O, const RecordDecl &Decl, size_t IndentLevel) {
     for (const RecordFieldDecl &Field : Decl.getFields())
-        print_record_field(O, Field, IndentLevel);
+        print_field_decl(O, Field, IndentLevel);
 }
 
 } // namespace
@@ -276,17 +327,13 @@ void ValueDecl::print(std::ostream &O) const {
 }
 
 void TypedefDecl::print(std::ostream &O) const {
+    QualType Underlying = getUnderlyingType();
+
     O << "TypedefDecl " << this << " name=";
     print_name(O, getName());
     O << " underlying=";
-    print_qual_type(O, getUnderlyingType());
-
-    if (const RecordDecl *InlineRecord = get_inline_record_decl(getUnderlyingType())) {
-        O << '\n';
-        print_record_decl(O, "InlineRecordDecl", *InlineRecord, 0);
-        return;
-    }
-
+    print_qual_type(O, Underlying);
+    O << " underlying_type=" << get_type_address(Underlying);
     O << '\n';
 }
 
@@ -305,7 +352,7 @@ void TagDecl::print(std::ostream &O) const {
 }
 
 void RecordFieldDecl::print(std::ostream &O) const {
-    print_record_field(O, *this, 0);
+    print_field_decl(O, *this, 0);
 }
 
 void RecordDecl::print(std::ostream &O) const {

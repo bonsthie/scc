@@ -24,7 +24,7 @@
 
 * [x] `Type` (base)
     * [x] `BuiltinType`
-    * [ ] `PointerType`
+    * [x] `PointerType`
     * [x] `ArrayType`
     * [ ] `FunctionType`
     * [x] `TagType` (base for tag-backed types)

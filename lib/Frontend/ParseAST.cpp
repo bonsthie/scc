@@ -1,7 +1,7 @@
 #include "scc/Frontend/FrontendAction.h"
 
-#include "scc/AST/ArrayType.h"
 #include "scc/AST/BuiltinType.h"
+#include "scc/AST/PointerType.h"
 #include "scc/AST/TagDecl.h"
 #include "scc/AST/TagType.h"
 #include "scc/AST/TypedefType.h"
@@ -10,38 +10,42 @@ using namespace scc;
 
 bool scc::ParseAST(Parser &, ASTConsumer &Consumer, ASTContext &) {
     BuiltinType IntTy(TYint);
-    BuiltinType LongTy(TYlong);
-    ArrayType   LongArrayTy(&LongTy, 0);
 
-    RecordFieldDecl Fields[] = {
-        {QualType(&IntTy), std::string_view("lhs")},
-        {QualType(&IntTy), std::string_view("rhs")},
-        {QualType(&LongArrayTy), std::string_view("tail")},
+    RecordFieldDecl TestFields[] = {
+        {QualType(&IntTy), std::string_view("a")},
     };
+    RecordDecl TestRecord(Struct, std::nullopt, TestFields, 1);
+    RecordType TestRecordTy(&TestRecord);
+    TypedefDecl TestTypedef(std::string_view("test"), QualType(&TestRecordTy));
+    TypedefType TestTy(&TestTypedef);
 
-    RecordDecl Record(Struct, std::nullopt, Fields, 3);
-    RecordType RecordTy(&Record);
-    InlineRecordType InlineRecordTy(&Record);
+    RecordDecl FoobarDecl(Union, std::string_view("foobar"), nullptr, 0);
+    RecordType FoobarTy(&FoobarDecl);
 
-    Qualifiers RecordQuals{};
-    RecordQuals.IsVolatile = true;
-    TypedefDecl Alias(std::string_view("VolatileStruct"), QualType(&RecordTy, RecordQuals));
-    TypedefType AliasTy(&Alias);
-
-    RecordFieldDecl Fields2[] = {
-        {QualType(&RecordTy), std::string_view("struc")},
-        {QualType(&InlineRecordTy), std::string_view("inline_struc")},
-        {QualType(&AliasTy), std::string_view("alias")},
-        {QualType(&IntTy), std::string_view("lhs")},
-        {QualType(&IntTy), std::string_view("rhs")},
-        {QualType(&LongArrayTy), std::string_view("tail")},
+    RecordFieldDecl InlineFields[] = {
+        {QualType(&IntTy), std::string_view("bar")},
     };
+    RecordDecl        InlineRecord(Struct, std::nullopt, InlineFields, 1);
+    InlineRecordType  InlineRecordTy(&InlineRecord);
 
-    RecordDecl Record2(Struct, "second_strcut", Fields2, 3);
+    RecordDecl  FooDecl(Struct, std::string_view("foo"), nullptr, 0);
+    RecordType  FooTy(&FooDecl);
+    PointerType FooPtrTy(&FooTy);
 
-    for (Decl *D : {static_cast<Decl *>(&Record2), static_cast<Decl *>(&Alias)}) {
+    RecordFieldDecl FooFields[] = {
+        {QualType(&IntTy), std::string_view("foo")},
+        {QualType(&FooPtrTy), std::string_view("ptr")},
+        {QualType(&TestTy), std::string_view("a")},
+        {QualType(&FoobarTy), std::string_view("yes")},
+        {QualType(&InlineRecordTy), std::nullopt},
+    };
+    FooDecl.setFields(FooFields, 5);
+
+    for (Decl *D : {static_cast<Decl *>(&TestRecord),
+                    static_cast<Decl *>(&TestTypedef),
+                    static_cast<Decl *>(&FoobarDecl),
+                    static_cast<Decl *>(&FooDecl)})
         Consumer.HandleTopLevelDecl(D);
-    }
 
     return false;
 }
