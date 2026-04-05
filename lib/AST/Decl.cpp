@@ -92,12 +92,56 @@ void print_indent(std::ostream &O, size_t IndentLevel) {
         O << ' ';
 }
 
+void print_decl_prefix(std::ostream &O, const char *DeclName, const void *DeclAddress, size_t IndentLevel = 0) {
+    print_indent(O, IndentLevel);
+    O << DeclName << ' ' << DeclAddress;
+}
+
+void print_decl_kind(std::ostream &O, const Decl &Decl) {
+    O << " kind=" << decl_kind_name(Decl.kind());
+}
+
+void print_named_decl_details(std::ostream &O, const NamedDecl &Decl) {
+    print_decl_kind(O, Decl);
+    O << " name=";
+    print_name(O, Decl.getName());
+}
+
+void print_value_decl_details(std::ostream &O, const ValueDecl &Decl);
 void print_type(std::ostream &O, const class scc::Type *Ty);
+void print_qual_type(std::ostream &O, QualType Ty);
 void print_field_decl(std::ostream &O, const RecordFieldDecl &Field, size_t IndentLevel);
+void print_enum_field_decl(std::ostream &O, const EnumFieldDecl &Field, size_t IndentLevel);
 void print_inline_record_body(std::ostream &O, const RecordDecl &Decl, size_t IndentLevel);
 void print_record_fields(std::ostream &O, const RecordDecl &Decl, size_t IndentLevel);
 void print_record_decl(std::ostream &O, const char *DeclName, const RecordDecl &Decl, size_t IndentLevel);
+void print_enum_fields(std::ostream &O, const EnumDecl &Decl, size_t IndentLevel);
+void print_enum_decl(std::ostream &O, const EnumDecl &Decl, size_t IndentLevel);
 const void *get_type_address(QualType Ty);
+
+void print_value_decl_details(std::ostream &O, const ValueDecl &Decl) {
+    print_named_decl_details(O, Decl);
+    O << " type=";
+    print_qual_type(O, Decl.getType());
+}
+
+const char *tag_decl_keyword(TagDeclKind Kind) {
+    switch (Kind) {
+    case Enum:
+        return "enum";
+    case Struct:
+        return "struct";
+    case Union:
+        return "union";
+    }
+    return "tag";
+}
+
+void print_tag_decl_details(std::ostream &O, const TagDecl &Decl) {
+    print_decl_kind(O, Decl);
+    O << " tag=" << tag_decl_kind_name(Decl.getTagDeclKind()) << " name=";
+    print_name(O, Decl.getName());
+}
 
 void print_tag_type(std::ostream &O, const TagDecl *Decl) {
     if (!Decl) {
@@ -105,14 +149,7 @@ void print_tag_type(std::ostream &O, const TagDecl *Decl) {
         return;
     }
 
-    if (Decl->isStruct())
-        O << "struct";
-    else if (Decl->isUnion())
-        O << "union";
-    else if (Decl->isEnum())
-        O << "enum";
-    else
-        O << "tag";
+    O << tag_decl_keyword(Decl->getTagDeclKind());
 
     if (Decl->getName().has_value())
         O << ' ' << *Decl->getName();
@@ -148,14 +185,21 @@ const RecordDecl *get_inline_record_decl(QualType Ty) {
     return Decl;
 }
 
-const char *get_field_decl_name(const RecordFieldDecl &Field) {
-    QualType Ty = Field.getType();
-    if (Ty.isNull() || Ty.kind() != TypeKind::Record)
+const char *get_field_decl_name(QualType Ty) {
+    if (Ty.isNull())
         return "FieldDecl";
-    const RecordType *RT = static_cast<const RecordType *>(Ty.getType());
-    if (RT->isInlineRecordType())
-        return "InlineRecordDecl";
-    return "RecordDecl";
+
+    while (Ty.kind() == TypeKind::Typedef)
+        Ty = Ty.desugarOnce();
+
+    if (Ty.kind() != TypeKind::Record)
+        return "FieldDecl";
+
+    const auto *RT = static_cast<const RecordType *>(Ty.getType());
+    if (RT && RT->isInlineRecordType())
+        return "InlineRecordFieldDecl";
+
+    return "RecordFieldDecl";
 }
 
 const void *get_type_address(QualType Ty) {
@@ -255,9 +299,8 @@ void print_qual_type(std::ostream &O, QualType Ty) {
 }
 
 void print_record_decl(std::ostream &O, const char *DeclName, const RecordDecl &Decl, size_t IndentLevel) {
-    print_indent(O, IndentLevel);
-    O << DeclName << ' ' << &Decl << " tag=" << tag_decl_kind_name(Decl.getTagDeclKind()) << " name=";
-    print_name(O, Decl.getName());
+    print_decl_prefix(O, DeclName, &Decl, IndentLevel);
+    print_tag_decl_details(O, Decl);
     O << " fields=" << Decl.size();
 
     if (Decl.empty()) {
@@ -281,11 +324,8 @@ void print_inline_record_body(std::ostream &O, const RecordDecl &Decl, size_t In
 void print_field_decl(std::ostream &O, const RecordFieldDecl &Field, size_t IndentLevel) {
     const RecordDecl *InlineRecord = get_inline_record_decl(Field.getType());
 
-    print_indent(O, IndentLevel);
-    O << get_field_decl_name(Field) << ' ' << &Field << " name=";
-    print_name(O, Field.getName());
-    O << " type=";
-    print_qual_type(O, Field.getType());
+    print_decl_prefix(O, get_field_decl_name(Field.getType()), &Field, IndentLevel);
+    print_value_decl_details(O, Field);
 
     if (InlineRecord) {
         print_inline_record_body(O, *InlineRecord, IndentLevel);
@@ -300,37 +340,64 @@ void print_record_fields(std::ostream &O, const RecordDecl &Decl, size_t IndentL
         print_field_decl(O, Field, IndentLevel);
 }
 
+void print_enum_field_decl(std::ostream &O, const EnumFieldDecl &Field, size_t IndentLevel) {
+    print_decl_prefix(O, "EnumFieldDecl", &Field, IndentLevel);
+    print_named_decl_details(O, Field);
+    O << '\n';
+}
+
+void print_enum_fields(std::ostream &O, const EnumDecl &Decl, size_t IndentLevel) {
+    for (const EnumFieldDecl &Field : Decl.getFields())
+        print_enum_field_decl(O, Field, IndentLevel);
+}
+
+void print_enum_decl(std::ostream &O, const EnumDecl &Decl, size_t IndentLevel) {
+    print_decl_prefix(O, "EnumDecl", &Decl, IndentLevel);
+    print_tag_decl_details(O, Decl);
+    O << " fields=" << Decl.size();
+
+    if (Decl.empty()) {
+        O << '\n';
+        return;
+    }
+
+    O << " {\n";
+    print_enum_fields(O, Decl, IndentLevel + 1);
+    print_indent(O, IndentLevel);
+    O << "}\n";
+}
+
 } // namespace
 
 void Decl::print(std::ostream &O) const {
-    O << "Decl " << this << " kind=" << decl_kind_name(kind()) << '\n';
+    print_decl_prefix(O, "Decl", this);
+    print_decl_kind(O, *this);
+    O << '\n';
 }
 
 void NamedDecl::print(std::ostream &O) const {
-    O << "NamedDecl " << this << " kind=" << decl_kind_name(kind()) << " name=";
-    print_name(O, getName());
+    print_decl_prefix(O, "NamedDecl", this);
+    print_named_decl_details(O, *this);
     O << '\n';
 }
 
 void TypeDecl::print(std::ostream &O) const {
-    O << "TypeDecl " << this << " kind=" << decl_kind_name(kind()) << " name=";
-    print_name(O, getName());
+    print_decl_prefix(O, "TypeDecl", this);
+    print_named_decl_details(O, *this);
     O << '\n';
 }
 
 void ValueDecl::print(std::ostream &O) const {
-    O << "ValueDecl " << this << " kind=" << decl_kind_name(kind()) << " name=";
-    print_name(O, getName());
-    O << " type=";
-    print_qual_type(O, getType());
+    print_decl_prefix(O, "ValueDecl", this);
+    print_value_decl_details(O, *this);
     O << '\n';
 }
 
 void TypedefDecl::print(std::ostream &O) const {
     QualType Underlying = getUnderlyingType();
 
-    O << "TypedefDecl " << this << " name=";
-    print_name(O, getName());
+    print_decl_prefix(O, "TypedefDecl", this);
+    print_named_decl_details(O, *this);
     O << " underlying=";
     print_qual_type(O, Underlying);
     O << " underlying_type=" << get_type_address(Underlying);
@@ -338,16 +405,14 @@ void TypedefDecl::print(std::ostream &O) const {
 }
 
 void VarDecl::print(std::ostream &O) const {
-    O << "VarDecl " << this << " name=";
-    print_name(O, getName());
-    O << " type=";
-    print_qual_type(O, getType());
+    print_decl_prefix(O, "VarDecl", this);
+    print_value_decl_details(O, *this);
     O << '\n';
 }
 
 void TagDecl::print(std::ostream &O) const {
-    O << "TagDecl " << this << " tag=" << tag_decl_kind_name(getTagDeclKind()) << " name=";
-    print_name(O, getName());
+    print_decl_prefix(O, "TagDecl", this);
+    print_tag_decl_details(O, *this);
     O << '\n';
 }
 
@@ -360,25 +425,9 @@ void RecordDecl::print(std::ostream &O) const {
 }
 
 void EnumFieldDecl::print(std::ostream &O) const {
-    O << "EnumFieldDecl " << this << " name=";
-    print_name(O, getName());
-    O << '\n';
+    print_enum_field_decl(O, *this, 0);
 }
 
 void EnumDecl::print(std::ostream &O) const {
-    O << "EnumDecl " << this << " name=";
-    print_name(O, getName());
-    O << " fields=" << size();
-
-    if (empty()) {
-        O << '\n';
-        return;
-    }
-
-    O << " {\n";
-    for (const EnumFieldDecl &Field : getFields()) {
-        O << "  ";
-        Field.print(O);
-    }
-    O << "}\n";
+    print_enum_decl(O, *this, 0);
 }

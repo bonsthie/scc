@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 
+#include <sstream>
+
 #include "scc/AST/BuiltinType.h"
 #include "scc/AST/CanQualType.h"
 #include "scc/AST/QualType.h"
@@ -195,4 +197,47 @@ TEST(TypeTest, RecordTypeSetElementsRebindsSpanView) {
     EXPECT_EQ(*FieldsView[0].getName(), "first");
     EXPECT_EQ(FieldsView[1].getType().getType(), &IntTy);
     EXPECT_FALSE(FieldsView[1].getName().has_value());
+}
+
+TEST(DeclPrintTest, RecordFieldPrintUsesInlineRecordFieldLabelThroughTypedefWrappedInlineRecord) {
+    BuiltinType IntTy(TYint);
+
+    RecordFieldDecl InlineFields[] = {
+        {QualType(&IntTy), std::string_view("x")},
+    };
+    RecordDecl       InlineDecl(Struct, std::nullopt, InlineFields, 1);
+    InlineRecordType InlineTy(&InlineDecl);
+
+    TypedefDecl  AliasDecl("Alias", QualType(&InlineTy));
+    TypedefType  AliasTy(&AliasDecl);
+    RecordFieldDecl Field(QualType(&AliasTy), std::string_view("member"));
+
+    std::ostringstream Out;
+    Field.print(Out);
+    std::string Printed = Out.str();
+
+    EXPECT_EQ(Printed.find("InlineRecordFieldDecl "), 0u);
+    EXPECT_NE(Printed.find("kind=RecordField name='member' type=Alias {\n"), std::string::npos);
+    EXPECT_NE(Printed.find("\n  FieldDecl "), std::string::npos);
+    EXPECT_EQ(Printed.find("InlineRecordDecl "), std::string::npos);
+    EXPECT_EQ(Printed.find("\n  RecordFieldDecl "), std::string::npos);
+}
+
+TEST(DeclPrintTest, EnumDeclPrintUsesSharedSchemaAndIndentedFields) {
+    EnumFieldDecl Fields[] = {
+        EnumFieldDecl(std::string_view("Red")),
+        EnumFieldDecl(std::string_view("Green")),
+    };
+    EnumDecl Decl(Enum, std::string_view("Color"), Fields, 2);
+
+    std::ostringstream Out;
+    Decl.print(Out);
+    std::string Printed = Out.str();
+
+    EXPECT_EQ(Printed.find("EnumDecl "), 0u);
+    EXPECT_NE(Printed.find("kind=Tag tag=Enum name='Color' fields=2 {\n"), std::string::npos);
+    EXPECT_NE(Printed.find("\n  EnumFieldDecl "), std::string::npos);
+    EXPECT_NE(Printed.find("kind=EnumField name='Red'\n"), std::string::npos);
+    EXPECT_NE(Printed.find("kind=EnumField name='Green'\n"), std::string::npos);
+    EXPECT_EQ(Printed.back(), '\n');
 }
