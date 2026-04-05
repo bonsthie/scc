@@ -4,6 +4,7 @@
 #include "scc/FileManager/FileManager.h"
 #include "scc/Frontend/CompilerBuilder.h"
 #include "scc/Frontend/CompilerInstance.h"
+#include "scc/Frontend/FrontendActionOptions.h"
 #include "scc/Option/OptionTable.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/String/StringInterner.h"
@@ -15,7 +16,7 @@
 using namespace scc;
 
 namespace scc {
-enum SccOptionIndex { Opt_none, Opt_test, Opt_oui, Opt_L, Opt_I, Opt_cc1};
+enum SccCC1OptionIndex { Opt_none, Opt_test, Opt_oui, Opt_L, Opt_I, Opt_cc1 };
 
 class SccOptionTable : public OptionTable {
 
@@ -24,6 +25,10 @@ class SccOptionTable : public OptionTable {
         {Opt_oui, "--oui=", OptKind::Equal, ValType::Str, "oui oui baguette", false},
         {Opt_L, "-L", OptKind::Separate, ValType::StrList, "L is for losser", false},
         {Opt_I, "-I", OptKind::JoinedOrSeparate, ValType::StrList, "system include folder", false},
+        {Opt_dump_tokens, "-dump-tokens", OptKind::Flag, ValType::None, "dump tokens", false},
+        {Opt_dump_raw_tokens, "-dump-raw-tokens", OptKind::Flag, ValType::None, "dump raw tokens",
+         false},
+        {Opt_dump_ast, "-dump-ast", OptKind::Flag, ValType::None, "dump ast", false},
     };
 
     virtual std::span<const OptionSpec> specs() const { return opt; }
@@ -49,8 +54,15 @@ bool cc1(int argc, char **argv, char **) {
     FileFinder  FF(Inc ? Inc->getValuesList() : scc::vector<std::string>{});
     FileManager FM(FF, EM);
 
-    CompilerBuilder                   Builder(FM, EM, *Args);
-    std::unique_ptr<CompilerInstance> CI(Builder.create());
+    CompilerBuilder Builder(FM, EM, *Args);
+    auto            Files = Args->getFiles();
+
+    std::unique_ptr<CompilerInstance> CI;
+    if (!Files.empty())
+        CI.reset(Builder.create(std::string(Files.front())));
+    else
+        CI.reset(Builder.create());
+
     if (CI == nullptr) {
         return EM.emit();
     }

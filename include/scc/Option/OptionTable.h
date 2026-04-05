@@ -40,7 +40,7 @@ class OptionTable {
   private:
     std::string printHasOption(OptKind kind);
 
-    std::unique_ptr<Arg> nextArg(ArgvIt &it, ArgvIt end);
+    std::unique_ptr<Arg> nextArg(ArgvIt &it, ArgvIt end, std::string *MatchedSpelling = nullptr);
 };
 
 } // namespace scc

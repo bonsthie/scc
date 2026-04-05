@@ -10,7 +10,16 @@
 
 using namespace scc;
 
-enum SccOptionIndex { Opt_none, Opt_test, Opt_oui, Opt_L, Opt_I };
+enum SccOptionIndex {
+    Opt_none,
+    Opt_test,
+    Opt_oui,
+    Opt_L,
+    Opt_I,
+    Opt_dump_tokens,
+    Opt_dump_raw_tokens,
+    Opt_dump_ast,
+};
 
 class SccOptionTable : public OptionTable {
     static constexpr OptionSpec opt[] = {
@@ -18,6 +27,10 @@ class SccOptionTable : public OptionTable {
         {Opt_oui, "--oui=", OptKind::Equal, ValType::Str, "oui oui baguette", false},
         {Opt_L, "-L", OptKind::Separate, ValType::StrList, "L is for losser", false},
         {Opt_I, "-I", OptKind::JoinedOrSeparate, ValType::StrList, "system include folder", false},
+        {Opt_dump_tokens, "-dump-tokens", OptKind::Flag, ValType::None, "dump tokens", false},
+        {Opt_dump_raw_tokens, "-dump-raw-tokens", OptKind::Flag, ValType::None,
+         "dump raw tokens", false},
+        {Opt_dump_ast, "-dump-ast", OptKind::Flag, ValType::None, "dump ast", false},
     };
 
   public:
@@ -298,4 +311,44 @@ TEST(SccOptionTable, I_MissingArgumentEmitsError) {
     EXPECT_EQ(errs.front()->getDiagLevel(), err::DiagLevel::error);
     EXPECT_NE(errs.front()->getMsg().find("-I"), std::string::npos);
     EXPECT_NE(errs.front()->getMsg().find("missing"), std::string::npos);
+}
+
+TEST(SccOptionTable, KeepsFirstAndLastOccurrenceAcrossDifferentOptions) {
+    ErrorManager   EM;
+    SccOptionTable Opt(EM);
+
+    auto argv = mkArgv({"-dump-tokens", "-dump-ast", "-dump-raw-tokens"});
+    auto args = Opt.parseArgs(argv);
+
+    ASSERT_TRUE(args);
+
+    const auto *First =
+        args->getFirstOccurrenceOf({Opt_dump_tokens, Opt_dump_raw_tokens, Opt_dump_ast});
+    const auto *Last =
+        args->getLastOccurrenceOf({Opt_dump_tokens, Opt_dump_raw_tokens, Opt_dump_ast});
+
+    ASSERT_NE(First, nullptr);
+    ASSERT_NE(Last, nullptr);
+    EXPECT_EQ(First->getType(), Opt_dump_tokens);
+    EXPECT_EQ(First->getSpelling(), "-dump-tokens");
+    EXPECT_EQ(Last->getType(), Opt_dump_raw_tokens);
+    EXPECT_EQ(Last->getSpelling(), "-dump-raw-tokens");
+    EXPECT_EQ(args->countOccurrencesOf({Opt_dump_tokens, Opt_dump_raw_tokens, Opt_dump_ast}), 3);
+}
+
+TEST(SccOptionTable, KeepsPositionalFilesAsStringViews) {
+    ErrorManager   EM;
+    SccOptionTable Opt(EM);
+
+    auto argv = mkArgv({"input1.c", "-I", "inc", "input2.c"});
+    auto args = Opt.parseArgs(argv);
+
+    ASSERT_TRUE(args);
+    ASSERT_EQ(args->getFiles().size(), 2u);
+    EXPECT_EQ(args->getFiles()[0], "input1.c");
+    EXPECT_EQ(args->getFiles()[1], "input2.c");
+
+    ASSERT_NE(args->getArg(Opt_I), nullptr);
+    EXPECT_EQ(args->getArg(Opt_I)->getValuesList()[0], "inc");
+    EXPECT_TRUE(EM.getErrsList().empty());
 }

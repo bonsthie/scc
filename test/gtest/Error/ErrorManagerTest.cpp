@@ -19,7 +19,7 @@ class HaltingError : public Error {
 };
 } // namespace
 
-TEST(ErrorManagerTest, ReportsAndClearsDiagnostics) {
+TEST(ErrorManagerTest, ErrorDiagnosticsEmitAndStop) {
     std::ostringstream Out;
     ErrorManager       EM(ErrorManager::defaultFactory(), Out);
 
@@ -27,10 +27,42 @@ TEST(ErrorManagerTest, ReportsAndClearsDiagnostics) {
     E.msg("something bad");
 
     ASSERT_EQ(EM.size(), 1);
-    EXPECT_FALSE(EM.emit());
+    EXPECT_TRUE(EM.emit());
     EXPECT_EQ(EM.size(), 0);
     EXPECT_NE(Out.str().find("error"), std::string::npos);
     EXPECT_NE(Out.str().find("something bad"), std::string::npos);
+}
+
+TEST(ErrorManagerTest, WarningDiagnosticsEmitWithoutStopping) {
+    std::ostringstream Out;
+    ErrorManager       EM(ErrorManager::defaultFactory(), Out);
+
+    Error &E = EM.report(err::warning);
+    E.msg("heads up");
+
+    ASSERT_EQ(EM.size(), 1);
+    EXPECT_FALSE(EM.emit());
+    EXPECT_EQ(EM.size(), 0);
+    EXPECT_NE(Out.str().find("warning"), std::string::npos);
+    EXPECT_NE(Out.str().find("heads up"), std::string::npos);
+}
+
+TEST(ErrorManagerTest, StopClearsRemainingDiagnostics) {
+    std::ostringstream Out;
+    ErrorManager       EM(ErrorManager::defaultFactory(), Out);
+
+    EM.report(err::warning).msg("first warning");
+    EM.report(err::error).msg("fatal error");
+    EM.report(err::warning).msg("should be dropped");
+
+    ASSERT_EQ(EM.size(), 3);
+    EXPECT_TRUE(EM.emit());
+    EXPECT_EQ(EM.size(), 0);
+
+    const std::string Printed = Out.str();
+    EXPECT_NE(Printed.find("first warning"), std::string::npos);
+    EXPECT_NE(Printed.find("fatal error"), std::string::npos);
+    EXPECT_EQ(Printed.find("should be dropped"), std::string::npos);
 }
 
 TEST(ErrorManagerTest, CustomFactoryControlsEmission) {

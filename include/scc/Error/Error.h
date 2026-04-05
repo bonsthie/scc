@@ -17,10 +17,7 @@ enum DiagLevel {
     error,
 };
 
-enum EmitionLeveL {
-    Emit = 1,
-    Stop = 1 << 1,
-};
+enum EmitionLeveL { Emit = 1, Stop = 1 << 1, EmitStop = Emit | Stop };
 
 } // namespace err
 
@@ -59,7 +56,9 @@ class Error {
     err::DiagLevel getDiagLevel() const { return Level; }
     std::string    getMsg() const { return Msg.str(); }
 
-    virtual err::EmitionLeveL shouldEmit() const { return err::Emit; }
+    virtual err::EmitionLeveL shouldEmit() const {
+        return Level == err::warning ? err::Emit : err::EmitStop;
+    }
 
     virtual void print(std::ostream &O) const;
     int          emit(std::ostream &O) const;

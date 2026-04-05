@@ -14,8 +14,16 @@ ArgsList *OptionTable::parseArgs(const scc::vector<const char *> &argv) {
     ArgvIt it = argv.begin(), end = argv.end();
 
     while (it != end) {
-        if (auto a = nextArg(it, end)) {
-            Args->addArgFlag(std::move(a));
+        std::string_view tok = (*it ? std::string_view(*it) : std::string_view());
+        if (!tok.empty() && tok[0] != '-') {
+            Args->addFile(tok);
+            ++it;
+            continue;
+        }
+
+        std::string MatchedSpelling;
+        if (auto a = nextArg(it, end, &MatchedSpelling)) {
+            Args->addArgFlag(std::move(a), MatchedSpelling);
         } else {
             ++it;
         }
@@ -27,7 +35,7 @@ static inline bool starts_with(std::string_view s, std::string_view pfx) {
     return s.size() >= pfx.size() && s.compare(0, pfx.size(), pfx) == 0;
 }
 
-std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end) {
+std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end, std::string *MatchedSpelling) {
     std::span<const OptionSpec> Options = specs();
 
     std::string_view tok = (*it ? std::string_view(*it) : std::string_view());
@@ -40,6 +48,8 @@ std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end) {
             // e.g., "-I/usr/include" where spelling is "-I"
             if (starts_with(tok, spell) && tok.size() > spell.size()) {
                 std::string val(tok.substr(spell.size()));
+                if (MatchedSpelling)
+                    *MatchedSpelling = std::string(spell);
                 ++it; // consumed current token
                 return std::make_unique<Arg>((int)Opt.key, (Arg::valueType)Opt.vtype,
                                              std::move(val));
@@ -63,6 +73,8 @@ std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end) {
                     return nullptr;
                 }
                 std::string val(val_sv);
+                if (MatchedSpelling)
+                    *MatchedSpelling = std::string(spell);
                 it = std::next(next);
                 return std::make_unique<Arg>((int)Opt.key, (Arg::valueType)Opt.vtype,
                                              std::move(val));
@@ -74,6 +86,8 @@ std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end) {
             // e.g., "--opt=value" where spelling is "--opt="
             if (starts_with(tok, spell) && tok.size() > spell.size()) {
                 std::string val(tok.substr(spell.size()));
+                if (MatchedSpelling)
+                    *MatchedSpelling = std::string(spell);
                 ++it;
                 return std::make_unique<Arg>((int)Opt.key, (Arg::valueType)Opt.vtype,
                                              std::move(val));
@@ -82,6 +96,8 @@ std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end) {
         }
         case OptKind::Flag: {
             if (tok == spell) {
+                if (MatchedSpelling)
+                    *MatchedSpelling = std::string(spell);
                 ++it;
                 return std::make_unique<Arg>((int)Opt.key);
             }

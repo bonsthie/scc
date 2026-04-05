@@ -12,9 +12,11 @@
 ///
 
 #include <cassert>
+#include <initializer_list>
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include "scc/ADT/vector.h"
 
@@ -26,10 +28,10 @@ class Arg {
     enum valueType { None, Str, StrList };
 
   private:
-    const int              Type;
+    const int                Type;
     scc::vector<std::string> Value;
-    Arg::valueType         ValueType;
-    bool              Claim = false;
+    Arg::valueType           ValueType;
+    bool                     Claim = false;
 
   public:
     explicit Arg(const int type) : Type(type), ValueType(None) {}
@@ -89,9 +91,19 @@ class Arg {
     bool claimed() const { return Claim; }
 };
 
+struct ArgOccurrence {
+    int         Type;
+    std::string Spelling;
+
+    int                getType() const { return Type; }
+    const std::string &getSpelling() const { return Spelling; }
+};
+
 class ArgsList {
     // all the possible type for the config
     std::map<int, std::unique_ptr<Arg>> ValMap;
+    scc::vector<ArgOccurrence>          Occurrences;
+    scc::vector<std::string_view>       Files;
 
   public:
     ~ArgsList() = default;
@@ -100,9 +112,17 @@ class ArgsList {
 
     int size() const { return ValMap.size(); }
 
-    bool hasArg(int index) { return getArg(index) != nullptr; }
+    bool hasArg(int index) const { return getArg(index) != nullptr; }
 
-    void addArgFlag(std::unique_ptr<Arg> A);
+    const scc::vector<ArgOccurrence> &getOccurrences() const { return Occurrences; }
+    const ArgOccurrence *getFirstOccurrenceOf(std::initializer_list<int> indices) const;
+    const ArgOccurrence *getLastOccurrenceOf(std::initializer_list<int> indices) const;
+    int                  countOccurrencesOf(std::initializer_list<int> indices) const;
+
+    void addArgFlag(std::unique_ptr<Arg> A, const std::string &Spelling = "");
+    void addFile(std::string_view File);
+
+    const scc::vector<std::string_view> &getFiles() const;
 };
 
 } // namespace scc

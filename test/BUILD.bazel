@@ -3,6 +3,11 @@ load("//bazel:scc.bzl", "scc_test_group")
 package(default_visibility = ["//visibility:public"])
 
 scc_test_group(
+    name = "driver",
+    lit = "//test/lit:driver",
+)
+
+scc_test_group(
     name = "adt",
     gtest = "//test/gtest:adt",
 )
