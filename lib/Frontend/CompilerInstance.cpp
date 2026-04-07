@@ -1,6 +1,7 @@
 #include "scc/Frontend/CompilerInstance.h"
 
 #include "scc/Frontend/FrontendAction.h"
+#include "scc/AST/ASTContext.h"
 
 using namespace scc;
 
@@ -10,7 +11,7 @@ CompilerInstance::CompilerInstance(FileManager &FM, ErrorManager &EM, CompilerIn
       Act(std::move(Act)),
       EM(EM),
       FM(&FM),
-      Context(std::make_unique<ASTContext>()) {}
+      Ctx(std::make_unique<ASTContext>()) {}
 
 CompilerInstance::~CompilerInstance() = default;
 

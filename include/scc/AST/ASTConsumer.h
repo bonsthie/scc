@@ -10,12 +10,12 @@ class ASTConsumer {
   public:
     virtual ~ASTConsumer();
 
-    virtual bool HandleTopLevelDecl(Decl *D) = 0;
+    virtual bool handleTopLevelDecl(Decl *D) = 0;
 };
 
 class DumpASTConsumer final : public ASTConsumer {
 
-    bool HandleTopLevelDecl(Decl *D) {
+    bool handleTopLevelDecl(Decl *D) {
         if (!D)
             return false;
 

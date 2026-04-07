@@ -1,6 +1,7 @@
 #ifndef SCC_COMPILERINSTANCE_H
 #define SCC_COMPILERINSTANCE_H
 
+#include "scc/AST/ASTContext.h"
 #include "scc/Frontend/CompilerInstanceSettings.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/Sema/Sema.h"
@@ -13,8 +14,6 @@ namespace scc {
 class ASTConsumer;
 class FrontendAction;
 
-class ASTContext {};
-
 class CompilerInstance {
     std::unique_ptr<Sema>           Action;
     std::unique_ptr<PreProcessor>   PP;
@@ -22,7 +21,7 @@ class CompilerInstance {
     std::unique_ptr<FrontendAction> Act;
     ErrorManager                   &EM;
     FileManager                    *FM = nullptr;
-    std::unique_ptr<ASTContext>     Context;
+    std::unique_ptr<ASTContext>     Ctx;
 
   public:
     CompilerInstance(FileManager &FM, ErrorManager &EM, CompilerInstanceSettings,
@@ -31,10 +30,10 @@ class CompilerInstance {
 
     bool Execute();
 
-    void InitSema(ASTConsumer &) {
-        if (!Context)
-            Context = std::make_unique<ASTContext>();
-        Action = std::make_unique<Sema>();
+    void InitSema() {
+        if (!Ctx)
+            Ctx = std::make_unique<ASTContext>();
+        Action = std::make_unique<Sema>(*Ctx, EM);
     }
 
     void createPreprocessor(File &MainFile) {
@@ -49,10 +48,10 @@ class CompilerInstance {
     Sema       &getSema() { return *Action; }
     const Sema &getSema() const { return *Action; }
 
-    ASTContext       &getASTContext() { return *Context; }
-    const ASTContext &getASTContext() const { return *Context; }
+    ASTContext       &getASTContext() { return *Ctx; }
+    const ASTContext &getASTContext() const { return *Ctx; }
 
-    void setASTContext(std::unique_ptr<ASTContext> NewContext) { Context = std::move(NewContext); }
+    void setASTContext(std::unique_ptr<ASTContext> NewContext) { Ctx = std::move(NewContext); }
 
     FileManager       &getFileManager() { return *FM; }
     const FileManager &getFileManager() const { return *FM; }

@@ -9,13 +9,13 @@ namespace scc {
 
 struct Qualifiers {
     SCC_PREFERRED_TYPE(bool)
-    uint64_t IsConst : 1;
+    uint64_t IsConst : 1 = 0;
 
     SCC_PREFERRED_TYPE(bool)
-    uint64_t IsRestrict : 1;
+    uint64_t IsRestrict : 1 = 0;
 
     SCC_PREFERRED_TYPE(bool)
-    uint64_t IsVolatile : 1;
+    uint64_t IsVolatile : 1 = 0;
 
     void merge(const Qualifiers &Other) {
         IsConst |= Other.IsConst;

@@ -8,7 +8,7 @@
 
 namespace scc {
 
-bool ParseAST(Parser &P, ASTConsumer &Consumer, ASTContext &Context);
+bool ParseAST(Parser &P, ASTConsumer &Consumer);
 
 class FrontendAction {
   public:
@@ -56,10 +56,10 @@ class ASTFrontendAction : public FrontendAction {
         if (!Consumer)
             return false;
 
-        CI.InitSema(*Consumer);
+        CI.InitSema();
 
-        Parser P(CI.getPreprocessor(), CI.getSema());
-        return ParseAST(P, *Consumer, CI.getASTContext());
+        Parser P(CI.getPreprocessor(), CI.getSema(), CI.getErrorManager());
+        return ParseAST(P, *Consumer);
     }
 
   protected:

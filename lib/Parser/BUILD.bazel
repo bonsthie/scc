@@ -1,14 +1,11 @@
 load("//bazel:scc.bzl", "scc_cc_lib")
 
 scc_cc_lib(
-    name = "Frontend",
+    name = "Parser",
     srcs = glob(["*.cpp"]),
     deps = [
-        "//lib/AST",
         "//lib/Error",
-        "//lib/FileManager",
-        "//lib/PreProcessor",
         "//lib/Sema",
-        "//lib/Parser",
+        "//lib/PreProcessor",
     ],
 )
