@@ -7,6 +7,7 @@
 #include <string_view>
 #include <utility>
 
+#include "scc/ADT/Span.h"
 #include "scc/AST/QualType.h"
 
 namespace scc {
@@ -94,6 +95,8 @@ class VarDecl : public ValueDecl {
 
     void print(std::ostream &o = std::cout) const override;
 };
+
+using DeclList = scc::Span<Decl *>;
 
 } // namespace scc
 

@@ -12,8 +12,9 @@ using namespace scc;
 bool scc::ParseAST(Parser &P, ASTConsumer &Consumer) {
 
     while (!P.isEOF()) {
-        if (Decl *D = P.parseTopLevelDecl())
-            Consumer.handleTopLevelDecl(D);
+        DeclList Decls = P.parseTopLevelDecl();
+        if (!Decls.empty())
+            Consumer.handleTopLevelDecl(Decls);
     }
 
     return P.hasErrorOccurred();
@@ -51,7 +52,7 @@ bool scc::ParseAST(Parser &P, ASTConsumer &Consumer) {
     //
     // for (Decl *D : {static_cast<Decl *>(&TestRecord), static_cast<Decl *>(&TestTypedef),
     //                 static_cast<Decl *>(&FoobarDecl), static_cast<Decl *>(&FooDecl)})
-    //     Consumer.HandleTopLevelDecl(D);
+    //     Consumer.handleTopLevelDecl(DeclList(&D, 1));
     //
     // return false;
 }

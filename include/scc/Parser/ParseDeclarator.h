@@ -1,0 +1,6 @@
+#ifndef SCC_PARSER_PARSEDDECLARATOR_H
+#define SCC_PARSER_PARSEDDECLARATOR_H
+
+class ParsedDeclarator {};
+
+#endif //  SCC_PARSER_PARSEDDECLARATOR_H

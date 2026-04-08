@@ -75,6 +75,7 @@ class Token {
         Range = SourceRange();
         IsDirty = false;
     }
+
 };
 
 // use a hash map of all the word is a Keyword and setup the CurTok
@@ -83,6 +84,7 @@ void create_keyword_token(Token &CurTok);
 std::string clean_token(std::string_view str);
 
 std::string stringify_token_kind(tok::TokenKind Kind);
+std::string token_spelling(tok::TokenKind Kind);
 
 // ostream utils
 std::ostream &operator<<(std::ostream &OS, const Token &T);

@@ -1,10 +1,14 @@
 #ifndef SCC_ALLOCATOR_ALLOCATOR_H
 #define SCC_ALLOCATOR_ALLOCATOR_H
 
+#include <memory>
 #include <cstddef>
 #include <cstring>
 #include <string_view>
+#include <type_traits>
 #include <utility>
+
+#include "scc/ADT/Span.h"
 
 namespace scc {
 
@@ -26,6 +30,24 @@ class Allocator {
     template <typename T>
     T *allocateArray(size_t count = 1) {
         return static_cast<T *>(allocate_bytes(sizeof(T) * count, alignof(T)));
+    }
+
+    template <typename T>
+    T *copyArray(const T *data, size_t count) {
+        if (count == 0)
+            return nullptr;
+
+        if constexpr (std::is_trivially_copyable_v<T>)
+            return static_cast<T *>(copyBytes(data, count * sizeof(T), alignof(T)));
+
+        T *newData = allocateArray<T>(count);
+        std::uninitialized_copy(data, data + count, newData);
+        return newData;
+    }
+
+    template <typename T, size_t N>
+    Span<T> toOwnedList(const Span<T, N> &values) {
+        return {copyArray(values.data(), values.size()), values.size()};
     }
 
     template <typename T, typename... Args>

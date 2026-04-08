@@ -10,16 +10,21 @@ class ASTConsumer {
   public:
     virtual ~ASTConsumer();
 
-    virtual bool handleTopLevelDecl(Decl *D) = 0;
+    virtual bool handleTopLevelDecl(DeclList Decls) = 0;
 };
 
 class DumpASTConsumer final : public ASTConsumer {
-
-    bool handleTopLevelDecl(Decl *D) {
-        if (!D)
+  public:
+    bool handleTopLevelDecl(DeclList Decls) override {
+        if (Decls.empty())
             return false;
 
-        D->print();
+        for (Decl *D : Decls) {
+            if (!D)
+                continue;
+            D->print();
+        }
+
         return false;
     }
 };

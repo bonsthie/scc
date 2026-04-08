@@ -10,6 +10,7 @@
 
 namespace scc {
 
+
 class Scope {
     std::unordered_map<std::string_view, Decl *> SymbolTable;
 
@@ -20,6 +21,10 @@ class Scope {
 
     Decl *lookup(std::string_view Name);
 };
+
+// maybe scope become SopeDecl and i create a ScopeType
+// Scope become a std::pair<ScopeDecl, ScopeType> Scope or just a struct
+// also `we need to think about the RecordScope mode
 
 class ScopeMgr {
     scc::vector<Scope> Scopes;

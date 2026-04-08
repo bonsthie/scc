@@ -24,6 +24,17 @@ std::string scc::stringify_token_kind(tok::TokenKind Kind) {
     return std::string(str[Kind]);
 }
 
+std::string scc::token_spelling(tok::TokenKind Kind) {
+    static const char *str[] = {
+#define TOK(id) [tok::id] = #id,
+#define TOKENKIND(id, string) [tok::id] = string,
+#include "scc/Token/TokenKinds.def"
+
+    };
+
+    return std::string(str[Kind]);
+}
+
 void scc::create_keyword_token(Token &CurTok) {
     auto KeyWord = TokenMap.find(CurTok.getValue());
     if (KeyWord != TokenMap.end()) {
