@@ -21,16 +21,21 @@ bool ParsedDeclSpec::tryAddSignSpecifier(SignSpecifier New, const SourceRange &R
 }
 
 bool ParsedDeclSpec::tryAddLengthSpecifier(LengthSpecifier New, const SourceRange &Range) {
-    if (hasLengthSpecifier())
+    bool isLong = Length == LengthSpecifier::Long;
+    if (hasLengthSpecifier() && (!isLong && New == LengthSpecifier::Long))
         return false;
+    if (isLong) {
+        setLengthSpecifier(LengthSpecifier::LongLong);
+        return true;
+    }
     setLengthSpecifier(New, Range);
     return true;
 }
 
-bool ParsedDeclSpec::tryAddTypeSpecifier(Type *New) {
+bool ParsedDeclSpec::tryAddTypeSpecifier(Type *New, SourceRange &Range) {
     if (hasTypeSpecifier())
         return false;
-    setTypeSpecifier(New);
+    setTypeSpecifier(New, Range);
     return true;
 }
 

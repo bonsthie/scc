@@ -26,6 +26,7 @@ enum class LengthSpecifier : int {
     Unspecified = tok::not_init,
     Short = tok::t_short,
     Long = tok::t_long,
+    LongLong = tok::t_long + tok::t_long
 };
 
 struct ParsedDeclSpec {
@@ -37,8 +38,9 @@ struct ParsedDeclSpec {
     LengthSpecifier Length = LengthSpecifier::Unspecified;
     SourceRange     LengthRange;
 
-    Type      *T;
-    Qualifiers Quals;
+    Type       *T;
+    Qualifiers  Quals;
+    SourceRange TypeSourceRange;
 
     bool hasStorageSpecifier() const { return StorageClass != StorageClassSpecifier::Unspecified; }
     bool hasSignSpecifier() const { return Sign != SignSpecifier::Unspecified; }
@@ -46,21 +48,27 @@ struct ParsedDeclSpec {
     bool hasTypeSpecifier() const { return T != nullptr; }
 
     void setStorageSpecifier(StorageClassSpecifier New) { StorageClass = New; }
-    void setSignSpecifier(SignSpecifier New, const SourceRange &Range = {}) {
+    void setSignSpecifier(SignSpecifier New, const SourceRange &Range) {
         Sign = New;
         RangeSign = Range;
     }
-    void setLengthSpecifier(LengthSpecifier New, const SourceRange &Range = {}) {
+
+    void setLengthSpecifier(LengthSpecifier New) { Length = New; }
+    void setLengthSpecifier(LengthSpecifier New, const SourceRange &Range) {
         Length = New;
         LengthRange = Range;
     }
-    void setTypeSpecifier(Type *NewType) { T = NewType; }
+
+    void setTypeSpecifier(Type *NewType, SourceRange &Range) {
+        T = NewType;
+        TypeSourceRange = Range;
+    }
 
     bool tryAddStorageSpecifier(StorageClassSpecifier New);
     bool trySetStorageSpecifier(StorageClassSpecifier New);
-    bool tryAddSignSpecifier(SignSpecifier New, const SourceRange &Range = {});
-    bool tryAddLengthSpecifier(LengthSpecifier New, const SourceRange &Range = {});
-    bool tryAddTypeSpecifier(Type *New);
+    bool tryAddSignSpecifier(SignSpecifier New, const SourceRange &Range);
+    bool tryAddLengthSpecifier(LengthSpecifier New, const SourceRange &Range);
+    bool tryAddTypeSpecifier(Type *New, SourceRange &Range);
     bool tryAddConst();
     bool tryAddRestrict();
     bool tryAddVolatile();

@@ -4,12 +4,6 @@
 
 using namespace scc;
 
-std::string Parser::currentTokenForDiag() const {
-    if (!CurTok.getValue().empty())
-        return std::string(CurTok.getValue());
-    return token_spelling(CurTok.getTokenKind());
-}
-
 bool Parser::consumeIf(tok::TokenKind TK) {
     if (!CurTok.is(TK))
         return false;
@@ -20,13 +14,7 @@ bool Parser::consumeIf(tok::TokenKind TK) {
 bool Parser::expect(tok::TokenKind TK) {
     if (!CurTok.is(TK)) {
         HasErrorOccurred = true;
-        EM.report(err::error)
-            .at(CurTok.posViewBegin())
-            .msg("expected '")
-            .msg(token_spelling(TK))
-            .msg("' but got '")
-            .msg(currentTokenForDiag())
-            .msg("'");
+        EM.expectedXButGotY(TK, CurTok);
         return false;
     }
     next();
@@ -48,13 +36,14 @@ DeclList Parser::parseTopLevelDecl() { return {}; }
 ParsedDeclSpec Parser::parseDeclSpec() {
     ParsedDeclSpec DS;
 
-    do {
-        // if (auto T = Action.getType(CurTok))
-        //     DS.setType(T);
-        // else
-        //     ...
-
-    } while (next());
+    while (true) {
+        switch (CurTok.getTokenKind()) {
+        default:
+            return DS;
+        }
+        if (!next())
+            break;
+    }
 
     IsEOF = true;
     return DS;

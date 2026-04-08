@@ -35,6 +35,7 @@ class Sema {
     Decl *actOnDeclarator(ParsedDeclSpec &DS, ParsedDeclarator &D);
 
     Type *getType(Token &T);
+
 };
 
 } // namespace scc

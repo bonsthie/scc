@@ -3,7 +3,7 @@
 
 #include "ParseDeclarator.h"
 #include "ParsedDeclSpec.h"
-#include "scc/Error/ErrorManager.h"
+#include "ParserErrorManager.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/Sema/Sema.h"
 #include "scc/Token/Token.h"
@@ -11,9 +11,9 @@
 namespace scc {
 
 class Parser {
-    PreProcessor                  &PP;
-    Sema                          &Action;
-    [[maybe_unused]] ErrorManager &EM;
+    PreProcessor       &PP;
+    Sema               &Action;
+    ParserErrorManager &EM;
 
     bool IsEOF = false;
     bool HasErrorOccurred = false;
@@ -21,7 +21,10 @@ class Parser {
     Token CurTok;
 
   public:
-    Parser(PreProcessor &PP, Sema &Action, ErrorManager &EM) : PP(PP), Action(Action), EM(EM) {}
+    Parser(PreProcessor &PP, Sema &Action, ParserErrorManager &EM)
+        : PP(PP),
+          Action(Action),
+          EM(EM) {}
 
     PreProcessor       &getPreprocessor() { return PP; }
     const PreProcessor &getPreprocessor() const { return PP; }
@@ -47,8 +50,6 @@ class Parser {
     bool expect(tok::TokenKind TK);
 
     bool isType(tok::TokenKind TK);
-
-    std::string currentTokenForDiag() const;
 };
 
 } // namespace scc
