@@ -8,9 +8,13 @@
 
 namespace scc {
 
+template <typename T, size_t StackSize>
+using SmallVectorAllocator =
+    StackGrowAllocator<(StackSize == 0 ? sizeof(T) : StackSize * sizeof(T)), alignof(T)>;
+
 template <typename T, size_t StackSize = 16>
-class SmallVector : public BaseVector<T, StackSize, StackGrowAllocator> {
-    using Base = BaseVector<T, StackSize, StackGrowAllocator>;
+class SmallVector : public BaseVector<T, StackSize, SmallVectorAllocator<T, StackSize>> {
+    using Base = BaseVector<T, StackSize, SmallVectorAllocator<T, StackSize>>;
 
   public:
     using Base::Base;
