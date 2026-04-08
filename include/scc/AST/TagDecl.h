@@ -17,7 +17,7 @@ class TagDecl : public TypeDecl {
     TagDeclKind TKind;
 
   public:
-    TagDecl(TagDeclKind TKind, NameType Name) : TypeDecl(Tag, Name), TKind(TKind) {}
+    TagDecl(TagDeclKind TKind, NameType Name) : TypeDecl(DeclKind::Tag, Name), TKind(TKind) {}
 
     TagDeclKind getTagDeclKind() const { return TKind; }
     bool        isEnum() const { return TKind == Enum; }
@@ -34,7 +34,7 @@ class RecordFieldDecl : public ValueDecl {
 
   public:
     RecordFieldDecl(QualType Ty, NameType Name = std::nullopt)
-        : ValueDecl(RecordField, Name, Ty) {}
+        : ValueDecl(DeclKind::RecordField, Name, Ty) {}
 
     void print(std::ostream &o = std::cout) const override;
 };
@@ -81,7 +81,7 @@ class EnumFieldDecl : public NamedDecl {
     using NameType = NamedDecl::NameType;
 
   public:
-    explicit EnumFieldDecl(NameType Name) : NamedDecl(EnumField, Name) {}
+    explicit EnumFieldDecl(NameType Name) : NamedDecl(DeclKind::EnumField, Name) {}
 
     void print(std::ostream &o = std::cout) const override;
 };

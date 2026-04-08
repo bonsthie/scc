@@ -8,7 +8,7 @@ using namespace scc;
 namespace {
 
 struct DummyDecl : Decl {
-    DummyDecl() : Decl(None) {}
+    DummyDecl() : Decl(DeclKind::None) {}
 };
 
 } // namespace

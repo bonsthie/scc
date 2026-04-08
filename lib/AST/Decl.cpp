@@ -17,19 +17,19 @@ constexpr size_t IndentWidth = 2;
 
 const char *decl_kind_name(DeclKind Kind) {
     switch (Kind) {
-    case None:
+    case DeclKind::None:
         return "None";
-    case Type:
+    case DeclKind::Type:
         return "Type";
-    case Tag:
+    case DeclKind::Tag:
         return "Tag";
-    case Typedef:
+    case DeclKind::Typedef:
         return "Typedef";
-    case Var:
+    case DeclKind::Var:
         return "Var";
-    case RecordField:
+    case DeclKind::RecordField:
         return "RecordField";
-    case EnumField:
+    case DeclKind::EnumField:
         return "EnumField";
     }
     return "<unknown-decl-kind>";

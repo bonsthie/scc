@@ -5,14 +5,13 @@
 #include <optional>
 #include <ostream>
 #include <string_view>
-#include <utility>
 
 #include "scc/ADT/Span.h"
 #include "scc/AST/QualType.h"
 
 namespace scc {
 
-enum DeclKind {
+enum class DeclKind {
     None,
     Type,
     Tag,
@@ -78,7 +77,7 @@ class TypedefDecl : public TypeDecl {
 
   public:
     TypedefDecl(NameType Name, QualType UnderlyingType)
-        : TypeDecl(Typedef, Name),
+        : TypeDecl(DeclKind::Typedef, Name),
           UnderlyingType(UnderlyingType) {}
 
     QualType getUnderlyingType() const { return UnderlyingType; }
@@ -91,7 +90,7 @@ class VarDecl : public ValueDecl {
   public:
     using NameType = ValueDecl::NameType;
 
-    VarDecl(NameType Name, QualType Ty) : ValueDecl(Var, Name, Ty) {}
+    VarDecl(NameType Name, QualType Ty) : ValueDecl(DeclKind::Var, Name, Ty) {}
 
     void print(std::ostream &o = std::cout) const override;
 };

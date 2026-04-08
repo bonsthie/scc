@@ -4,10 +4,13 @@
 #include <string_view>
 
 #include "scc/AST/ASTContext.h"
+#include "scc/AST/Decl.h"
+#include "scc/AST/Type.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/Parser/ParseDeclarator.h"
 #include "scc/Parser/ParsedDeclSpec.h"
 #include "scc/Sema/Scope.h"
+#include "scc/Token/Token.h"
 
 namespace scc {
 
@@ -30,6 +33,8 @@ class Sema {
     Decl *lookup(std::string_view Name) { return SM.lookup(Name); }
 
     Decl *actOnDeclarator(ParsedDeclSpec &DS, ParsedDeclarator &D);
+
+    Type *getType(Token &T);
 };
 
 } // namespace scc

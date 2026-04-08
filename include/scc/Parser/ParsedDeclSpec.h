@@ -2,111 +2,69 @@
 #define SCC_PARSER_PARSEDDECLSPEC_H
 
 #include "scc/AST/Qualifiers.h"
+#include "scc/AST/Type.h"
+#include "scc/Token/Token.h"
 
 namespace scc {
 
-enum class StorageClassSpecifier {
-    Unspecified,
-    Auto,
-    Typedef,
-    Static,
-    Extern,
-    Register,
+enum class StorageClassSpecifier : int {
+    Unspecified = tok::not_init,
+    Auto = tok::kw_auto,
+    Typedef = tok::kw_typedef,
+    Static = tok::kw_static,
+    Extern = tok::kw_extern,
+    Register = tok::kw_register,
 };
 
-enum class SignSpecifier {
-    Unspecified,
-    Signed,
-    Unsigned,
+enum class SignSpecifier : int {
+    Unspecified = tok::not_init,
+    Signed = tok::t_signed,
+    Unsigned = tok::t_unsigned,
 };
 
-enum class BuiltinTypeSpecifier {
-    Unspecified,
-    Void,
-    Bool,
-    Char,
-    Short,
-    Int,
-    Long,
-    Float,
-    Double,
-    Complex,
-    Imaginary,
+enum class LengthSpecifier : int {
+    Unspecified = tok::not_init,
+    Short = tok::t_short,
+    Long = tok::t_long,
 };
 
 struct ParsedDeclSpec {
     StorageClassSpecifier StorageClass = StorageClassSpecifier::Unspecified;
-    SignSpecifier         Sign = SignSpecifier::Unspecified;
-    BuiltinTypeSpecifier  BuiltinType = BuiltinTypeSpecifier::Unspecified;
-    Qualifiers            Quals;
 
-    bool hasStorageClass() const { return StorageClass != StorageClassSpecifier::Unspecified; }
+    SignSpecifier Sign = SignSpecifier::Unspecified;
+    SourceRange   RangeSign; // use by sema to emit error if the type can't have a Sign Specifier
+
+    LengthSpecifier Length = LengthSpecifier::Unspecified;
+    SourceRange     LengthRange;
+
+    Type      *T;
+    Qualifiers Quals;
+
+    bool hasStorageSpecifier() const { return StorageClass != StorageClassSpecifier::Unspecified; }
     bool hasSignSpecifier() const { return Sign != SignSpecifier::Unspecified; }
-    bool hasBuiltinTypeSpecifier() const {
-        return BuiltinType != BuiltinTypeSpecifier::Unspecified;
+    bool hasLengthSpecifier() const { return Length != LengthSpecifier::Unspecified; }
+    bool hasTypeSpecifier() const { return T != nullptr; }
+
+    void setStorageSpecifier(StorageClassSpecifier New) { StorageClass = New; }
+    void setSignSpecifier(SignSpecifier New, const SourceRange &Range = {}) {
+        Sign = New;
+        RangeSign = Range;
     }
-
-    void setStorageClass(StorageClassSpecifier Spec) { StorageClass = Spec; }
-    void setSignSpecifier(SignSpecifier Spec) { Sign = Spec; }
-    void setBuiltinTypeSpecifier(BuiltinTypeSpecifier Spec) { BuiltinType = Spec; }
-
-    bool trySetStorageSpecifier(StorageClassSpecifier Spec) {
-        if (hasStorageClass())
-            return false;
-        setStorageClass(Spec);
-        return true;
+    void setLengthSpecifier(LengthSpecifier New, const SourceRange &Range = {}) {
+        Length = New;
+        LengthRange = Range;
     }
+    void setTypeSpecifier(Type *NewType) { T = NewType; }
 
-    bool trySetSignSpecifier(SignSpecifier Spec) {
-        if (hasSignSpecifier())
-            return false;
-        setSignSpecifier(Spec);
-        return true;
-    }
-
-    bool trySetBuiltinTypeSpecifier(BuiltinTypeSpecifier Spec) {
-        if (hasBuiltinTypeSpecifier())
-            return false;
-        setBuiltinTypeSpecifier(Spec);
-        return true;
-    }
-
-    void addConst() { Quals.IsConst = true; }
-    void addRestrict() { Quals.IsRestrict = true; }
-    void addVolatile() { Quals.IsVolatile = true; }
-    void addQualifiers(const Qualifiers &Other) { Quals.merge(Other); }
-    void setConstQualified(bool Value = true) { Quals.IsConst = Value; }
-    void setRestrictQualified(bool Value = true) { Quals.IsRestrict = Value; }
-    void setVolatileQualified(bool Value = true) { Quals.IsVolatile = Value; }
-
-    bool trySetConstQualified() {
-        if (Quals.IsConst)
-            return false;
-        addConst();
-        return true;
-    }
-
-    bool trySetRestrictQualified() {
-        if (Quals.IsRestrict)
-            return false;
-        addRestrict();
-        return true;
-    }
-
-    bool trySetVolatileQualified() {
-        if (Quals.IsVolatile)
-            return false;
-        addVolatile();
-        return true;
-    }
-
-    bool tryAddQualifiers(const Qualifiers &Other) {
-        if ((Quals.IsConst && Other.IsConst) || (Quals.IsRestrict && Other.IsRestrict) ||
-            (Quals.IsVolatile && Other.IsVolatile))
-            return false;
-        addQualifiers(Other);
-        return true;
-    }
+    bool tryAddStorageSpecifier(StorageClassSpecifier New);
+    bool trySetStorageSpecifier(StorageClassSpecifier New);
+    bool tryAddSignSpecifier(SignSpecifier New, const SourceRange &Range = {});
+    bool tryAddLengthSpecifier(LengthSpecifier New, const SourceRange &Range = {});
+    bool tryAddTypeSpecifier(Type *New);
+    bool tryAddConst();
+    bool tryAddRestrict();
+    bool tryAddVolatile();
+    bool tryAddQualifiers(const Qualifiers &Other);
 };
 
 } // namespace scc

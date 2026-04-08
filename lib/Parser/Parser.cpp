@@ -49,9 +49,10 @@ ParsedDeclSpec Parser::parseDeclSpec() {
     ParsedDeclSpec DS;
 
     do {
-        switch (CurTok.getTokenKind())
-        default:
-            return DS;
+        // if (auto T = Action.getType(CurTok))
+        //     DS.setType(T);
+        // else
+        //     ...
 
     } while (next());
 

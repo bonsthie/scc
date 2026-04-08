@@ -75,7 +75,6 @@ class Token {
         Range = SourceRange();
         IsDirty = false;
     }
-
 };
 
 // use a hash map of all the word is a Keyword and setup the CurTok
