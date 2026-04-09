@@ -1,7 +1,6 @@
 #include "scc/Option/OptionTable.h"
 #include "scc/Error/Error.h"
 #include "scc/Option/Args.h"
-#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <memory>

@@ -76,9 +76,8 @@ LangVersion LangOptBuilder::getCVersion() {
 }
 
 void LangOptBuilder::addWarningFlags(LangOpt &Opts) {
-
-    for (auto &[Type, ArgPtr] : Args) {
-        switch (Type) {
+    for (const auto &Occurrence : Args.getOccurrences()) {
+        switch (Occurrence.getType()) {
         case Opt_Wtrigraphs:
             Opts.TrigraphEnable = false;
             break;
