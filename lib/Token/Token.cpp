@@ -1,3 +1,4 @@
+#include "scc/Colors/Colors.h"
 #include "scc/Token/Token.h"
 #include "scc/Lex/DecodeChar.h"
 #include <iomanip>
@@ -10,6 +11,55 @@ static std::unordered_map<std::string_view, tok::TokenKind> TokenMap{
 #define KEYWORD_TOKENKIND(id, string) {string, tok::id},
 #include "scc/Token/TokenKinds.def"
 };
+
+static const char *kind_color(tok::TokenKind Kind) {
+    switch (Kind) {
+    case tok::unknown:
+        return Color::red();
+    case tok::identifier:
+        return Color::cyan();
+    case tok::numeric_constant:
+    case tok::char_constant:
+    case tok::string_literal:
+    case tok::system_string:
+        return Color::yellow();
+    case tok::comment:
+    case tok::comment_line:
+    case tok::space:
+    case tok::eol:
+    case tok::eof:
+        return Color::dim();
+
+#define DELIMITERS(id, string) case tok::id:
+#define OPERATORS(id, string) case tok::id:
+        return Color::magenta();
+
+#define KEYWORD_TOKENKIND(id, string) case tok::id:
+        return Color::blue();
+
+#define PP_TOKENKIND(id, string) case tok::id:
+        return Color::red();
+
+#include "scc/Token/TokenKinds.def"
+
+    default:
+        return "";
+    }
+}
+
+static const char *value_color(tok::TokenKind Kind) {
+    switch (Kind) {
+    case tok::identifier:
+        return Color::cyan();
+    case tok::numeric_constant:
+    case tok::char_constant:
+    case tok::string_literal:
+    case tok::system_string:
+        return Color::yellow();
+    default:
+        return Color::green();
+    }
+}
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wc99-designator"
@@ -61,22 +111,29 @@ std::string scc::clean_token(std::string_view str) {
 }
 
 void Token::print(std::ostream &OS) const {
-    std::ostringstream KindFormat;
-    KindFormat << stringify_token_kind(TKind);
+    const std::string KindText = stringify_token_kind(TKind);
+    std::string       PlainField = KindText;
+    if (!Value.empty())
+        PlainField += " '" + std::string(Value) + "'";
 
-    if (!Value.empty()) {
-        KindFormat << " '" << Value << "'";
+    if (Color::enabled()) {
+        OS << kind_color(TKind) << KindText << Color::reset();
+        if (!Value.empty())
+            OS << " '" << value_color(TKind) << Value << Color::reset() << "'";
+
+        if (PlainField.size() < 30)
+            OS << std::string(30 - PlainField.size(), ' ');
+    } else {
+        OS << std::left << std::setw(30) << PlainField;
     }
 
-    OS << std::left << std::setw(30) << KindFormat.str();
-
     if (isStartOfLine())
-        OS << " [StartOfLine]";
+        OS << Color::dim() << " [StartOfLine]" << Color::reset();
 
     if (isDirty())
-        OS << " [Unclean='" << DirtyValue << "']";
+        OS << Color::yellow() << " [Unclean='" << DirtyValue << "']" << Color::reset();
 
-    OS << " Loc=<" << posViewBegin() << '>';
+    OS << Color::dim() << " Loc=<" << posViewBegin() << '>' << Color::reset();
 }
 
 std::ostream &scc::operator<<(std::ostream &OS, const Token &T) {

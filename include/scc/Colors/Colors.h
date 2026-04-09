@@ -24,6 +24,7 @@ class Color {
     static const char *reset() { return code("\x1b[0m"); }
     static const char *bold() { return code("\x1b[1m"); }
     static const char *dim() { return code("\x1b[2m"); }
+    static const char *green() { return code("\x1b[32m"); }
     static const char *red() { return code("\x1b[31m"); }
     static const char *yellow() { return code("\x1b[33m"); }
     static const char *blue() { return code("\x1b[34m"); }
