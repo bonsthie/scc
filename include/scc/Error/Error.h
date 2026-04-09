@@ -1,7 +1,6 @@
 #ifndef SCC_ERROR_ERROR_H
 #define SCC_ERROR_ERROR_H
 
-#include "scc/Error/ErrorColors.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include <optional>
 #include <ostream>

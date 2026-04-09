@@ -1,15 +1,15 @@
+#include "scc/Colors/Colors.h"
 #include "scc/Error/Error.h"
 
 using namespace scc;
 
-// TODO : handle NO_COLOR
 void Error::print(std::ostream &O) const {
     if (Pos)
-        O << COL_BOLD << Pos.value() << ": ";
+        O << Color::bold() << Pos.value() << ": ";
     else
-        O << getProgramNameString() << ": " COL_BOLD;
+        O << getProgramNameString() << ": " << Color::bold();
 
-    O << getPrintLevelString() << COL_BOLD ": " << Msg.str() << COL_RESET "\n";
+    O << getPrintLevelString() << Color::bold() << ": " << Msg.str() << Color::reset() << "\n";
 }
 
 int Error::emit(std::ostream &O) const {
@@ -22,9 +22,9 @@ int Error::emit(std::ostream &O) const {
 std::string Error::getPrintLevelString() const {
     switch (Level) {
     case err::DiagLevel::error:
-        return COL_RED "error" COL_RESET;
+        return std::string(Color::red()) + "error" + Color::reset();
     case err::DiagLevel::warning:
-        return COL_MAGENTA "warning" COL_RESET;
+        return std::string(Color::magenta()) + "warning" + Color::reset();
     }
     return "";
 }

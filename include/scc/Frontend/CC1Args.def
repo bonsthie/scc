@@ -4,6 +4,7 @@ BASIC_FLAG(cc1, "-cc1", "run the internal cc1 frontend", true)
 
 BASIC_FLAG(help, "--help", "show this help message", false)
 ALIAS_BASIC_FLAG(help, "-h", "", true)
+BASIC_FLAG(enable_color, "--enable-color", "enable ANSI color in diagnostics", false)
 
 BASIC_FLAG(dump_tokens, "-dump-tokens", "lex the input and print tokens", false)
 BASIC_FLAG(dump_raw_tokens, "-dump-raw-tokens", "lex the raw input and print tokens", false)

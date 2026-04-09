@@ -1,4 +1,5 @@
 #include "scc/ADT/vector.h"
+#include "scc/Colors/Colors.h"
 #include "scc/Error/Error.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileFinder.h"
@@ -16,11 +17,21 @@
 
 using namespace scc;
 
+namespace {
+
+void configureColor(const ArgsList &Args) {
+    Color::setEnabled(Args.hasArg(Opt_enable_color));
+}
+
+} // namespace
+
 bool cc1(int argc, char **argv, char **) {
     ErrorManager   EM;
     SccOptionTable Opt(EM);
 
     std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::vector<const char *>(argv + 2, argv + argc)));
+    if (Args)
+        configureColor(*Args);
     if (EM.emit() || !Args)
         return 1;
 
@@ -71,6 +82,8 @@ int main(int argc, char **argv, char **env) {
     SccOptionTable Opt(EM);
 
     std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::vector<const char *>(argv + 1, argv + argc)));
+    if (Args)
+        configureColor(*Args);
     if (!Args)
         return 10;
     EM.emit();
