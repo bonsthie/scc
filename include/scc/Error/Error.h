@@ -19,6 +19,12 @@ enum DiagLevel {
 
 enum EmitionLeveL { Emit = 1, Stop = 1 << 1, EmitStop = Emit | Stop };
 
+enum class Code {
+	OK,
+	ERROR, // EM manager error has been set
+};
+
+
 } // namespace err
 
 #define ERR_MSG

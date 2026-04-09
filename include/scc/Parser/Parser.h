@@ -4,6 +4,7 @@
 #include "ParseDeclarator.h"
 #include "ParsedDeclSpec.h"
 #include "ParserErrorManager.h"
+#include "scc/Frontend/LangOpt.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/Sema/Sema.h"
 #include "scc/Token/Token.h"
@@ -14,6 +15,7 @@ class Parser {
     PreProcessor       &PP;
     Sema               &Action;
     ParserErrorManager &EM;
+    const LangOpt      &Opts;
 
     bool IsEOF = false;
     bool HasErrorOccurred = false;
@@ -21,16 +23,18 @@ class Parser {
     Token CurTok;
 
   public:
-    Parser(PreProcessor &PP, Sema &Action, ParserErrorManager &EM)
+    Parser(PreProcessor &PP, Sema &Action, ParserErrorManager &EM, const LangOpt &Opts)
         : PP(PP),
           Action(Action),
-          EM(EM) {}
+          EM(EM),
+          Opts(Opts) {}
 
     PreProcessor       &getPreprocessor() { return PP; }
     const PreProcessor &getPreprocessor() const { return PP; }
 
     Sema       &getSema() { return Action; }
     const Sema &getSema() const { return Action; }
+    const LangOpt &getLangOpt() const { return Opts; }
 
     bool isEOF() { return IsEOF; }
     bool hasErrorOccurred() { return HasErrorOccurred; }

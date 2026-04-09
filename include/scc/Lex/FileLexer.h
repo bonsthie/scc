@@ -4,6 +4,7 @@
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/MemoryBufferView.h"
+#include "scc/Frontend/LangOpt.h"
 #include "scc/Lex/SizedChar.h"
 #include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
@@ -12,6 +13,7 @@ namespace scc {
 
 class FileLexer : public TokenStream {
     ErrorManager    &EM;
+    const LangOpt   &Opts;
     StringInterner  &SI;
     MemoryBufferView MemBufferView;
     FileID           FID;
@@ -23,14 +25,17 @@ class FileLexer : public TokenStream {
     bool ParseDirtyToken = false;
 
   public:
-    FileLexer(File &F, StringInterner &SI, ErrorManager &EM)
+    FileLexer(File &F, StringInterner &SI, ErrorManager &EM, const LangOpt &Opts)
         : EM(EM),
+          Opts(Opts),
           SI(SI),
           MemBufferView(F.view()),
           FID(F.getFileID()) {}
 
-    FileLexer(MemoryBufferView &&MBF, StringInterner &SI, FileID &FID, ErrorManager &EM)
+    FileLexer(MemoryBufferView &&MBF, StringInterner &SI, FileID &FID, ErrorManager &EM,
+              const LangOpt &Opts)
         : EM(EM),
+          Opts(Opts),
           SI(SI),
           MemBufferView(MBF),
           FID(FID) {}
@@ -41,6 +46,7 @@ class FileLexer : public TokenStream {
     bool lexInclude(Token &CurTok);
 
     const FileID &getFID() const { return FID; }
+    const LangOpt &getLangOpt() const { return Opts; }
 
   private:
     SizedChar getChar(void);

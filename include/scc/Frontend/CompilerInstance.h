@@ -19,6 +19,7 @@ class CompilerInstance {
     std::unique_ptr<PreProcessor>   PP;
     StringInterner                 *SI;
     std::unique_ptr<FrontendAction> Act;
+    CompilerInstanceSettings        Settings;
     ErrorManager                   &EM;
     FileManager                    *FM = nullptr;
     std::unique_ptr<ASTContext>     Ctx;
@@ -33,11 +34,11 @@ class CompilerInstance {
     void InitSema() {
         if (!Ctx)
             Ctx = std::make_unique<ASTContext>();
-        Action = std::make_unique<Sema>(*Ctx, EM);
+        Action = std::make_unique<Sema>(*Ctx, EM, Settings.LangOptions);
     }
 
     void createPreprocessor(File &MainFile) {
-        PP = std::make_unique<PreProcessor>(MainFile, EM, *FM, *SI);
+        PP = std::make_unique<PreProcessor>(MainFile, EM, *FM, *SI, Settings.LangOptions);
     }
 
     PreProcessor       &getPreprocessor() { return *PP; }
@@ -58,6 +59,9 @@ class CompilerInstance {
 
     ErrorManager       &getErrorManager() { return EM; }
     const ErrorManager &getErrorManager() const { return EM; }
+
+    LangOpt       &getLangOpt() { return Settings.LangOptions; }
+    const LangOpt &getLangOpt() const { return Settings.LangOptions; }
 
     void setFileManager(FileManager &NewFM) { FM = &NewFM; }
 };

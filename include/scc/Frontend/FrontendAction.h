@@ -59,7 +59,7 @@ class ASTFrontendAction : public FrontendAction {
         CI.InitSema();
 
         ParserErrorManager PEM(CI.getErrorManager());
-        Parser             P(CI.getPreprocessor(), CI.getSema(), PEM);
+        Parser             P(CI.getPreprocessor(), CI.getSema(), PEM, CI.getLangOpt());
         return ParseAST(P, *Consumer);
     }
 

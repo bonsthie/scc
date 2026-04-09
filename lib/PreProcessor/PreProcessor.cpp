@@ -8,9 +8,11 @@
 
 using namespace scc;
 
-PreProcessor::PreProcessor(File &F, ErrorManager &EM, FileManager &FM, StringInterner &SI)
+PreProcessor::PreProcessor(File &F, ErrorManager &EM, FileManager &FM, StringInterner &SI,
+                           const LangOpt &Opts)
     : EM(EM),
       FM(FM),
+      Opts(Opts),
       SI(SI) {
     addNewTokenStream(F);
 }

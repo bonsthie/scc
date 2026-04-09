@@ -5,8 +5,8 @@
 #include "scc/FileManager/FileManager.h"
 #include "scc/Frontend/CompilerBuilder.h"
 #include "scc/Frontend/CompilerInstance.h"
-#include "scc/Frontend/FrontendActionOptions.h"
-#include "scc/Option/OptionTable.h"
+#include "scc/Frontend/CC1Args.h"
+#include "scc/Frontend/LangOpt.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
@@ -16,29 +16,6 @@
 
 using namespace scc;
 
-namespace scc {
-enum SccCC1OptionIndex { Opt_none, Opt_test, Opt_oui, Opt_L, Opt_I, Opt_cc1 };
-
-class SccOptionTable : public OptionTable {
-
-    static constexpr OptionSpec opt[] = {
-        {Opt_test, "-test", OptKind::Flag, ValType::None, "this is a test", false},
-        {Opt_oui, "--oui=", OptKind::Equal, ValType::Str, "oui oui baguette", false},
-        {Opt_L, "-L", OptKind::Separate, ValType::StrList, "L is for losser", false},
-        {Opt_I, "-I", OptKind::JoinedOrSeparate, ValType::StrList, "system include folder", false},
-        {Opt_dump_tokens, "-dump-tokens", OptKind::Flag, ValType::None, "dump tokens", false},
-        {Opt_dump_raw_tokens, "-dump-raw-tokens", OptKind::Flag, ValType::None, "dump raw tokens",
-         false},
-        {Opt_dump_ast, "-dump-ast", OptKind::Flag, ValType::None, "dump ast", false},
-    };
-
-    virtual std::span<const OptionSpec> specs() const { return opt; }
-
-  public:
-    SccOptionTable(ErrorManager &EM) : OptionTable(EM) {}
-};
-
-} // namespace scc
 
 bool cc1(int argc, char **argv, char **) {
     ErrorManager   EM;
@@ -108,7 +85,12 @@ int main(int argc, char **argv, char **env) {
     BumpAllocator  BumpAlloca;
     StringInterner SI(BumpAlloca);
 
-    PreProcessor PP(*F, EM, FM, SI);
+    LangOptBuilder LangOptB(*Args, EM);
+    auto           LangOptions = LangOptB.build();
+    if (!LangOptions)
+        return EM.emit();
+
+    PreProcessor PP(*F, EM, FM, SI, *LangOptions);
 
     Token CurTok;
     do {

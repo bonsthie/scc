@@ -5,10 +5,11 @@
 
 using namespace scc;
 
-CompilerInstance::CompilerInstance(FileManager &FM, ErrorManager &EM, CompilerInstanceSettings,
+CompilerInstance::CompilerInstance(FileManager &FM, ErrorManager &EM, CompilerInstanceSettings Settings,
                                    StringInterner &SI, std::unique_ptr<FrontendAction> Act)
     : SI(&SI),
       Act(std::move(Act)),
+      Settings(Settings),
       EM(EM),
       FM(&FM),
       Ctx(std::make_unique<ASTContext>()) {}

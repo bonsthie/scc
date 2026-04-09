@@ -1,20 +1,27 @@
 #include "scc/Frontend/CompilerBuilder.h"
+#include "scc/Frontend/CC1Args.h"
+#include "scc/Frontend/LangOpt.h"
 
 #include "scc/Error/Error.h"
-#include "scc/Frontend/FrontendActionOptions.h"
 
 using namespace scc;
 
 CompilerInstance *CompilerBuilder::create() { /* TODO replace by stdin */ return create("test.c"); }
 
 CompilerInstance *CompilerBuilder::create(File *MainFile) {
-
     auto Act = selectForntendAction();
     if (Act == nullptr)
         return nullptr;
 
-    auto *CI = new CompilerInstance(FM, EM, CompilerInstanceSettings{}, SI,
-                                    std::unique_ptr<FrontendAction>(Act));
+    auto LangOptions = LangOptBuilder(Args, EM).build();
+    if (!LangOptions)
+        return nullptr;
+
+    CompilerInstanceSettings Settings{
+        .LangOptions = *LangOptions,
+    };
+
+    auto *CI = new CompilerInstance(FM, EM, Settings, SI, std::unique_ptr<FrontendAction>(Act));
     if (MainFile)
         CI->createPreprocessor(*MainFile);
     return CI;
