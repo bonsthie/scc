@@ -8,6 +8,11 @@
 
 using namespace scc;
 
+const LangOpt &PreProcessor::defaultLangOpt() {
+    static const LangOpt Opts{};
+    return Opts;
+}
+
 PreProcessor::PreProcessor(File &F, ErrorManager &EM, FileManager &FM, StringInterner &SI,
                            const LangOpt &Opts)
     : EM(EM),

@@ -31,6 +31,9 @@ class PreProcessor {
     // LineMapper								 Mapper;
 
   public:
+    PreProcessor(File &F, ErrorManager &EM, FileManager &FM, StringInterner &SI)
+        : PreProcessor(F, EM, FM, SI, defaultLangOpt()) {}
+
     PreProcessor(File &F, ErrorManager &EM, FileManager &FM, StringInterner &SI,
                  const LangOpt &Opts);
 
@@ -39,6 +42,8 @@ class PreProcessor {
     const LangOpt &getLangOpt() const { return Opts; }
 
   private:
+    static const LangOpt &defaultLangOpt();
+
     bool handlePP(Token &Tok);
     bool handleInclude(Token &Tok, FileLexer &FL);
 

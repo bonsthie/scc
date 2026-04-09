@@ -1,6 +1,7 @@
 #include "scc/ADT/vector.h"
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/MemoryBufferView.h"
+#include "scc/Frontend/LangOpt.h"
 #include "scc/Lex/FileLexer.h"
 #include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
@@ -26,6 +27,11 @@ class FileLexTests : public ::testing::Test {
     FileLexer create_lexer(const char *str) {
         MemoryBufferView MV(str, strlen(str));
         return FileLexer(std::move(MV), SI, *FID, *EM);
+    }
+
+    FileLexer create_lexer(const char *str, const LangOpt &Opts) {
+        MemoryBufferView MV(str, strlen(str));
+        return FileLexer(std::move(MV), SI, *FID, *EM, Opts);
     }
 
     static void expectSeq(FileLexer &FL, std::initializer_list<tok::TokenKind> kinds) {
@@ -424,10 +430,13 @@ O 10\
 }
 
 TEST_F(FileLexTests, Trigraphs_AllMappingsHandled) {
+    LangOpt Opts;
+    Opts.TrigraphEnable = true;
+
     auto FL = create_lexer(R"(??= inclu??/
 de "test.h"
 ??' ??( ??) ??! ??< ??> ??-
-)");
+)", Opts);
 
     expectNextKindLexeme(FL, tok::pp_hash, "\?\?=", "#");
     expectNextKindLexeme(FL, tok::pp_include, "inclu\?\?/\nde", "include");

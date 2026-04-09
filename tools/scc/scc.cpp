@@ -3,9 +3,9 @@
 #include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileFinder.h"
 #include "scc/FileManager/FileManager.h"
+#include "scc/Frontend/CC1Args.h"
 #include "scc/Frontend/CompilerBuilder.h"
 #include "scc/Frontend/CompilerInstance.h"
-#include "scc/Frontend/CC1Args.h"
 #include "scc/Frontend/LangOpt.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/String/StringInterner.h"
@@ -16,7 +16,6 @@
 
 using namespace scc;
 
-
 bool cc1(int argc, char **argv, char **) {
     ErrorManager   EM;
     SccOptionTable Opt(EM);
@@ -24,6 +23,11 @@ bool cc1(int argc, char **argv, char **) {
     std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::vector<const char *>(argv + 2, argv + argc)));
     if (EM.emit() || !Args)
         return 1;
+
+    if (Args->hasArg(Opt_help)) {
+        Opt.printOpt(std::cout);
+		return false;
+    }
 
     BumpAllocator  BumpAlloca;
     StringInterner SI(BumpAlloca);

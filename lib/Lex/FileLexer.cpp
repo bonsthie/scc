@@ -1,13 +1,71 @@
 
 #include "scc/Lex/FileLexer.h"
 #include "scc/FileManager/MemoryBufferView.h"
-#include "scc/Lex/DecodeChar.h"
 #include "scc/Lex/SizedChar.h"
 #include "scc/Token/Token.h"
 #include <cassert>
 #include <cctype>
 
 using namespace scc;
+
+namespace {
+
+MemoryViewPos advance_pos(const char *Begin, const char *Ptr, MemoryViewPos Pos) {
+    while (Begin < Ptr) {
+        if (*Begin == '\n') {
+            Pos.Line++;
+            Pos.Column = 1;
+        } else {
+            Pos.Column++;
+        }
+        Pos.Buff++;
+        Begin++;
+    }
+    return Pos;
+}
+
+int handle_trigraph(int c) {
+    char decoded = 0;
+
+    switch (c) {
+    case '=':
+        decoded = '#';
+        break;
+    case '/':
+        decoded = '\\';
+        break;
+    case '\'':
+        decoded = '^';
+        break;
+    case '(':
+        decoded = '[';
+        break;
+    case ')':
+        decoded = ']';
+        break;
+    case '!':
+        decoded = '|';
+        break;
+    case '<':
+        decoded = '{';
+        break;
+    case '>':
+        decoded = '}';
+        break;
+    case '-':
+        decoded = '~';
+        break;
+    }
+
+    return decoded;
+}
+
+} // namespace
+
+const LangOpt &FileLexer::defaultLangOpt() {
+    static const LangOpt Opts{};
+    return Opts;
+}
 
 bool FileLexer::next(Token &CurTok) {
     do {
@@ -99,7 +157,53 @@ bool FileLexer::lexInclude(Token &CurTok) {
 
 SizedChar FileLexer::peakCharAtIdx(int Idx) {
     const char *Ptr = MemBufferView.raw() + Pos.Buff + Idx;
-    return decode_logical_char(Ptr, MemBufferView.end());
+    return decodeLogicalChar(Ptr);
+}
+
+SizedChar FileLexer::decodeLogicalChar(const char *Ptr) {
+    const char *End = MemBufferView.end();
+    if (Ptr >= End)
+        return {0, 0};
+
+    int     c = *Ptr;
+    uint8_t consumed = 1;
+
+    if (c != '\\' && c != '?')
+        return {c, consumed};
+
+    if (c == '?' && Ptr + 2 < End && Ptr[1] == '?') {
+        int trigraphValue = handle_trigraph(Ptr[2]);
+        if (trigraphValue) {
+            if (!Opts.TrigraphEnable) {
+                const char    *Begin = MemBufferView.raw() + Pos.Buff;
+                MemoryViewPos  DiagPos = advance_pos(Begin, Ptr, Pos);
+                EM.report(err::warning)
+                    .at({DiagPos, &FID})
+                    .msg("trigraph ignored [-Wtrigraphs]");
+                return {c, consumed};
+            }
+            c = trigraphValue;
+            consumed = 3;
+        }
+    }
+
+    const char *NextPtr = Ptr + consumed;
+
+    if (c == '\\') {
+        if (NextPtr < End && *NextPtr == '\n') {
+            SizedChar Next = decodeLogicalChar(NextPtr + 1);
+            Next.size += consumed + 1;
+            return Next;
+        }
+
+        if (NextPtr + 1 < End && NextPtr[0] == '\r' && NextPtr[1] == '\n') {
+            SizedChar Next = decodeLogicalChar(NextPtr + 2);
+            Next.size += consumed + 2;
+            return Next;
+        }
+    }
+
+    return {c, consumed};
 }
 
 SizedChar FileLexer::peakChar(int Idx) {

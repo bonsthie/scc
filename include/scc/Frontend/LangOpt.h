@@ -49,6 +49,7 @@ class LangOptBuilder {
 
   private:
     LangVersion getCVersion();
+    void        addWarningFlags(LangOpt &Opts);
 };
 
 } // namespace scc

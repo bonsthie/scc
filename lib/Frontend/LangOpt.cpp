@@ -45,7 +45,9 @@ std::expected<LangOpt, err::Code> LangOptBuilder::build() {
         return std::unexpected(err::Code::ERROR);
 
     // TODO: add flags -W option like -Wnocrampte -Wcrampte
-    return VersionTable[static_cast<size_t>(Version)];
+    LangOpt Opts = VersionTable[static_cast<size_t>(Version)];
+    addWarningFlags(Opts);
+    return Opts;
 }
 
 LangVersion LangOptBuilder::getCVersion() {
@@ -71,4 +73,18 @@ LangVersion LangOptBuilder::getCVersion() {
     }
 
     return LV;
+}
+
+void LangOptBuilder::addWarningFlags(LangOpt &Opts) {
+
+    for (auto &[Type, ArgPtr] : Args) {
+        switch (Type) {
+        case Opt_Wtrigraphs:
+            Opts.TrigraphEnable = false;
+            break;
+        case Opt_Wnotrigraphs:
+            Opts.TrigraphEnable = true;
+            break;
+        }
+    }
 }

@@ -25,12 +25,18 @@ class FileLexer : public TokenStream {
     bool ParseDirtyToken = false;
 
   public:
+    FileLexer(File &F, StringInterner &SI, ErrorManager &EM)
+        : FileLexer(F, SI, EM, defaultLangOpt()) {}
+
     FileLexer(File &F, StringInterner &SI, ErrorManager &EM, const LangOpt &Opts)
         : EM(EM),
           Opts(Opts),
           SI(SI),
           MemBufferView(F.view()),
           FID(F.getFileID()) {}
+
+    FileLexer(MemoryBufferView &&MBF, StringInterner &SI, FileID &FID, ErrorManager &EM)
+        : FileLexer(std::move(MBF), SI, FID, EM, defaultLangOpt()) {}
 
     FileLexer(MemoryBufferView &&MBF, StringInterner &SI, FileID &FID, ErrorManager &EM,
               const LangOpt &Opts)
@@ -49,9 +55,12 @@ class FileLexer : public TokenStream {
     const LangOpt &getLangOpt() const { return Opts; }
 
   private:
+    static const LangOpt &defaultLangOpt();
+
     SizedChar getChar(void);
     SizedChar peakChar(int Idx = 1);
     SizedChar peakCharAtIdx(int Idx = 0);
+    SizedChar decodeLogicalChar(const char *Ptr);
     void      consumeChar(void);
     void      consumeChar(SizedChar sc);
     void      consumeChar(int size);

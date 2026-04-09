@@ -101,9 +101,11 @@ struct ArgOccurrence {
 
 class ArgsList {
     // all the possible type for the config
-    std::map<int, std::unique_ptr<Arg>> ValMap;
-    scc::vector<ArgOccurrence>          Occurrences;
-    scc::vector<std::string_view>       Files;
+    using ValMapType = std::map<int, std::unique_ptr<Arg>>;
+
+    ValMapType                    ValMap;
+    scc::vector<ArgOccurrence>    Occurrences;
+    scc::vector<std::string_view> Files;
 
   public:
     ~ArgsList() = default;
@@ -121,6 +123,9 @@ class ArgsList {
 
     void addArgFlag(std::unique_ptr<Arg> A, const std::string &Spelling = "");
     void addFile(std::string_view File);
+
+    ValMapType::iterator begin() { return ValMap.begin(); }
+    ValMapType::iterator end() { return ValMap.end(); }
 
     const scc::vector<std::string_view> &getFiles() const;
 };

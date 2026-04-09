@@ -1,0 +1,30 @@
+#include "scc/Option/ArgsDefine.h"
+
+BASIC_FLAG(cc1, "-cc1", "run the internal cc1 frontend", true)
+
+BASIC_FLAG(help, "--help", "show this help message", false)
+ALIAS_BASIC_FLAG(help, "-h", "", true)
+
+BASIC_FLAG(dump_tokens, "-dump-tokens", "lex the input and print tokens", false)
+BASIC_FLAG(dump_raw_tokens, "-dump-raw-tokens", "lex the raw input and print tokens", false)
+BASIC_FLAG(dump_ast, "-dump-ast", "parse the input and print the AST", false)
+
+EQUAL_FLAG(std, std, "select the C language standard", false)
+
+BASIC_FLAG_VALUES(I, "-I", "add a directory to the system include search path", false)
+
+WARN_FLAG(trigraphs, trigraphs, "trigraph support", false)
+
+
+#undef FLAG
+#undef OPT_ENUM
+#undef BASIC_FLAG
+#undef BASIC_FLAG_VALUE
+#undef BASIC_FLAG_VALUES
+#undef ALIAS_FLAG
+#undef ALIAS_BASIC_FLAG
+#undef ALIAS_BASIC_FLAG_VALUE
+#undef ALIAS_BASIC_FLAG_VALUES
+#undef ALIAS_EQUAL_FLAG
+#undef EQUAL_FLAG
+#undef WARN_FLAG

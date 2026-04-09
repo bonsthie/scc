@@ -1,5 +1,6 @@
 // File: SccOptionTableTest.cpp
 #include <gtest/gtest.h>
+#include <sstream>
 #include <string>
 
 #include "scc/ADT/vector.h"
@@ -12,6 +13,7 @@ using namespace scc;
 
 enum SccOptionIndex {
     Opt_none,
+    Opt_help,
     Opt_test,
     Opt_oui,
     Opt_L,
@@ -23,6 +25,8 @@ enum SccOptionIndex {
 
 class SccOptionTable : public OptionTable {
     static constexpr OptionSpec opt[] = {
+        {Opt_help, "--help", OptKind::Flag, ValType::None, "display help", false},
+        {Opt_help, "-h", OptKind::Flag, ValType::None, "", true},
         {Opt_test, "-test", OptKind::Flag, ValType::None, "this is a test", false},
         {Opt_oui, "--oui=", OptKind::Equal, ValType::Str, "oui oui baguette", false},
         {Opt_L, "-L", OptKind::Separate, ValType::StrList, "L is for losser", false},
@@ -55,6 +59,38 @@ TEST(SccOptionTable, ParsesFlagTest) {
     ASSERT_NE(args->getArg(Opt_test), nullptr);
 
     EXPECT_TRUE(EM.getErrsList().empty());
+}
+
+TEST(SccOptionTable, AliasFlagParsesAsSameOption) {
+    ErrorManager   EM;
+    SccOptionTable Opt(EM);
+
+    auto argv = mkArgv({"-h"});
+    auto args = Opt.parseArgs(argv);
+
+    ASSERT_TRUE(args);
+    ASSERT_NE(args->getArg(Opt_help), nullptr);
+    ASSERT_EQ(args->countOccurrencesOf({Opt_help}), 1);
+
+    const auto *First = args->getFirstOccurrenceOf({Opt_help});
+    ASSERT_NE(First, nullptr);
+    EXPECT_EQ(First->getSpelling(), "-h");
+
+    EXPECT_TRUE(EM.getErrsList().empty());
+}
+
+TEST(SccOptionTable, PrintOptShowsAliasesAsSeparateLines) {
+    ErrorManager        EM;
+    SccOptionTable      Opt(EM);
+    std::ostringstream  OS;
+
+    Opt.printOpt(OS);
+
+    const std::string Help = OS.str();
+    EXPECT_NE(Help.find("--help"), std::string::npos);
+    EXPECT_NE(Help.find("display help"), std::string::npos);
+    EXPECT_NE(Help.find("-h"), std::string::npos);
+    EXPECT_NE(Help.find("alias of --help"), std::string::npos);
 }
 
 TEST(SccOptionTable, ParsesEqualOption) {

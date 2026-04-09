@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <string_view>
 
 using namespace scc;
@@ -33,6 +34,16 @@ ArgsList *OptionTable::parseArgs(const scc::vector<const char *> &argv) {
 
 static inline bool starts_with(std::string_view s, std::string_view pfx) {
     return s.size() >= pfx.size() && s.compare(0, pfx.size(), pfx) == 0;
+}
+
+static const OptionSpec *findVisibleOptionForAlias(std::span<const OptionSpec> Options,
+                                                   const OptionSpec            &Alias) {
+    for (const auto &Option : Options) {
+        if (!Option.hidde && Option.key == Alias.key)
+            return &Option;
+    }
+
+    return nullptr;
 }
 
 std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end, std::string *MatchedSpelling) {
@@ -115,7 +126,20 @@ void OptionTable::printOpt(std::ostream &O) {
 
     for (const auto &Option : opt) {
         std::string fullSpelling = Option.spelling + printHasOption(Option.kind);
-        O << " " << std::left << std::setw(20) << fullSpelling << Option.help << "\n";
+
+        if (Option.hidde) {
+            const OptionSpec *Base = findVisibleOptionForAlias(opt, Option);
+            if (!Base)
+                continue;
+
+            std::string target = Base->spelling + printHasOption(Base->kind);
+            O << " " << std::left << std::setw(20) << fullSpelling << "alias of " << target
+              << "\n";
+            continue;
+        }
+
+        std::string help = Option.help ? std::string(Option.help) : std::string();
+        O << " " << std::left << std::setw(20) << fullSpelling << help << "\n";
     }
 }
 
