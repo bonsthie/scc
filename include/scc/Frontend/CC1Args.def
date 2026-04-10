@@ -14,7 +14,8 @@ EQUAL_FLAG(std, std, "select the C language standard", false)
 
 BASIC_FLAG_VALUES(I, "-I", "add a directory to the system include search path", false)
 
-WARN_FLAG(trigraphs, trigraphs, "trigraph support", false)
+WARN_FLAG(trigraphs, trigraphs, "trigraph warning", false)
+F_FLAG(trigraphs, trigraphs, "trigraph support", false)
 
 
 #undef FLAG

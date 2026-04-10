@@ -60,7 +60,9 @@ class FileLexer : public TokenStream {
     SizedChar getChar(void);
     SizedChar peakChar(int Idx = 1);
     SizedChar peakCharAtIdx(int Idx = 0);
-    SizedChar decodeLogicalChar(const char *Ptr);
+    SizedChar decodeLogicalChar(const char *Ptr, bool EmitTrigraphWarning = false);
+    SizedChar handleTrigraph(const char *Ptr, bool EmitWarning);
+    void      reportTrigraphWarning(const char *Ptr, int TrigraphValue, bool Converted);
     void      consumeChar(void);
     void      consumeChar(SizedChar sc);
     void      consumeChar(int size);

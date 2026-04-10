@@ -7,7 +7,6 @@
 #    endif
 #endif
 
-
 #ifndef BASIC_FLAG
 #    define BASIC_FLAG(Enum, FlagType, Desc, Hidden) FLAG(Enum, FlagType, Flag, None, Desc, Hidden)
 #endif
@@ -33,6 +32,11 @@
         BASIC_FLAG(Wno##Enum, "-Wno-" #FlagType, "Disable " Desc, Hidden)
 #endif
 
+#ifndef F_FLAG
+#    define F_FLAG(Enum, FlagType, Desc, Hidden)                                                   \
+        BASIC_FLAG(f##Enum, "-f" #FlagType, "Enable " Desc, Hidden)                                \
+        BASIC_FLAG(fno##Enum, "-fno-" #FlagType, "Disable " Desc, Hidden)
+#endif
 
 #ifndef ALIAS_FLAG
 #    ifdef OPT_ENUM
@@ -44,21 +48,21 @@
 #endif
 
 #ifndef ALIAS_BASIC_FLAG
-#    define ALIAS_BASIC_FLAG(Enum, FlagType, Desc, Hidden)                                          \
+#    define ALIAS_BASIC_FLAG(Enum, FlagType, Desc, Hidden)                                         \
         ALIAS_FLAG(Enum, FlagType, Flag, None, Desc, Hidden)
 #endif
 
 #ifndef ALIAS_BASIC_FLAG_VALUE
-#    define ALIAS_BASIC_FLAG_VALUE(Enum, FlagType, Desc, Hidden)                                    \
+#    define ALIAS_BASIC_FLAG_VALUE(Enum, FlagType, Desc, Hidden)                                   \
         ALIAS_FLAG(Enum, FlagType, JoinedOrSeparate, Str, Desc, Hidden)
 #endif
 
 #ifndef ALIAS_BASIC_FLAG_VALUES
-#    define ALIAS_BASIC_FLAG_VALUES(Enum, FlagType, Desc, Hidden)                                   \
+#    define ALIAS_BASIC_FLAG_VALUES(Enum, FlagType, Desc, Hidden)                                  \
         ALIAS_FLAG(Enum, FlagType, JoinedOrSeparate, StrList, Desc, Hidden)
 #endif
 
 #ifndef ALIAS_EQUAL_FLAG
-#    define ALIAS_EQUAL_FLAG(Enum, FlagType, Desc, Hidden)                                          \
+#    define ALIAS_EQUAL_FLAG(Enum, FlagType, Desc, Hidden)                                         \
         ALIAS_FLAG(Enum, "--" #FlagType "=", Equal, Str, Desc, Hidden)
 #endif

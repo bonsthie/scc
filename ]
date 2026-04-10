@@ -22,7 +22,7 @@ struct TableBuilder {
 
 static constexpr LangOpt OptC89 = {
     .TrigraphEnable = true,
-    .TrigraphWarning = false,
+    .TrigraphWarningDisable = true,
     .TypeDefaultToINT = true,
 };
 
@@ -47,7 +47,7 @@ std::expected<LangOpt, err::Code> LangOptBuilder::build() {
 
     // TODO: add flags -W option like -Wnocrampte -Wcrampte
     LangOpt Opts = VersionTable[static_cast<size_t>(Version)];
-    addWarnindAndFeatureFlags(Opts);
+    addWarningFlags(Opts);
     return Opts;
 }
 
@@ -76,26 +76,23 @@ LangVersion LangOptBuilder::getCVersion() {
     return LV;
 }
 
-void LangOptBuilder::addWarnindAndFeatureFlags(LangOpt &Opts) {
+void LangOptBuilder::addWarningFlags(LangOpt &Opts) {
     for (const auto &Occurrence : Args.getOccurrences()) {
         switch (Occurrence.getType()) {
-		// Warning Flags
-            // -W[no]trigraphs
         case Opt_Wtrigraphs:
-            Opts.TrigraphWarning = true;
+            Opts.TrigraphWarningDisable = false;
             break;
         case Opt_Wnotrigraphs:
-            Opts.TrigraphWarning = false;
+            Opts.TrigraphWarningDisable = true;
             break;
 
-		// Feature Flags
-            // -f[no-]trigraphs
         case Opt_ftrigraphs:
             Opts.TrigraphEnable = true;
             break;
         case Opt_fnotrigraphs:
-            Opts.TrigraphEnable = false;
+            Opts.TrigraphEnable = true;
             break;
+
         }
     }
 }

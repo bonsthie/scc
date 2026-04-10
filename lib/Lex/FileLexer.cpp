@@ -160,7 +160,47 @@ SizedChar FileLexer::peakCharAtIdx(int Idx) {
     return decodeLogicalChar(Ptr);
 }
 
-SizedChar FileLexer::decodeLogicalChar(const char *Ptr) {
+void FileLexer::reportTrigraphWarning(const char *Ptr, int TrigraphValue, bool Converted) {
+    if (!Opts.TrigraphWarning)
+        return;
+
+    const char    *Begin = MemBufferView.raw() + Pos.Buff;
+    MemoryViewPos  DiagPos = advance_pos(Begin, Ptr, Pos);
+    Error         &Diag = EM.report(err::warning);
+    Diag.at({DiagPos, &FID});
+
+    if (Converted) {
+        Diag.msg("trigraph converted to ")
+            .Char(static_cast<char>(TrigraphValue))
+            .msg(" character [-Wtrigraphs]");
+        return;
+    }
+
+    Diag.msg("trigraph ignored [-Wtrigraphs]");
+}
+
+SizedChar FileLexer::handleTrigraph(const char *Ptr, bool EmitWarning) {
+    const char *End = MemBufferView.end();
+    if (*Ptr != '?' || Ptr + 2 >= End || Ptr[1] != '?')
+        return {'?', 1};
+
+    int TrigraphValue = handle_trigraph(Ptr[2]);
+    if (!TrigraphValue)
+        return {'?', 1};
+
+    if (!Opts.TrigraphEnable) {
+        if (EmitWarning)
+            reportTrigraphWarning(Ptr, TrigraphValue, false);
+        return {'?', 1};
+    }
+
+    if (EmitWarning)
+        reportTrigraphWarning(Ptr, TrigraphValue, true);
+
+    return {TrigraphValue, 3};
+}
+
+SizedChar FileLexer::decodeLogicalChar(const char *Ptr, bool EmitTrigraphWarning) {
     const char *End = MemBufferView.end();
     if (Ptr >= End)
         return {0, 0};
@@ -172,32 +212,22 @@ SizedChar FileLexer::decodeLogicalChar(const char *Ptr) {
         return {c, consumed};
 
     if (c == '?' && Ptr + 2 < End && Ptr[1] == '?') {
-        int trigraphValue = handle_trigraph(Ptr[2]);
-        if (trigraphValue) {
-            if (!Opts.TrigraphEnable) {
-                const char    *Begin = MemBufferView.raw() + Pos.Buff;
-                MemoryViewPos  DiagPos = advance_pos(Begin, Ptr, Pos);
-                EM.report(err::warning)
-                    .at({DiagPos, &FID})
-                    .msg("trigraph ignored [-Wtrigraphs]");
-                return {c, consumed};
-            }
-            c = trigraphValue;
-            consumed = 3;
-        }
+        SizedChar Trigraph = handleTrigraph(Ptr, EmitTrigraphWarning);
+        c = Trigraph.value;
+        consumed = Trigraph.size;
     }
 
     const char *NextPtr = Ptr + consumed;
 
     if (c == '\\') {
         if (NextPtr < End && *NextPtr == '\n') {
-            SizedChar Next = decodeLogicalChar(NextPtr + 1);
+            SizedChar Next = decodeLogicalChar(NextPtr + 1, EmitTrigraphWarning);
             Next.size += consumed + 1;
             return Next;
         }
 
         if (NextPtr + 1 < End && NextPtr[0] == '\r' && NextPtr[1] == '\n') {
-            SizedChar Next = decodeLogicalChar(NextPtr + 2);
+            SizedChar Next = decodeLogicalChar(NextPtr + 2, EmitTrigraphWarning);
             Next.size += consumed + 2;
             return Next;
         }
@@ -218,7 +248,8 @@ SizedChar FileLexer::peakChar(int Idx) {
 }
 
 SizedChar FileLexer::getChar(void) {
-    SizedChar c = peakChar();
+    const char *Ptr = MemBufferView.raw() + Pos.Buff;
+    SizedChar   c = decodeLogicalChar(Ptr, true);
     consumeChar(c);
     return c;
 }

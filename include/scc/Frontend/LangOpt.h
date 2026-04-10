@@ -25,6 +25,7 @@ struct LangOpt {
     // Lexer Option
     SCC_PREFERRED_TYPE(bool)
     uint64_t TrigraphEnable : 1 = false;
+    uint64_t TrigraphWarning : 1 = true;
 
     // Parsing / Sema Option
 
@@ -49,7 +50,7 @@ class LangOptBuilder {
 
   private:
     LangVersion getCVersion();
-    void        addWarningFlags(LangOpt &Opts);
+    void        addWarnindAndFeatureFlags(LangOpt &Opts);
 };
 
 } // namespace scc

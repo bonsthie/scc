@@ -1,9 +1,11 @@
 // RUN: @scc_cc1 -dump-raw-tokens --std=c89 %s 2>&1 | FileCheck %s --check-prefix=C89
 // RUN: @scc_cc1 -dump-raw-tokens --std=c99 %s 2>&1 | FileCheck %s --check-prefix=C99
+// RUN: @scc_cc1 -dump-raw-tokens --std=c99 -ftrigraphs %s 2>&1 | FileCheck %s --check-prefix=F-ON
+// RUN: @scc_cc1 -dump-raw-tokens --std=c89 -fno-trigraphs %s 2>&1 | FileCheck %s --check-prefix=F-OFF
 // RUN: @scc_cc1 -dump-raw-tokens --std=c99 -Wno-trigraphs -Wtrigraphs %s 2>&1 | FileCheck %s --check-prefix=MIX-WARN
 // RUN: @scc_cc1 -dump-raw-tokens --std=c89 -Wtrigraphs -Wno-trigraphs %s 2>&1 | FileCheck %s --check-prefix=MIX-NO-WARN
 
-// C89-NOT: warning: trigraph ignored [-Wtrigraphs]
+// C89: warning: trigraph converted to '#' character [-Wtrigraphs]
 // C89: pp_hash '#'
 // C89-NOT: question '?'
 
@@ -12,6 +14,16 @@
 // C99: question '?'
 // C99: equal '='
 // C99-NOT: pp_hash '#'
+
+// F-ON: warning: trigraph converted to '#' character [-Wtrigraphs]
+// F-ON: pp_hash '#'
+// F-ON-NOT: question '?'
+
+// F-OFF: warning: trigraph ignored [-Wtrigraphs]
+// F-OFF: question '?'
+// F-OFF: question '?'
+// F-OFF: equal '='
+// F-OFF-NOT: pp_hash '#'
 
 // MIX-WARN: warning: trigraph ignored [-Wtrigraphs]
 // MIX-WARN: question '?'

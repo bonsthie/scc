@@ -432,6 +432,7 @@ O 10\
 TEST_F(FileLexTests, Trigraphs_AllMappingsHandled) {
     LangOpt Opts;
     Opts.TrigraphEnable = true;
+    Opts.TrigraphWarning = false;
 
     auto FL = create_lexer(R"(??= inclu??/
 de "test.h"
@@ -449,6 +450,38 @@ de "test.h"
     expectNextKindLexeme(FL, tok::r_brace, "\?\?>", "}");
     expectNextKindLexeme(FL, tok::tilde, "\?\?-", "~");
     expectNextKind(FL, tok::eof);
+}
+
+TEST_F(FileLexTests, Trigraphs_WarnWhenIgnored) {
+    LangOpt Opts;
+    Opts.TrigraphEnable = false;
+    Opts.TrigraphWarning = true;
+
+    auto FL = create_lexer("?""?=", Opts);
+
+    expectNextKindLexeme(FL, tok::question, "?", "?");
+    expectNextKindLexeme(FL, tok::question, "?", "?");
+    expectNextKindLexeme(FL, tok::equal, "=", "=");
+    expectNextKind(FL, tok::eof);
+
+    ASSERT_EQ(EM->size(), 1);
+    EXPECT_EQ(EM->last().getDiagLevel(), err::warning);
+    EXPECT_EQ(EM->last().getMsg(), "trigraph ignored [-Wtrigraphs]");
+}
+
+TEST_F(FileLexTests, Trigraphs_WarnWhenConverted) {
+    LangOpt Opts;
+    Opts.TrigraphEnable = true;
+    Opts.TrigraphWarning = true;
+
+    auto FL = create_lexer("?""?=", Opts);
+
+    expectNextKindLexeme(FL, tok::pp_hash, "\?\?=", "#");
+    expectNextKind(FL, tok::eof);
+
+    ASSERT_EQ(EM->size(), 1);
+    EXPECT_EQ(EM->last().getDiagLevel(), err::warning);
+    EXPECT_EQ(EM->last().getMsg(), "trigraph converted to '#' character [-Wtrigraphs]");
 }
 
 // ================ Unknown / illegal symbols =========================
