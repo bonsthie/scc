@@ -11,5 +11,5 @@ config.suffixes = ['.c']
 scc = os.environ.get("SCC_LIT_SCC")
 if scc:
     scc = shlex.quote(scc)
-    config.substitutions.append(("@scc_cc1", scc + " -cc1"))
-    config.substitutions.append(("@scc", scc))
+    config.substitutions.append(("@scc_cc1", scc + " -cc1  --disable-colors"))
+    config.substitutions.append(("@scc", scc + " --disable-colors"))

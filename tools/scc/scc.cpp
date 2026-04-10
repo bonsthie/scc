@@ -19,9 +19,7 @@ using namespace scc;
 
 namespace {
 
-void configureColor(const ArgsList &Args) {
-    Color::setEnabled(Args.hasArg(Opt_enable_color));
-}
+void configureColor(const ArgsList &Args) { Color::setDisable(!Args.hasArg(Opt_disable_colors)); }
 
 } // namespace
 
@@ -37,7 +35,7 @@ bool cc1(int argc, char **argv, char **) {
 
     if (Args->hasArg(Opt_help)) {
         Opt.printOpt(std::cout);
-		return false;
+        return false;
     }
 
     BumpAllocator  BumpAlloca;

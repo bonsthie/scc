@@ -4,7 +4,7 @@
 namespace scc {
 
 class Color {
-    bool Enabled = false;
+    bool Disable = false;
 
     Color() = default;
 
@@ -16,10 +16,10 @@ class Color {
         return Instance;
     }
 
-    static void enable() { instance().Enabled = true; }
-    static void disable() { instance().Enabled = false; }
-    static void setEnabled(bool Enable) { instance().Enabled = Enable; }
-    static bool enabled() { return instance().Enabled; }
+    static void enable() { instance().Disable = false; }
+    static void disable() { instance().Disable = true; }
+    static void setDisable(bool Disable) { instance().Disable = Disable; }
+    static bool enabled() { return instance().Disable; }
 
     static const char *reset() { return code("\x1b[0m"); }
     static const char *bold() { return code("\x1b[1m"); }
