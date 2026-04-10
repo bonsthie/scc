@@ -41,34 +41,28 @@ struct ParsedDeclSpec {
     LengthSpecifier Length = LengthSpecifier::Unspecified;
     SourceRange     LengthRange;
 
-    Type            *T = nullptr;
-    BuiltinTypeKind  BuiltinTy = TYunspecified;
-    Qualifiers       Quals;
-    SourceRange      TypeSourceRange;
+    const Type       *T = nullptr;
+    Qualifiers  Quals;
+    SourceRange TypeSourceRange;
 
     bool hasStorageSpecifier() const { return StorageClass != StorageClassSpecifier::Unspecified; }
     bool hasSignSpecifier() const { return Sign != SignSpecifier::Unspecified; }
     bool hasLengthSpecifier() const { return Length != LengthSpecifier::Unspecified; }
-    bool hasBuiltinTypeSpecifier() const { return BuiltinTy != TYunspecified; }
-    bool hasTypeSpecifier() const { return T != nullptr || hasBuiltinTypeSpecifier(); }
+    bool hasTypeSpecifier() const { return T != nullptr; }
     StorageClassSpecifier getStorageSpecifier() const { return StorageClass; }
-    tok::TokenKind getStorageSpecifierTokenKind() const {
+    tok::TokenKind        getStorageSpecifierTokenKind() const {
         return static_cast<tok::TokenKind>(StorageClass);
     }
-    SignSpecifier getSignSpecifier() const { return Sign; }
-    tok::TokenKind getSignSpecifierTokenKind() const {
-        return static_cast<tok::TokenKind>(Sign);
-    }
+    SignSpecifier  getSignSpecifier() const { return Sign; }
+    tok::TokenKind getSignSpecifierTokenKind() const { return static_cast<tok::TokenKind>(Sign); }
     const SourceRange &getSignSpecifierRange() const { return RangeSign; }
-    LengthSpecifier getLengthSpecifier() const { return Length; }
-    tok::TokenKind getLengthSpecifierTokenKind() const {
+    LengthSpecifier    getLengthSpecifier() const { return Length; }
+    tok::TokenKind     getLengthSpecifierTokenKind() const {
         if (Length == LengthSpecifier::LongLong)
             return tok::t_long;
         return static_cast<tok::TokenKind>(Length);
     }
     const SourceRange &getLengthSpecifierRange() const { return LengthRange; }
-    BuiltinTypeKind getBuiltinTypeSpecifier() const { return BuiltinTy; }
-    const SourceRange &getBuiltinTypeSpecifierRange() const { return TypeSourceRange; }
 
     void setStorageSpecifier(StorageClassSpecifier New) { StorageClass = New; }
     void setSignSpecifier(SignSpecifier New, const SourceRange &Range) {
@@ -82,15 +76,8 @@ struct ParsedDeclSpec {
         LengthRange = Range;
     }
 
-    void setTypeSpecifier(Type *NewType, SourceRange &Range) {
+    void setTypeSpecifier(const Type *NewType, const SourceRange &Range) {
         T = NewType;
-        BuiltinTy = TYunspecified;
-        TypeSourceRange = Range;
-    }
-
-    void setBuiltinTypeSpecifier(BuiltinTypeKind NewBuiltinTy, const SourceRange &Range) {
-        T = nullptr;
-        BuiltinTy = NewBuiltinTy;
         TypeSourceRange = Range;
     }
 
@@ -98,8 +85,7 @@ struct ParsedDeclSpec {
     bool trySetStorageSpecifier(StorageClassSpecifier New);
     bool tryAddSignSpecifier(SignSpecifier New, const SourceRange &Range);
     bool tryAddLengthSpecifier(LengthSpecifier New, const SourceRange &Range);
-    bool tryAddTypeSpecifier(Type *New, SourceRange &Range);
-    bool tryAddBuiltinTypeSpecifier(const Token &Tok);
+    bool tryAddTypeSpecifier(const Type *New, const SourceRange &Range);
     bool tryAddConst();
     bool tryAddRestrict();
     bool tryAddVolatile();

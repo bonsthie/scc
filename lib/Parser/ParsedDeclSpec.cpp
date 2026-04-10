@@ -48,18 +48,10 @@ bool ParsedDeclSpec::tryAddLengthSpecifier(LengthSpecifier New, const SourceRang
     return false;
 }
 
-bool ParsedDeclSpec::tryAddTypeSpecifier(Type *New, SourceRange &Range) {
-    if (New == nullptr || T != nullptr || hasBuiltinTypeSpecifier())
+bool ParsedDeclSpec::tryAddTypeSpecifier(const Type *New, const SourceRange &Range) {
+    if (New == nullptr || T != nullptr)
         return false;
     setTypeSpecifier(New, Range);
-    return true;
-}
-
-bool ParsedDeclSpec::tryAddBuiltinTypeSpecifier(const Token &Tok) {
-    BuiltinTypeKind New = static_cast<BuiltinTypeKind>(Tok.getTokenKind());
-    if (New == TYunspecified || T != nullptr || hasBuiltinTypeSpecifier())
-        return false;
-    setBuiltinTypeSpecifier(New, Tok.getRange());
     return true;
 }
 
@@ -107,12 +99,6 @@ void ParsedDeclSpec::print(std::ostream &O) const {
         print_word(O, NeedsSpace, "restrict");
     if (Quals.IsVolatile)
         print_word(O, NeedsSpace, "volatile");
-
-    if (hasBuiltinTypeSpecifier()) {
-        print_word(O, NeedsSpace, builtin_type_specifier_to_string(BuiltinTy));
-        return;
-    }
-
     if (T)
         print_word(O, NeedsSpace, type_to_string(T));
 }

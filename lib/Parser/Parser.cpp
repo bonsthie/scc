@@ -52,13 +52,25 @@ ParsedDeclSpec Parser::parseDeclSpec() {
         case tok::t__Bool:
         case tok::t__Imaginary:
         case tok::t__Complex: {
-            if (!DS.tryAddBuiltinTypeSpecifier(CurTok)) {
-                EM.cannotCombine(CurTok.getTokenKind(),
-                                 static_cast<tok::TokenKind>(DS.getBuiltinTypeSpecifier()),
-                                 CurTok.getRange())
+            const Type *T = Action.getType(CurTok);
+            if (!DS.tryAddTypeSpecifier(T, CurTok.getRange())) {
+                tok::TokenKind Previous = CurTok.getTokenKind();
+                if (DS.T && DS.T->isBuiltinType()) {
+                    Previous = static_cast<tok::TokenKind>(
+                        static_cast<const BuiltinType *>(DS.T)->getBuiltinKind());
+                }
+
+                EM.cannotCombine(CurTok.getTokenKind(), Previous, CurTok.getRange())
                     .msg(" declaration specifier");
                 HasErrorOccurred = EM.emit();
             }
+            break;
+        }
+
+        case tok::identifier: {
+            const Type *T = Action.getTypeSpecifierType(CurTok);
+            if (!DS.tryAddTypeSpecifier(T, CurTok.getRange()))
+                return DS;
             break;
         }
 

@@ -4,6 +4,8 @@
 #include <string_view>
 
 #include "scc/AST/ASTContext.h"
+#include "scc/AST/BuiltinType.h"
+#include "scc/AST/CanQualType.h"
 #include "scc/AST/Decl.h"
 #include "scc/AST/Type.h"
 #include "scc/Error/ErrorManager.h"
@@ -23,10 +25,7 @@ class Sema {
     ScopeMgr SM;
 
   public:
-    Sema(ASTContext &Ctx, ErrorManager &EM, const LangOpt &Opts)
-        : Ctx(Ctx),
-          EM(EM),
-          Opts(Opts) {}
+    Sema(ASTContext &Ctx, ErrorManager &EM, const LangOpt &Opts) : Ctx(Ctx), EM(EM), Opts(Opts) {}
 
     void pushScope() { SM.newScope(); }
     void popScope() { SM.popScope(); }
@@ -36,12 +35,13 @@ class Sema {
     const LangOpt    &getLangOpt() const { return Opts; }
 
     bool  addDecl(std::string_view Name, Decl *D) { return SM.addDecl(Name, D); }
-    Decl *lookup(std::string_view Name) { return SM.lookup(Name); }
+    Decl *lookup(std::string_view Name) { return SM.lookupDecl(Name); }
 
     Decl *actOnDeclarator(ParsedDeclSpec &DS, ParsedDeclarator &D);
 
-    Type *getType(Token &T);
-
+    const Type        *getType(Token &T);
+    const Type        *getTypeSpecifierType(Token &T);
+    const CanQualType *getBuiltinType(BuiltinTypeKind BType);
 };
 
 } // namespace scc

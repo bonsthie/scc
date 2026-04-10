@@ -4,6 +4,7 @@
 namespace scc {
 
 enum class TypeKind {
+    Unknow = -1,
     Uninitialized,
     Builtin,  // int, char, float, void
     Pointer,  // int*
@@ -18,17 +19,18 @@ class Type {
     TypeKind Kind;
 
   public:
-    explicit Type(TypeKind Kind) : Kind(Kind) {}
+    explicit constexpr Type(TypeKind Kind) : Kind(Kind) {}
 
-    TypeKind kind() const { return Kind; }
+    constexpr TypeKind kind() const { return Kind; }
 
-    bool isBuiltinType() const { return Kind == TypeKind::Builtin; }
-    bool isPointerType() const { return Kind == TypeKind::Pointer; }
-    bool isArrayType() const { return Kind == TypeKind::Array; }
-    bool isEnumType() const { return Kind == TypeKind::Enum; }
-    bool isRecordType() const { return Kind == TypeKind::Record; }
-    bool isTypedefType() const { return Kind == TypeKind::Typedef; }
-    bool isVoidType() const { return false; }; // TODO by checking if builtin type
+    constexpr bool isBuiltinType() const { return Kind == TypeKind::Builtin; }
+    constexpr bool isPointerType() const { return Kind == TypeKind::Pointer; }
+    constexpr bool isArrayType() const { return Kind == TypeKind::Array; }
+    constexpr bool isEnumType() const { return Kind == TypeKind::Enum; }
+    constexpr bool isRecordType() const { return Kind == TypeKind::Record; }
+    constexpr bool isTypedefType() const { return Kind == TypeKind::Typedef; }
+    constexpr bool isUnknow() const { return Kind == TypeKind::Unknow; }
+    constexpr bool isVoidType() const { return false; }; // TODO by checking if builtin type
 };
 
 } // namespace scc

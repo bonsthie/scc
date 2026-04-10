@@ -10,16 +10,27 @@
 
 namespace scc {
 
-
+template <typename T>
 class Scope {
-    std::unordered_map<std::string_view, Decl *> SymbolTable;
+    std::unordered_map<std::string_view, T *> SymbolTable;
 
   public:
     Scope() = default;
 
-    bool addDecl(std::string_view Name, Decl *D);
+    bool add(std::string_view Name, T *D) {
+        if (SymbolTable.find(Name) != SymbolTable.end())
+            return false;
 
-    Decl *lookup(std::string_view Name);
+        SymbolTable[Name] = D;
+        return true;
+    };
+
+    T *lookup(std::string_view Name) {
+        auto It = SymbolTable.find(Name);
+        if (It != SymbolTable.end())
+            return It->second;
+        return nullptr;
+    }
 };
 
 // maybe scope become SopeDecl and i create a ScopeType
@@ -27,15 +38,27 @@ class Scope {
 // also `we need to think about the RecordScope mode
 
 class ScopeMgr {
-    scc::vector<Scope> Scopes;
+    scc::vector<Scope<Decl>> DeclScopes;
+    scc::vector<Scope<Type>> TypeScopes;
 
   public:
-    void popScope() { Scopes.pop_back(); }
-    void newScope() { Scopes.emplace_back(); }
+    void popScope() {
+        DeclScopes.pop_back();
+        TypeScopes.pop_back();
+    }
+    void newScope() {
+        DeclScopes.emplace_back();
+        TypeScopes.emplace_back();
+    }
 
     bool addDecl(std::string_view Name, Decl *D);
+    bool addType(std::string_view Name, Type *D);
 
-    Decl *lookup(std::string_view Name);
+    Decl *lookupDecl(std::string_view Name);
+    Type *lookupTypeOrNull(std::string_view Name);
+
+	// info: return a unknow type if not found
+    Type *lookupType(std::string_view Name);
 };
 
 } // namespace scc

@@ -49,6 +49,8 @@ const char *tag_decl_kind_name(TagDeclKind Kind) {
 
 const char *type_kind_name(TypeKind Kind) {
     switch (Kind) {
+    case TypeKind::Unknow:
+        return "Unknow";
     case TypeKind::Uninitialized:
         return "Uninitialized";
     case TypeKind::Builtin:
@@ -209,6 +211,8 @@ const void *get_type_address(QualType Ty) {
         return nullptr;
 
     switch (Ty.kind()) {
+    case TypeKind::Unknow:
+        return Ty.getType();
     case TypeKind::Enum:
     case TypeKind::Record:
         return static_cast<const TagType *>(Ty.getType())->getDecl();
@@ -232,6 +236,9 @@ void print_type(std::ostream &O, const class scc::Type *Ty) {
     }
 
     switch (Ty->kind()) {
+    case TypeKind::Unknow:
+        O << "<unknow-type>";
+        return;
     case TypeKind::Builtin:
         O << builtin_type_kind_name(static_cast<const BuiltinType *>(Ty)->getBuiltinKind());
         return;

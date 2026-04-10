@@ -11,46 +11,43 @@ TEST(ParsedDeclSpecTest, DefaultsToNoTypeSpecifier) {
     ParsedDeclSpec DS;
 
     EXPECT_EQ(nullptr, DS.T);
-    EXPECT_EQ(TYunspecified, DS.BuiltinTy);
     EXPECT_FALSE(DS.hasTypeSpecifier());
     EXPECT_EQ(SignSpecifier::Unspecified, DS.getSignSpecifier());
     EXPECT_EQ(tok::not_init, DS.getSignSpecifierTokenKind());
     EXPECT_EQ(LengthSpecifier::Unspecified, DS.getLengthSpecifier());
     EXPECT_EQ(tok::not_init, DS.getLengthSpecifierTokenKind());
-    EXPECT_EQ(TYunspecified, DS.getBuiltinTypeSpecifier());
 }
 
-TEST(ParsedDeclSpecTest, AddingBuiltinTypeMarksTypeSpecifierPresent) {
+TEST(ParsedDeclSpecTest, AddingTypeSpecifierMarksTypeSpecifierPresent) {
     ParsedDeclSpec DS;
+    BuiltinType    IntTy(TYint);
     Token          Tok(tok::t_int);
 
-    EXPECT_TRUE(DS.tryAddBuiltinTypeSpecifier(Tok));
+    EXPECT_TRUE(DS.tryAddTypeSpecifier(&IntTy, Tok.getRange()));
     EXPECT_TRUE(DS.hasTypeSpecifier());
-    EXPECT_EQ(nullptr, DS.T);
-    EXPECT_EQ(TYint, DS.BuiltinTy);
-    EXPECT_EQ(TYint, DS.getBuiltinTypeSpecifier());
-    EXPECT_EQ(Tok.getRange().FID, DS.getBuiltinTypeSpecifierRange().FID);
-    EXPECT_EQ(Tok.getRange().Begin.Line, DS.getBuiltinTypeSpecifierRange().Begin.Line);
-    EXPECT_EQ(Tok.getRange().Begin.Column, DS.getBuiltinTypeSpecifierRange().Begin.Column);
-    EXPECT_EQ(Tok.getRange().End.Line, DS.getBuiltinTypeSpecifierRange().End.Line);
-    EXPECT_EQ(Tok.getRange().End.Column, DS.getBuiltinTypeSpecifierRange().End.Column);
+    EXPECT_EQ(&IntTy, DS.T);
+    EXPECT_EQ(Tok.getRange().FID, DS.TypeSourceRange.FID);
+    EXPECT_EQ(Tok.getRange().Begin.Line, DS.TypeSourceRange.Begin.Line);
+    EXPECT_EQ(Tok.getRange().Begin.Column, DS.TypeSourceRange.Begin.Column);
+    EXPECT_EQ(Tok.getRange().End.Line, DS.TypeSourceRange.End.Line);
+    EXPECT_EQ(Tok.getRange().End.Column, DS.TypeSourceRange.End.Column);
 }
 
-TEST(ParsedDeclSpecTest, RejectsSecondTypeSpecifierAfterBuiltinType) {
+TEST(ParsedDeclSpecTest, RejectsSecondTypeSpecifierAfterTypeSpecifier) {
     ParsedDeclSpec DS;
     SourceRange    Range;
+    BuiltinType    IntTy(TYint);
     BuiltinType    FloatTy(TYfloat);
-    Token          Tok(tok::t_int);
 
-    ASSERT_TRUE(DS.tryAddBuiltinTypeSpecifier(Tok));
+    ASSERT_TRUE(DS.tryAddTypeSpecifier(&IntTy, Range));
     EXPECT_FALSE(DS.tryAddTypeSpecifier(&FloatTy, Range));
 }
 
-TEST(ParsedDeclSpecTest, RejectsUnspecifiedBuiltinType) {
+TEST(ParsedDeclSpecTest, RejectsNullTypeSpecifier) {
     ParsedDeclSpec DS;
-    Token          Tok;
+    SourceRange    Range;
 
-    EXPECT_FALSE(DS.tryAddBuiltinTypeSpecifier(Tok));
+    EXPECT_FALSE(DS.tryAddTypeSpecifier(nullptr, Range));
     EXPECT_FALSE(DS.hasTypeSpecifier());
 }
 
@@ -104,7 +101,7 @@ TEST(ParsedDeclSpecTest, LengthSpecifierRejectsInvalidSecondLength) {
 
 TEST(ParsedDeclSpecTest, PrintUsesRequestedSpecifierOrderWithBuiltinType) {
     ParsedDeclSpec DS;
-    Token          IntTok(tok::t_int);
+    BuiltinType    IntTy(TYint);
     SourceRange    Range;
     std::ostringstream Out;
 
@@ -115,7 +112,7 @@ TEST(ParsedDeclSpecTest, PrintUsesRequestedSpecifierOrderWithBuiltinType) {
     ASSERT_TRUE(DS.tryAddConst());
     ASSERT_TRUE(DS.tryAddRestrict());
     ASSERT_TRUE(DS.tryAddVolatile());
-    ASSERT_TRUE(DS.tryAddBuiltinTypeSpecifier(IntTok));
+    ASSERT_TRUE(DS.tryAddTypeSpecifier(&IntTy, Range));
 
     DS.print(Out);
     EXPECT_EQ("static unsigned long long const restrict volatile int", Out.str());

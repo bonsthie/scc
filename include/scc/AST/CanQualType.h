@@ -10,16 +10,18 @@ class CanQualType {
     QualType Canonical;
 
   public:
-    CanQualType() = default;
-    explicit CanQualType(QualType QT);
+    constexpr CanQualType() = default;
+    explicit constexpr CanQualType(QualType QT) : Canonical(QT) {}
 
     static CanQualType create(QualType QT);
 
-    bool            isNull() const;
-    const QualType &asQualType() const;
-    QualType        desugarOnce() const;
-    bool            operator==(const CanQualType &Other) const;
-    bool            operator!=(const CanQualType &Other) const;
+    constexpr bool            isNull() const { return Canonical.isNull(); }
+    constexpr const QualType &asQualType() const { return Canonical; }
+    QualType                  desugarOnce() const { return Canonical.desugarOnce(); }
+    constexpr bool            operator==(const CanQualType &Other) const {
+        return Canonical == Other.Canonical;
+    }
+    constexpr bool operator!=(const CanQualType &Other) const { return !(*this == Other); }
 };
 
 } // namespace scc

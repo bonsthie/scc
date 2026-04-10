@@ -63,7 +63,11 @@ scc_cc_gtest(
 scc_cc_gtest(
     name = "sema",
     root = "Sema",
-    deps = ["//lib/Sema"],
+    deps = [
+        "//lib/Allocator",
+        "//lib/Error",
+        "//lib/Sema",
+    ],
 )
 
 scc_cc_gtest(

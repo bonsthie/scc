@@ -15,10 +15,10 @@ struct DummyDecl : Decl {
 
 TEST(ScopeTest, RejectsDuplicateSymbols) {
     DummyDecl First, Second;
-    Scope     S;
+    Scope<Decl> S;
 
-    EXPECT_TRUE(S.addDecl("foo", &First));
-    EXPECT_FALSE(S.addDecl("foo", &Second));
+    EXPECT_TRUE(S.add("foo", &First));
+    EXPECT_FALSE(S.add("foo", &Second));
     EXPECT_EQ(S.lookup("foo"), &First);
     EXPECT_EQ(S.lookup("bar"), nullptr);
 }
@@ -33,8 +33,8 @@ TEST(ScopeMgrTest, PrefersInnermostScope) {
     SM.newScope();
     ASSERT_TRUE(SM.addDecl("value", &Inner));
 
-    EXPECT_EQ(SM.lookup("value"), &Inner);
+    EXPECT_EQ(SM.lookupDecl("value"), &Inner);
 
     SM.popScope();
-    EXPECT_EQ(SM.lookup("value"), &Outer);
+    EXPECT_EQ(SM.lookupDecl("value"), &Outer);
 }

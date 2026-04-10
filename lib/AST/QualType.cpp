@@ -12,9 +12,3 @@ QualType QualType::desugarOnce() const {
     Under.addQualifiers(Quals);
     return Under;
 }
-
-bool QualType::operator==(const QualType &Other) const {
-    if (Ty != Other.Ty)
-        return false;
-    return Quals == Other.Quals;
-}

@@ -16,10 +16,6 @@
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-*.smod
-
 # Compiled Static libraries
 *.lai
 *.la
@@ -31,14 +27,22 @@
 *.out
 *.app
 
+# clanker sh*t
 .codex
 
-build/
+# lsp
 .cache/
 compile_commands.json
 
+# build
+build/
 /bazel-*
 /external
 /out
 
+# test files
 /*.c
+
+# i create them all the time with vim
+/]
+/\\

@@ -1,6 +1,32 @@
 #include "scc/Parser/DeclSpecSpelling.h"
+#include "scc/AST/TagType.h"
+#include "scc/AST/TypedefType.h"
 
 using namespace scc;
+
+namespace {
+
+std::string named_type_to_string(const Type *Ty) {
+    if (!Ty)
+        return {};
+
+    if (Ty->isTypedefType()) {
+        const auto *TT = static_cast<const TypedefType *>(Ty);
+        if (const auto *Decl = TT->getDecl(); Decl && Decl->getName().has_value())
+            return std::string(*Decl->getName());
+        return {};
+    }
+
+    if (Ty->isEnumType() || Ty->isRecordType()) {
+        const auto *TT = static_cast<const TagType *>(Ty);
+        if (const auto *Decl = TT->getDecl(); Decl && Decl->getName().has_value())
+            return std::string(*Decl->getName());
+    }
+
+    return {};
+}
+
+} // namespace
 
 std::string scc::storage_class_specifier_to_string(StorageClassSpecifier StorageClass) {
     if (StorageClass == StorageClassSpecifier::Unspecified)
@@ -45,25 +71,31 @@ std::string scc::type_to_string(const Type *Ty) {
         return {};
 
     if (Ty->isBuiltinType())
-        return builtin_type_specifier_to_string(static_cast<const BuiltinType *>(Ty)->getBuiltinKind());
+        return builtin_type_specifier_to_string(
+            static_cast<const BuiltinType *>(Ty)->getBuiltinKind());
+
+    if (std::string Name = named_type_to_string(Ty); !Name.empty())
+        return Name;
 
     switch (Ty->kind()) {
     case TypeKind::Uninitialized:
-        return "uninitialized";
+        return "<uninitialized>";
+    case TypeKind::Unknow:
+        return "<unknow>";
     case TypeKind::Pointer:
-        return "pointer";
+        return "<pointer>";
     case TypeKind::Array:
-        return "array";
+        return "<array>";
     case TypeKind::Function:
-        return "function";
+        return "<function>";
     case TypeKind::Enum:
-        return "enum";
+        return "<enum>";
     case TypeKind::Record:
-        return "record";
+        return "<record>";
     case TypeKind::Typedef:
-        return "typedef";
+        return "<typedef>";
     case TypeKind::Builtin:
-        return "builtin";
+        return "<builtin>";
     }
     return {};
 }

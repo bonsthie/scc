@@ -16,9 +16,9 @@ class BuiltinType : public Type {
     BuiltinTypeKind BKind;
 
   public:
-    BuiltinType(BuiltinTypeKind BKind) : Type(TypeKind::Builtin), BKind(BKind) {}
+    constexpr BuiltinType(BuiltinTypeKind BKind) : Type(TypeKind::Builtin), BKind(BKind) {}
 
-    BuiltinTypeKind getBuiltinKind() const { return BKind; }
+    constexpr BuiltinTypeKind getBuiltinKind() const { return BKind; }
 };
 
 } // namespace scc
