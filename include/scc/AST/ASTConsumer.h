@@ -29,6 +29,14 @@ class DumpASTConsumer final : public ASTConsumer {
     }
 };
 
+
+class SyntaxOnlyConsumer final : public ASTConsumer {
+  public:
+    bool handleTopLevelDecl(DeclList ) override {
+        return false;
+    }
+};
+
 } // namespace scc
 
 #endif // SCC_AST_ASTCONSUMER

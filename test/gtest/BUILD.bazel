@@ -49,6 +49,12 @@ scc_cc_gtest(
 )
 
 scc_cc_gtest(
+    name = "parser",
+    root = "Parser",
+    deps = ["//lib/Parser"],
+)
+
+scc_cc_gtest(
     name = "preprocessor",
     root = "PreProcessor",
     deps = ["//lib/PreProcessor"],
@@ -82,6 +88,7 @@ scc_test_group(
         ":file-manager",
         ":lex",
         ":option",
+        ":parser",
         ":preprocessor",
         ":sema",
         ":string",

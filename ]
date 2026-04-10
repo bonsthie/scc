@@ -1,8 +1,6 @@
 #ifndef SCC_PARSER_PARSEDDECLSPEC_H
 #define SCC_PARSER_PARSEDDECLSPEC_H
 
-#include <iostream>
-
 #include "scc/AST/BuiltinType.h"
 #include "scc/AST/Qualifiers.h"
 #include "scc/AST/Type.h"
@@ -51,24 +49,6 @@ struct ParsedDeclSpec {
     bool hasLengthSpecifier() const { return Length != LengthSpecifier::Unspecified; }
     bool hasBuiltinTypeSpecifier() const { return BuiltinTy != TYunspecified; }
     bool hasTypeSpecifier() const { return T != nullptr || hasBuiltinTypeSpecifier(); }
-    StorageClassSpecifier getStorageSpecifier() const { return StorageClass; }
-    tok::TokenKind getStorageSpecifierTokenKind() const {
-        return static_cast<tok::TokenKind>(StorageClass);
-    }
-    SignSpecifier getSignSpecifier() const { return Sign; }
-    tok::TokenKind getSignSpecifierTokenKind() const {
-        return static_cast<tok::TokenKind>(Sign);
-    }
-    const SourceRange &getSignSpecifierRange() const { return RangeSign; }
-    LengthSpecifier getLengthSpecifier() const { return Length; }
-    tok::TokenKind getLengthSpecifierTokenKind() const {
-        if (Length == LengthSpecifier::LongLong)
-            return tok::t_long;
-        return static_cast<tok::TokenKind>(Length);
-    }
-    const SourceRange &getLengthSpecifierRange() const { return LengthRange; }
-    BuiltinTypeKind getBuiltinTypeSpecifier() const { return BuiltinTy; }
-    const SourceRange &getBuiltinTypeSpecifierRange() const { return TypeSourceRange; }
 
     void setStorageSpecifier(StorageClassSpecifier New) { StorageClass = New; }
     void setSignSpecifier(SignSpecifier New, const SourceRange &Range) {
@@ -104,7 +84,6 @@ struct ParsedDeclSpec {
     bool tryAddRestrict();
     bool tryAddVolatile();
     bool tryAddQualifiers(const Qualifiers &Other);
-    void print(std::ostream &O = std::cout) const;
 };
 
 } // namespace scc

@@ -29,11 +29,21 @@ scc_lit_test(
     ],
 )
 
+scc_lit_test(
+    name = "parser",
+    dir = "Parser",
+    data = [
+        "lit.cfg.py",
+        "//tools/scc:scc",
+    ],
+)
+
 test_suite(
     name = "lit",
     tests = [
 		":cc1_driver_lit",
         ":driver_lit",
         ":lex_lit",
+        ":parser_lit",
     ],
 )

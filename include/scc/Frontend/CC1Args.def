@@ -1,18 +1,19 @@
 #include "scc/Option/ArgsDefine.h"
 
-BASIC_FLAG(cc1, "-cc1", "run the internal cc1 frontend", true)
+BASIC_FLAG(cc1, "-cc1", "Run the internal cc1 frontend", true)
 
-BASIC_FLAG(help, "--help", "show this help message", false)
+BASIC_FLAG(help, "--help", "Show this help message", false)
 ALIAS_BASIC_FLAG(help, "-h", "", true)
-BASIC_FLAG(enable_color, "--enable-color", "enable ANSI color in diagnostics", false)
+BASIC_FLAG(enable_color, "--enable-color", "Enable ANSI color in diagnostics", false)
 
-BASIC_FLAG(dump_tokens, "-dump-tokens", "lex the input and print tokens", false)
-BASIC_FLAG(dump_raw_tokens, "-dump-raw-tokens", "lex the raw input and print tokens", false)
-BASIC_FLAG(dump_ast, "-dump-ast", "parse the input and print the AST", false)
+BASIC_FLAG(dump_tokens, "-dump-tokens", "Lex the input and print tokens", false)
+BASIC_FLAG(dump_raw_tokens, "-dump-raw-tokens", "Lex the raw input and print tokens", false)
+BASIC_FLAG(dump_ast, "-dump-ast", "Parse the input and print the AST", false)
+BASIC_FLAG(fsyntax_only, "-fsyntax-only", "Run the preprocessor, parser and semantic analysis stages", false)
 
-EQUAL_FLAG(std, std, "select the C language standard", false)
+EQUAL_FLAG(std, std, "Select the C language standard", false)
 
-BASIC_FLAG_VALUES(I, "-I", "add a directory to the system include search path", false)
+BASIC_FLAG_VALUES(I, "-I", "Add a directory to the system include search path", false)
 
 WARN_FLAG(trigraphs, trigraphs, "trigraph warning", false)
 F_FLAG(trigraphs, trigraphs, "trigraph support", false)

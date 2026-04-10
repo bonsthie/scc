@@ -48,7 +48,6 @@ class DumpRawToken : public FrontendAction {
     }
 };
 
-
 class ASTFrontendAction : public FrontendAction {
   public:
     bool Execute(CompilerInstance &CI) final {
@@ -71,6 +70,13 @@ class DumpASTAction final : public ASTFrontendAction {
   protected:
     std::unique_ptr<ASTConsumer> CreateConsumer(CompilerInstance &) override {
         return std::make_unique<DumpASTConsumer>();
+    }
+};
+
+class SyntaxOnly final : public ASTFrontendAction {
+  protected:
+    std::unique_ptr<ASTConsumer> CreateConsumer(CompilerInstance &) override {
+        return std::make_unique<SyntaxOnlyConsumer>();
     }
 };
 

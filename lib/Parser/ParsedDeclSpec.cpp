@@ -1,6 +1,20 @@
 #include "scc/Parser/ParsedDeclSpec.h"
+#include "scc/Parser/DeclSpecSpelling.h"
 
 using namespace scc;
+
+namespace {
+
+void print_word(std::ostream &O, bool &NeedsSpace, std::string_view Word) {
+    if (Word.empty())
+        return;
+    if (NeedsSpace)
+        O << ' ';
+    O << Word;
+    NeedsSpace = true;
+}
+
+} // namespace
 
 bool ParsedDeclSpec::tryAddStorageSpecifier(StorageClassSpecifier New) {
     if (hasStorageSpecifier())
@@ -21,21 +35,31 @@ bool ParsedDeclSpec::tryAddSignSpecifier(SignSpecifier New, const SourceRange &R
 }
 
 bool ParsedDeclSpec::tryAddLengthSpecifier(LengthSpecifier New, const SourceRange &Range) {
-    bool isLong = Length == LengthSpecifier::Long;
-    if (hasLengthSpecifier() && (!isLong && New == LengthSpecifier::Long))
-        return false;
-    if (isLong) {
+    if (!hasLengthSpecifier()) {
+        setLengthSpecifier(New, Range);
+        return true;
+    }
+
+    if (Length == LengthSpecifier::Long && New == LengthSpecifier::Long) {
         setLengthSpecifier(LengthSpecifier::LongLong);
         return true;
     }
-    setLengthSpecifier(New, Range);
-    return true;
+
+    return false;
 }
 
 bool ParsedDeclSpec::tryAddTypeSpecifier(Type *New, SourceRange &Range) {
-    if (hasTypeSpecifier())
+    if (New == nullptr || T != nullptr || hasBuiltinTypeSpecifier())
         return false;
     setTypeSpecifier(New, Range);
+    return true;
+}
+
+bool ParsedDeclSpec::tryAddBuiltinTypeSpecifier(const Token &Tok) {
+    BuiltinTypeKind New = static_cast<BuiltinTypeKind>(Tok.getTokenKind());
+    if (New == TYunspecified || T != nullptr || hasBuiltinTypeSpecifier())
+        return false;
+    setBuiltinTypeSpecifier(New, Tok.getRange());
     return true;
 }
 
@@ -66,4 +90,29 @@ bool ParsedDeclSpec::tryAddQualifiers(const Qualifiers &Other) {
         return false;
     Quals.merge(Other);
     return true;
+}
+
+void ParsedDeclSpec::print(std::ostream &O) const {
+    bool NeedsSpace = false;
+
+    if (hasStorageSpecifier())
+        print_word(O, NeedsSpace, storage_class_specifier_to_string(StorageClass));
+    if (hasSignSpecifier())
+        print_word(O, NeedsSpace, sign_specifier_to_string(Sign));
+    if (hasLengthSpecifier())
+        print_word(O, NeedsSpace, length_specifier_to_string(Length));
+    if (Quals.IsConst)
+        print_word(O, NeedsSpace, "const");
+    if (Quals.IsRestrict)
+        print_word(O, NeedsSpace, "restrict");
+    if (Quals.IsVolatile)
+        print_word(O, NeedsSpace, "volatile");
+
+    if (hasBuiltinTypeSpecifier()) {
+        print_word(O, NeedsSpace, builtin_type_specifier_to_string(BuiltinTy));
+        return;
+    }
+
+    if (T)
+        print_word(O, NeedsSpace, type_to_string(T));
 }

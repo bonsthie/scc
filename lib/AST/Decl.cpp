@@ -71,6 +71,8 @@ const char *type_kind_name(TypeKind Kind) {
 
 const char *builtin_type_kind_name(BuiltinTypeKind Kind) {
     switch (Kind) {
+    case TYunspecified:
+        break;
 #define TYPE_KEYWORD(x) \
     case TY##x: \
         return #x;

@@ -3,12 +3,13 @@
 #define SCC_AST_BUILTINTYPE_H
 
 #include "scc/AST/Type.h"
+#include "scc/Token/Token.h"
 namespace scc {
 
 enum BuiltinTypeKind {
-#define TYPE_KEYWORD(x) TY##x,
+    TYunspecified = tok::not_init,
+#define TYPE_KEYWORD(x) TY##x = tok::t_##x,
 #include "scc/Token/TokenKinds.def"
-
 };
 
 class BuiltinType : public Type {

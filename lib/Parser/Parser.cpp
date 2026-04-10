@@ -31,17 +31,102 @@ bool isType(tok::TokenKind TK) {
     }
 }
 
-DeclList Parser::parseTopLevelDecl() { return {}; }
+DeclList Parser::parseTopLevelDecl() {
+    next(); // init fist token
+    auto DS = parseDeclSpec();
+    DS.print();
+    IsEOF = true;
+    return {};
+}
 
 ParsedDeclSpec Parser::parseDeclSpec() {
     ParsedDeclSpec DS;
 
     while (true) {
         switch (CurTok.getTokenKind()) {
+        case tok::t_char:
+        case tok::t_int:
+        case tok::t_float:
+        case tok::t_double:
+        case tok::t_void:
+        case tok::t__Bool:
+        case tok::t__Imaginary:
+        case tok::t__Complex: {
+            if (!DS.tryAddBuiltinTypeSpecifier(CurTok)) {
+                EM.cannotCombine(CurTok.getTokenKind(),
+                                 static_cast<tok::TokenKind>(DS.getBuiltinTypeSpecifier()),
+                                 CurTok.getRange())
+                    .msg(" declaration specifier");
+                HasErrorOccurred = EM.emit();
+            }
+            break;
+        }
+
+        case tok::t_signed:
+        case tok::t_unsigned: {
+            SignSpecifier New = static_cast<SignSpecifier>(CurTok.getTokenKind());
+            if (!DS.tryAddSignSpecifier(New, CurTok.getRange())) {
+                EM.cannotCombine(New, DS.getSignSpecifier(), CurTok.getRange())
+                    .msg(" declaration specifier");
+                HasErrorOccurred = EM.emit();
+            }
+            break;
+        }
+
+        case tok::t_long:
+        case tok::t_short: {
+            LengthSpecifier New = static_cast<LengthSpecifier>(CurTok.getTokenKind());
+            if (!DS.tryAddLengthSpecifier(New, CurTok.getRange())) {
+                EM.cannotCombine(New, DS.getLengthSpecifier(), CurTok.getRange())
+                    .msg(" declaration specifier");
+                HasErrorOccurred = EM.emit();
+            }
+            break;
+        }
+
+        case tok::kw_auto:
+        case tok::kw_typedef:
+        case tok::kw_static:
+        case tok::kw_extern:
+        case tok::kw_register: {
+            StorageClassSpecifier New = static_cast<StorageClassSpecifier>(CurTok.getTokenKind());
+            if (!DS.tryAddStorageSpecifier(New)) {
+                EM.cannotCombine(CurTok.getTokenKind(), DS.getStorageSpecifierTokenKind(),
+                                 CurTok.getRange())
+                    .msg(" declaration specifier");
+                HasErrorOccurred = EM.emit();
+            }
+            break;
+        }
+
+        case tok::kw_const:
+            if (!DS.tryAddConst()) {
+                EM.duplicateQualifier(CurTok.getTokenKind(), CurTok.getRange())
+                    .msg(" declaration specifier");
+                HasErrorOccurred = EM.emit();
+            }
+            break;
+
+        case tok::kw_restrict:
+            if (!DS.tryAddRestrict()) {
+                EM.duplicateQualifier(CurTok.getTokenKind(), CurTok.getRange())
+                    .msg(" declaration specifier");
+                HasErrorOccurred = EM.emit();
+            }
+            break;
+
+        case tok::kw_volatile:
+            if (!DS.tryAddVolatile()) {
+                EM.duplicateQualifier(CurTok.getTokenKind(), CurTok.getRange())
+                    .msg(" declaration specifier");
+                HasErrorOccurred = EM.emit();
+            }
+            break;
+
         default:
             return DS;
         }
-        if (!next())
+        if (next())
             break;
     }
 
@@ -55,6 +140,8 @@ DeclList Parser::parseDeclaration() {
     SmallVector<Decl *, 4> Decls;
 
     ParsedDeclSpec DS = parseDeclSpec();
+    if (hasErrorOccurred())
+        return {};
 
     do {
         ParsedDeclarator D = parseDeclarator();

@@ -32,8 +32,8 @@ class Parser {
     PreProcessor       &getPreprocessor() { return PP; }
     const PreProcessor &getPreprocessor() const { return PP; }
 
-    Sema       &getSema() { return Action; }
-    const Sema &getSema() const { return Action; }
+    Sema          &getSema() { return Action; }
+    const Sema    &getSema() const { return Action; }
     const LangOpt &getLangOpt() const { return Opts; }
 
     bool isEOF() { return IsEOF; }
@@ -49,7 +49,14 @@ class Parser {
     DeclList         parseDeclaration();
 
   private:
-    bool next() { return PP.next(CurTok); }
+    // TODO i think this not a good idea
+    bool next() {
+        bool ret = PP.next(CurTok);
+        if (CurTok.getTokenKind() == tok::eof)
+            IsEOF = true;
+        return ret;
+    }
+
     bool consumeIf(tok::TokenKind TK);
     bool expect(tok::TokenKind TK);
 

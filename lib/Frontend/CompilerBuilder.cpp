@@ -1,5 +1,6 @@
 #include "scc/Frontend/CompilerBuilder.h"
 #include "scc/Frontend/CC1Args.h"
+#include "scc/Frontend/FrontendAction.h"
 #include "scc/Frontend/LangOpt.h"
 
 #include "scc/Error/Error.h"
@@ -45,6 +46,7 @@ FrontendAction *CompilerBuilder::selectForntendAction() {
         case Opt_dump_tokens:
         case Opt_dump_raw_tokens:
         case Opt_dump_ast:
+        case Opt_fsyntax_only:
             if (Selected == nullptr) {
                 Selected = &Occurrence;
                 break;
@@ -68,12 +70,16 @@ FrontendAction *CompilerBuilder::selectForntendAction() {
         return nullptr;
 
     switch (Selected->getType()) {
+    default: // TODO change
+        return new DumpToken();
+
     case Opt_dump_raw_tokens:
         return new DumpRawToken();
     case Opt_dump_ast:
         return new DumpASTAction();
     case Opt_dump_tokens:
-    default:
         return new DumpToken();
+    case Opt_fsyntax_only:
+        return new SyntaxOnly();
     }
 }

@@ -39,6 +39,12 @@ scc_test_group(
 )
 
 scc_test_group(
+    name = "parser",
+    lit = "//test/lit:parser",
+    gtest = "//test/gtest:parser",
+)
+
+scc_test_group(
     name = "lit",
     lit = "//test/lit:lit",
 )

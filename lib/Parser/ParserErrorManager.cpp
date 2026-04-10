@@ -1,3 +1,4 @@
+#include "scc/Parser/DeclSpecSpelling.h"
 #include "scc/Parser/ParserErrorManager.h"
 #include "scc/Parser/ParsedDeclSpec.h"
 
@@ -13,32 +14,6 @@ static Error &atRange(Error &Diag, const SourceRange &Range) {
     if (Range.isValid())
         Diag.at(Range.posViewBegin());
     return Diag;
-}
-
-static std::string signSpecifierForDiag(SignSpecifier Sign) {
-    switch (Sign) {
-    case SignSpecifier::Signed:
-        return "signed";
-    case SignSpecifier::Unsigned:
-        return "unsigned";
-    case SignSpecifier::Unspecified:
-        return "<unspecified-sign>";
-    }
-    return "<invalid-sign>";
-}
-
-static std::string lengthSpecifierForDiag(LengthSpecifier Length) {
-    switch (Length) {
-    case LengthSpecifier::Short:
-        return "short";
-    case LengthSpecifier::Long:
-        return "long";
-    case LengthSpecifier::LongLong:
-        return "long long";
-    case LengthSpecifier::Unspecified:
-        return "<unspecified-length>";
-    }
-    return "<invalid-length>";
 }
 
 Error &ParserErrorManager::expectedXButGotY(tok::TokenKind Expected, const Token &Got) {
@@ -72,9 +47,9 @@ Error &ParserErrorManager::cannotCombine(SignSpecifier X, SignSpecifier Y,
                                          const SourceRange &Range) {
     return atRange(report(err::error), Range)
         .msg("cannot combine '")
-        .msg(signSpecifierForDiag(X))
+        .msg(sign_specifier_to_string(X))
         .msg("' with previous '")
-        .msg(signSpecifierForDiag(Y))
+        .msg(sign_specifier_to_string(Y))
         .msg("'");
 }
 
@@ -82,8 +57,8 @@ Error &ParserErrorManager::cannotCombine(LengthSpecifier X, LengthSpecifier Y,
                                          const SourceRange &Range) {
     return atRange(report(err::error), Range)
         .msg("cannot combine '")
-        .msg(lengthSpecifierForDiag(X))
+        .msg(length_specifier_to_string(X))
         .msg("' with previous '")
-        .msg(lengthSpecifierForDiag(Y))
+        .msg(length_specifier_to_string(Y))
         .msg("'");
 }

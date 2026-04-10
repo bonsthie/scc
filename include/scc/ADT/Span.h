@@ -6,7 +6,7 @@
 
 namespace scc {
 
-template <typename T, size_t BaseCount = static_cast<size_t>(-1)>
+template <typename T, size_t BaseCount = 0>
 class Span {
   protected:
     T     *Data = nullptr;
