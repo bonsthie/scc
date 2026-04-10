@@ -17,5 +17,9 @@ build:asan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine_sanitizer=asan
 common --enable_bzlmod
 
 
+# Some clang versions used in CI do not recognize every warning-suppression flag
+# below. Keep unknown warning options non-fatal for test-only C++ builds.
+test --cxxopt=-Wno-unknown-warning-option
+
 # gtest cast error
 test --cxxopt=-Wno-character-conversion

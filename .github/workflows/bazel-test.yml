@@ -1,0 +1,44 @@
+name: Bazel Test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install LLVM 21
+        run: |
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/keyrings/llvm.asc >/dev/null
+          echo "deb [signed-by=/etc/apt/keyrings/llvm.asc] http://apt.llvm.org/noble/ llvm-toolchain-noble-21 main" \
+            | sudo tee /etc/apt/sources.list.d/llvm.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y clang-21 lld-21 llvm-21-tools python3-pip
+          sudo ln -sf /usr/bin/clang-21 /usr/local/bin/clang
+          sudo ln -sf /usr/bin/clang++-21 /usr/local/bin/clang++
+          sudo ln -sf /usr/lib/llvm-21/bin/FileCheck /usr/local/bin/FileCheck
+          sudo ln -sf /usr/lib/llvm-21/bin/not /usr/local/bin/not
+          sudo python3 -m pip install --break-system-packages lit
+          clang --version
+          clang++ --version
+          FileCheck --version
+          command -v lit
+          command -v not
+          lit --version
+
+      - name: Setup Bazelisk
+        uses: bazelbuild/setup-bazelisk@v3
+
+      - name: Show Bazel version
+        run: |
+          bazel version
+
+      - name: Run Bazel tests
+        run: bazel test all --test_output=errors
