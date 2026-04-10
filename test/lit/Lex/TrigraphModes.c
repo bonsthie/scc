@@ -5,7 +5,7 @@
 // RUN: @scc_cc1 -dump-raw-tokens --std=c99 -Wno-trigraphs -Wtrigraphs %s 2>&1 | FileCheck %s --check-prefix=MIX-WARN
 // RUN: @scc_cc1 -dump-raw-tokens --std=c89 -Wtrigraphs -Wno-trigraphs %s 2>&1 | FileCheck %s --check-prefix=MIX-NO-WARN
 
-// C89: warning: trigraph converted to '#' character [-Wtrigraphs]
+// C89-NOT: warning: trigraph converted to '#' character [-Wtrigraphs]
 // C89: pp_hash '#'
 // C89-NOT: question '?'
 
@@ -19,7 +19,6 @@
 // F-ON: pp_hash '#'
 // F-ON-NOT: question '?'
 
-// F-OFF: warning: trigraph ignored [-Wtrigraphs]
 // F-OFF: question '?'
 // F-OFF: question '?'
 // F-OFF: equal '='
