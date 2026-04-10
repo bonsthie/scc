@@ -10,6 +10,8 @@
 
 namespace scc {
 
+// TODO: -internal-include (are after the -I in the list of of priority and supress warning)
+
 class FileManager {
     std::map<FileID, File> Files;
 

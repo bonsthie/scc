@@ -1,24 +1,10 @@
+#include "scc/ADT/TableBuilder.h"
 #include "scc/Frontend/LangOpt.h"
 #include "scc/Frontend/CC1Args.h"
 #include "scc/String/StringSwitch.h"
-#include <array>
 #include <expected>
 
 using namespace scc;
-
-namespace {
-
-template <typename T, size_t N>
-struct TableBuilder {
-    std::array<T, N>        data{};
-    constexpr TableBuilder &add(LangVersion ver, T opt) {
-        data[static_cast<size_t>(ver)] = opt;
-        return *this;
-    }
-    constexpr std::array<T, N> build() { return data; }
-};
-
-} // namespace
 
 static constexpr LangOpt OptC89 = {
     .TrigraphEnable = true,
@@ -33,7 +19,7 @@ static constexpr LangOpt OptGNU89 = {};
 static constexpr LangOpt OptGNU99 = {};
 
 static constexpr auto VersionTable = //
-    TableBuilder<LangOpt, static_cast<size_t>(LangVersion::SIZE)>{}
+    TableBuilder<LangVersion, LangOpt, static_cast<size_t>(LangVersion::SIZE)>{}
         .add(LangVersion::C89, OptC89)
         .add(LangVersion::C99, OptC99)
         .add(LangVersion::GNU89, OptGNU89)
