@@ -44,6 +44,15 @@ ParsedDeclSpec Parser::parseDeclSpec() {
 
     while (true) {
         switch (CurTok.getTokenKind()) {
+        case tok::identifier: {
+            if (DS.hasTypeSpecifier())
+                return DS; // Main exit
+
+            const Type *T = Action.getTypeSpecifierType(CurTok);
+            DS.setTypeSpecifier(T, CurTok.getRange());
+            break;
+        }
+
         case tok::t_char:
         case tok::t_int:
         case tok::t_float:
@@ -64,13 +73,6 @@ ParsedDeclSpec Parser::parseDeclSpec() {
                     .msg(" declaration specifier");
                 HasErrorOccurred = EM.emit();
             }
-            break;
-        }
-
-        case tok::identifier: {
-            const Type *T = Action.getTypeSpecifierType(CurTok);
-            if (!DS.tryAddTypeSpecifier(T, CurTok.getRange()))
-                return DS;
             break;
         }
 
