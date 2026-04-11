@@ -1,3 +1,5 @@
+// Components for manipulating non-owning sequences of characters -*- C++ -*-
+
 #include "scc/Option/ArgsDefine.h"
 
 BASIC_FLAG(cc1, "-cc1", "Run the internal cc1 frontend", true)
@@ -15,8 +17,18 @@ EQUAL_FLAG(std, std, "Select the C language standard", false)
 
 BASIC_FLAG_VALUES(I, "-I", "Add a directory to the system include search path", false)
 
+// Lexer Option
+
 WARN_FLAG(trigraphs, trigraphs, "trigraph warning", false)
 F_FLAG(trigraphs, trigraphs, "trigraph support", false)
+
+
+// Parser/ Sema Option
+
+// -std=c89 option so that by default if not specify the type is int
+// ex : foo() { return 1; } or typedef foo;
+WARN_FLAG(implicit_int, implicit-int, "implicit int warning", false)
+F_FLAG(implicit_int, implicit-int, "implicit int support", false)
 
 
 #undef FLAG
@@ -31,3 +43,4 @@ F_FLAG(trigraphs, trigraphs, "trigraph support", false)
 #undef ALIAS_EQUAL_FLAG
 #undef EQUAL_FLAG
 #undef WARN_FLAG
+#undef F_FLAG

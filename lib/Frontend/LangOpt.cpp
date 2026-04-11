@@ -1,5 +1,5 @@
-#include "scc/ADT/TableBuilder.h"
 #include "scc/Frontend/LangOpt.h"
+#include "scc/ADT/TableBuilder.h"
 #include "scc/Frontend/CC1Args.h"
 #include "scc/String/StringSwitch.h"
 #include <expected>
@@ -7,16 +7,24 @@
 using namespace scc;
 
 static constexpr LangOpt OptC89 = {
-    .TrigraphEnable = true,
-    .TrigraphWarning = false,
-    .TypeDefaultToINT = true,
+    .trigraphsEnable = true,
+    .implicit_intEnable = true,
 };
 
-static constexpr LangOpt OptC99 = {};
+static constexpr LangOpt OptC99 = {
+    .trigraphsWarning = true,
+    .implicit_intWarning = true,
+};
 
-static constexpr LangOpt OptGNU89 = {};
+static constexpr LangOpt OptGNU89 = {
+    .trigraphsWarning = true,
+    .implicit_intWarning = true,
+};
 
-static constexpr LangOpt OptGNU99 = {};
+static constexpr LangOpt OptGNU99 = {
+    .trigraphsWarning = true,
+    .implicit_intWarning = true,
+};
 
 static constexpr auto VersionTable = //
     TableBuilder<LangVersion, LangOpt, static_cast<size_t>(LangVersion::SIZE)>{}
@@ -65,23 +73,26 @@ LangVersion LangOptBuilder::getCVersion() {
 void LangOptBuilder::addWarnindAndFeatureFlags(LangOpt &Opts) {
     for (const auto &Occurrence : Args.getOccurrences()) {
         switch (Occurrence.getType()) {
-		// Warning Flags
-            // -W[no]trigraphs
-        case Opt_Wtrigraphs:
-            Opts.TrigraphWarning = true;
-            break;
-        case Opt_Wnotrigraphs:
-            Opts.TrigraphWarning = false;
-            break;
 
-		// Feature Flags
-            // -f[no-]trigraphs
-        case Opt_ftrigraphs:
-            Opts.TrigraphEnable = true;
-            break;
-        case Opt_fnotrigraphs:
-            Opts.TrigraphEnable = false;
-            break;
+#define ALIAS_FLAG(Enum, FlagType, Kind, VType, Desc, Hidden)
+#define FLAG(Enum, FlagType, Kind, VType, Desc, Hidden)
+#define WARN_FLAG(Enum, FlagType, Desc, Hidden)                                                    \
+    case Opt_Wno##Enum:                                                                            \
+        Opts.Enum##Warning = false;                                                                \
+        break;                                                                                     \
+    case Opt_W##Enum:                                                                              \
+        Opts.Enum##Warning = true;                                                                 \
+        break;
+
+#define F_FLAG(Enum, FlagType, Desc, Hidden)                                                       \
+    case Opt_fno##Enum:                                                                            \
+        Opts.Enum##Enable = false;                                                                 \
+        break;                                                                                     \
+    case Opt_f##Enum:                                                                              \
+        Opts.Enum##Enable = true;                                                                  \
+        break;
+
+#include "scc/Frontend/CC1Args.def"
         }
     }
 }

@@ -431,8 +431,8 @@ O 10\
 
 TEST_F(FileLexTests, Trigraphs_AllMappingsHandled) {
     LangOpt Opts;
-    Opts.TrigraphEnable = true;
-    Opts.TrigraphWarning = false;
+    Opts.trigraphsEnable = true;
+    Opts.trigraphsWarning = false;
 
     auto FL = create_lexer(R"(??= inclu??/
 de "test.h"
@@ -454,8 +454,8 @@ de "test.h"
 
 TEST_F(FileLexTests, Trigraphs_WarnWhenIgnored) {
     LangOpt Opts;
-    Opts.TrigraphEnable = false;
-    Opts.TrigraphWarning = true;
+    Opts.trigraphsEnable = false;
+    Opts.trigraphsWarning = true;
 
     auto FL = create_lexer("?""?=", Opts);
 
@@ -471,8 +471,8 @@ TEST_F(FileLexTests, Trigraphs_WarnWhenIgnored) {
 
 TEST_F(FileLexTests, Trigraphs_WarnWhenConverted) {
     LangOpt Opts;
-    Opts.TrigraphEnable = true;
-    Opts.TrigraphWarning = true;
+    Opts.trigraphsEnable = true;
+    Opts.trigraphsWarning = true;
 
     auto FL = create_lexer("?""?=", Opts);
 

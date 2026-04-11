@@ -1,3 +1,4 @@
+
 #ifndef FLAG
 #    ifdef OPT_ENUM
 #        define FLAG(Enum, FlagType, Kind, VType, Desc, Hidden) Opt_##Enum,

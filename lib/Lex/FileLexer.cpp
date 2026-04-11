@@ -161,7 +161,7 @@ SizedChar FileLexer::peakCharAtIdx(int Idx) {
 }
 
 void FileLexer::reportTrigraphWarning(const char *Ptr, int TrigraphValue, bool Converted) {
-    if (!Opts.TrigraphWarning)
+    if (!Opts.trigraphsWarning)
         return;
 
     const char    *Begin = MemBufferView.raw() + Pos.Buff;
@@ -188,7 +188,7 @@ SizedChar FileLexer::handleTrigraph(const char *Ptr, bool EmitWarning) {
     if (!TrigraphValue)
         return {'?', 1};
 
-    if (!Opts.TrigraphEnable) {
+    if (!Opts.trigraphsEnable) {
         if (EmitWarning)
             reportTrigraphWarning(Ptr, TrigraphValue, false);
         return {'?', 1};

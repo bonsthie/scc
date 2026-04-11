@@ -21,18 +21,17 @@ enum class LangVersion : size_t {
 };
 
 struct LangOpt {
+#define ALIAS_FLAG(Enum, FlagType, Kind, VType, Desc, Hidden)
+#define FLAG(Enum, FlagType, Kind, VType, Desc, Hidden)
+#define WARN_FLAG(Enum, FlagType, Desc, Hidden)                                                    \
+    SCC_PREFERRED_TYPE(bool)                                                                       \
+    uint64_t Enum##Warning : 1 = false;
 
-    // Lexer Option
-    SCC_PREFERRED_TYPE(bool)
-    uint64_t TrigraphEnable : 1 = false;
-    uint64_t TrigraphWarning : 1 = true;
+#define F_FLAG(Enum, FlagType, Desc, Hidden)                                                       \
+    SCC_PREFERRED_TYPE(bool)                                                                       \
+    uint64_t Enum##Enable : 1 = false;
 
-    // Parsing / Sema Option
-
-    // -std=c89 option so that by default if not specify the type is int
-    // ex : foo() { return 1; } or typedef foo;
-    SCC_PREFERRED_TYPE(bool)
-    uint64_t TypeDefaultToINT : 1 = false;
+#include "scc/Frontend/CC1Args.def"
 };
 
 class LangOptBuilder {
