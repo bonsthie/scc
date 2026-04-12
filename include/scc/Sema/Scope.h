@@ -57,7 +57,7 @@ class ScopeMgr {
     Decl *lookupDecl(std::string_view Name);
     Type *lookupTypeOrNull(std::string_view Name);
 
-	// info: return a unknow type if not found
+    // info: return a unknow type if not found
     Type *lookupType(std::string_view Name);
 };
 

@@ -11,6 +11,7 @@ TEST(ParsedDeclSpecTest, DefaultsToNoTypeSpecifier) {
     ParsedDeclSpec DS;
 
     EXPECT_EQ(nullptr, DS.T);
+    EXPECT_EQ(nullptr, DS.getType());
     EXPECT_FALSE(DS.hasTypeSpecifier());
     EXPECT_EQ(SignSpecifier::Unspecified, DS.getSignSpecifier());
     EXPECT_EQ(tok::not_init, DS.getSignSpecifierTokenKind());
@@ -26,7 +27,10 @@ TEST(ParsedDeclSpecTest, AddingTypeSpecifierMarksTypeSpecifierPresent) {
     EXPECT_TRUE(DS.tryAddTypeSpecifier(&IntTy, Tok.getRange()));
     EXPECT_TRUE(DS.hasTypeSpecifier());
     EXPECT_EQ(&IntTy, DS.T);
+    EXPECT_EQ(&IntTy, DS.getType());
     EXPECT_EQ(Tok.getRange().FID, DS.TypeSourceRange.FID);
+    EXPECT_EQ(Tok.getRange().FID, DS.getTypeRange().FID);
+    EXPECT_EQ(Tok.getRange().FID, DS.getTypeSpecifierRange().FID);
     EXPECT_EQ(Tok.getRange().Begin.Line, DS.TypeSourceRange.Begin.Line);
     EXPECT_EQ(Tok.getRange().Begin.Column, DS.TypeSourceRange.Begin.Column);
     EXPECT_EQ(Tok.getRange().End.Line, DS.TypeSourceRange.End.Line);

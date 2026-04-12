@@ -1,9 +1,9 @@
 #ifndef SCC_LEX_FILELEXER_H
 #define SCC_LEX_FILELEXER_H
 
-#include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/MemoryBufferView.h"
+#include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/Frontend/LangOpt.h"
 #include "scc/Lex/SizedChar.h"
 #include "scc/String/StringInterner.h"
@@ -12,7 +12,7 @@
 namespace scc {
 
 class FileLexer : public TokenStream {
-    ErrorManager    &EM;
+    FrontendErrorManager &EM;
     const LangOpt   &Opts;
     StringInterner  &SI;
     MemoryBufferView MemBufferView;
@@ -25,20 +25,20 @@ class FileLexer : public TokenStream {
     bool ParseDirtyToken = false;
 
   public:
-    FileLexer(File &F, StringInterner &SI, ErrorManager &EM)
+    FileLexer(File &F, StringInterner &SI, FrontendErrorManager &EM)
         : FileLexer(F, SI, EM, defaultLangOpt()) {}
 
-    FileLexer(File &F, StringInterner &SI, ErrorManager &EM, const LangOpt &Opts)
+    FileLexer(File &F, StringInterner &SI, FrontendErrorManager &EM, const LangOpt &Opts)
         : EM(EM),
           Opts(Opts),
           SI(SI),
           MemBufferView(F.view()),
           FID(F.getFileID()) {}
 
-    FileLexer(MemoryBufferView &&MBF, StringInterner &SI, FileID &FID, ErrorManager &EM)
+    FileLexer(MemoryBufferView &&MBF, StringInterner &SI, FileID &FID, FrontendErrorManager &EM)
         : FileLexer(std::move(MBF), SI, FID, EM, defaultLangOpt()) {}
 
-    FileLexer(MemoryBufferView &&MBF, StringInterner &SI, FileID &FID, ErrorManager &EM,
+    FileLexer(MemoryBufferView &&MBF, StringInterner &SI, FileID &FID, FrontendErrorManager &EM,
               const LangOpt &Opts)
         : EM(EM),
           Opts(Opts),

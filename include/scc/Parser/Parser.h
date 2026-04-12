@@ -21,6 +21,8 @@ class Parser {
     bool HasErrorOccurred = false;
 
     Token CurTok;
+    Token LookaheadTok;
+    bool  HasLookaheadTok = false;
 
   public:
     Parser(PreProcessor &PP, Sema &Action, ParserErrorManager &EM, const LangOpt &Opts)
@@ -49,16 +51,35 @@ class Parser {
     DeclList         parseDeclaration();
 
   private:
-    // TODO i think this not a good idea
     bool next() {
+        if (HasLookaheadTok) {
+            CurTok = LookaheadTok;
+            LookaheadTok.flush();
+            HasLookaheadTok = false;
+            if (CurTok.getTokenKind() == tok::eof)
+                IsEOF = true;
+            return CurTok.getTokenKind() == tok::eof;
+        }
+
         bool ret = PP.next(CurTok);
+        // Temporary token-state plumbing; this will go away when parser recovery is
+        // redesigned and EOF/error handling is not folded into one bool.
         if (CurTok.getTokenKind() == tok::eof)
             IsEOF = true;
         return ret;
     }
 
+    const Token &peek() {
+        if (!HasLookaheadTok) {
+            PP.next(LookaheadTok);
+            HasLookaheadTok = true;
+        }
+        return LookaheadTok;
+    }
+
     bool consumeIf(tok::TokenKind TK);
     bool expect(tok::TokenKind TK);
+    void skipUntilDeclarationEnd();
 
     bool isType(tok::TokenKind TK);
 };

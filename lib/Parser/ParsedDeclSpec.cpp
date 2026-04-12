@@ -1,5 +1,5 @@
 #include "scc/Parser/ParsedDeclSpec.h"
-#include "scc/Parser/DeclSpecSpelling.h"
+#include "scc/Frontend/DeclSpecSpelling.h"
 
 using namespace scc;
 
@@ -15,6 +15,101 @@ void print_word(std::ostream &O, bool &NeedsSpace, std::string_view Word) {
 }
 
 } // namespace
+
+bool ParsedDeclSpec::hasStorageSpecifier() const {
+    return StorageClass != StorageClassSpecifier::Unspecified;
+}
+
+bool ParsedDeclSpec::hasSignSpecifier() const {
+    return Sign != SignSpecifier::Unspecified;
+}
+
+bool ParsedDeclSpec::hasLengthSpecifier() const {
+    return Length != LengthSpecifier::Unspecified;
+}
+
+bool ParsedDeclSpec::hasTypeSpecifier() const {
+    return T != nullptr;
+}
+
+StorageClassSpecifier ParsedDeclSpec::getStorageSpecifier() const {
+    return StorageClass;
+}
+
+tok::TokenKind ParsedDeclSpec::getStorageSpecifierTokenKind() const {
+    return static_cast<tok::TokenKind>(StorageClass);
+}
+
+SignSpecifier ParsedDeclSpec::getSignSpecifier() const {
+    return Sign;
+}
+
+tok::TokenKind ParsedDeclSpec::getSignSpecifierTokenKind() const {
+    return static_cast<tok::TokenKind>(Sign);
+}
+
+const SourceRange &ParsedDeclSpec::getSignSpecifierRange() const {
+    return RangeSign;
+}
+
+LengthSpecifier ParsedDeclSpec::getLengthSpecifier() const {
+    return Length;
+}
+
+tok::TokenKind ParsedDeclSpec::getLengthSpecifierTokenKind() const {
+    if (Length == LengthSpecifier::LongLong)
+        return tok::t_long;
+    return static_cast<tok::TokenKind>(Length);
+}
+
+const SourceRange &ParsedDeclSpec::getLengthSpecifierRange() const {
+    return LengthRange;
+}
+
+const Type *ParsedDeclSpec::getType() const {
+    return T;
+}
+
+std::string_view ParsedDeclSpec::getTypeName() const {
+    return TypeName;
+}
+
+const SourceRange &ParsedDeclSpec::getTypeRange() const {
+    return TypeSourceRange;
+}
+
+const SourceRange &ParsedDeclSpec::getTypeSpecifierRange() const {
+    return getTypeRange();
+}
+
+void ParsedDeclSpec::setStorageSpecifier(StorageClassSpecifier New) {
+    StorageClass = New;
+}
+
+void ParsedDeclSpec::setSignSpecifier(SignSpecifier New, const SourceRange &Range) {
+    Sign = New;
+    RangeSign = Range;
+}
+
+void ParsedDeclSpec::setLengthSpecifier(LengthSpecifier New) {
+    Length = New;
+}
+
+void ParsedDeclSpec::setLengthSpecifier(LengthSpecifier New, const SourceRange &Range) {
+    Length = New;
+    LengthRange = Range;
+}
+
+void ParsedDeclSpec::setTypeSpecifier(const Type *NewType, const SourceRange &Range) {
+    setTypeSpecifier(NewType, Range, {});
+}
+
+void ParsedDeclSpec::setTypeSpecifier(const Type *NewType, const SourceRange &Range,
+                                      std::string_view Name) {
+    T = NewType;
+    TypeName = Name;
+    TypeSourceRange = Range;
+}
 
 bool ParsedDeclSpec::tryAddStorageSpecifier(StorageClassSpecifier New) {
     if (hasStorageSpecifier())

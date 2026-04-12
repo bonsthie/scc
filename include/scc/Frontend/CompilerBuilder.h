@@ -4,11 +4,11 @@
 #include <string>
 
 #include "scc/Allocator/BumpAllocator.h"
-#include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/FileManager.h"
 #include "scc/Frontend/CompilerInstance.h"
 #include "scc/Frontend/FrontendAction.h"
+#include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/Option/Args.h"
 
 namespace scc {
@@ -17,11 +17,11 @@ class CompilerBuilder {
     BumpAllocator  Arena;
     StringInterner SI;
     FileManager   &FM;
-    ErrorManager  &EM;
-    ArgsList      &Args;
+    FrontendErrorManager &EM;
+    ArgsList             &Args;
 
   public:
-    CompilerBuilder(FileManager &FM, ErrorManager &EM, ArgsList &Args)
+    CompilerBuilder(FileManager &FM, FrontendErrorManager &EM, ArgsList &Args)
         : Arena(),
           SI(Arena),
           FM(FM),

@@ -2,9 +2,9 @@
 #define SCC_PREPROCESSOR_PREPROCESSOR_H
 
 #include "scc/ADT/vector.h"
-#include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/File.h"
 #include "scc/FileManager/FileManager.h"
+#include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/Frontend/LangOpt.h"
 #include "scc/Lex/FileLexer.h"
 #include "scc/String/StringInterner.h"
@@ -21,7 +21,7 @@ class PreProcessor {
     scc::vector<std::unique_ptr<TokenStream>> TSList;
     TokenStream                              *CurrentTokStream = nullptr;
 
-    ErrorManager   &EM;
+    FrontendErrorManager &EM;
     FileManager    &FM;
     const LangOpt  &Opts;
     StringInterner &SI;
@@ -31,10 +31,10 @@ class PreProcessor {
     // LineMapper								 Mapper;
 
   public:
-    PreProcessor(File &F, ErrorManager &EM, FileManager &FM, StringInterner &SI)
+    PreProcessor(File &F, FrontendErrorManager &EM, FileManager &FM, StringInterner &SI)
         : PreProcessor(F, EM, FM, SI, defaultLangOpt()) {}
 
-    PreProcessor(File &F, ErrorManager &EM, FileManager &FM, StringInterner &SI,
+    PreProcessor(File &F, FrontendErrorManager &EM, FileManager &FM, StringInterner &SI,
                  const LangOpt &Opts);
 
     bool next(Token &Tok);

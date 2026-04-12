@@ -1,4 +1,4 @@
-#include "scc/Parser/DeclSpecSpelling.h"
+#include "scc/Frontend/DeclSpecSpelling.h"
 #include "scc/Parser/ParserErrorManager.h"
 #include "scc/Parser/ParsedDeclSpec.h"
 
@@ -8,12 +8,6 @@ static std::string tokenForDiag(const Token &Tok) {
     if (!Tok.getValue().empty())
         return std::string(Tok.getValue());
     return token_spelling(Tok.getTokenKind());
-}
-
-static Error &atRange(Error &Diag, const SourceRange &Range) {
-    if (Range.isValid())
-        Diag.at(Range.posViewBegin());
-    return Diag;
 }
 
 Error &ParserErrorManager::expectedXButGotY(tok::TokenKind Expected, const Token &Got) {
@@ -27,38 +21,20 @@ Error &ParserErrorManager::expectedXButGotY(tok::TokenKind Expected, const Token
 }
 
 Error &ParserErrorManager::duplicateQualifier(tok::TokenKind Qualifier, const SourceRange &Range) {
-    return atRange(report(err::error), Range)
-        .msg("duplicate Qualifer '")
-        .msg(token_spelling(Qualifier))
-        .msg("'");
+    return EM.duplicateQualifier(token_spelling(Qualifier), Range);
 }
 
 Error &ParserErrorManager::cannotCombine(tok::TokenKind X, tok::TokenKind Y,
                                          const SourceRange &Range) {
-    return atRange(report(err::error), Range)
-        .msg("cannot combine '")
-        .msg(token_spelling(X))
-        .msg("' with previous '")
-        .msg(token_spelling(Y))
-        .msg("'");
+    return EM.cannotCombine(token_spelling(X), token_spelling(Y), Range);
 }
 
 Error &ParserErrorManager::cannotCombine(SignSpecifier X, SignSpecifier Y,
                                          const SourceRange &Range) {
-    return atRange(report(err::error), Range)
-        .msg("cannot combine '")
-        .msg(sign_specifier_to_string(X))
-        .msg("' with previous '")
-        .msg(sign_specifier_to_string(Y))
-        .msg("'");
+    return EM.cannotCombine(sign_specifier_to_string(X), sign_specifier_to_string(Y), Range);
 }
 
 Error &ParserErrorManager::cannotCombine(LengthSpecifier X, LengthSpecifier Y,
                                          const SourceRange &Range) {
-    return atRange(report(err::error), Range)
-        .msg("cannot combine '")
-        .msg(length_specifier_to_string(X))
-        .msg("' with previous '")
-        .msg(length_specifier_to_string(Y))
-        .msg("'");
+    return EM.cannotCombine(length_specifier_to_string(X), length_specifier_to_string(Y), Range);
 }

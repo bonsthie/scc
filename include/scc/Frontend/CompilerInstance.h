@@ -3,6 +3,7 @@
 
 #include "scc/AST/ASTContext.h"
 #include "scc/Frontend/CompilerInstanceSettings.h"
+#include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/Sema/Sema.h"
 #include "scc/String/StringInterner.h"
@@ -20,12 +21,12 @@ class CompilerInstance {
     StringInterner                 *SI;
     std::unique_ptr<FrontendAction> Act;
     CompilerInstanceSettings        Settings;
-    ErrorManager                   &EM;
+    FrontendErrorManager          &EM;
     FileManager                    *FM = nullptr;
     std::unique_ptr<ASTContext>     Ctx;
 
   public:
-    CompilerInstance(FileManager &FM, ErrorManager &EM, CompilerInstanceSettings,
+    CompilerInstance(FileManager &FM, FrontendErrorManager &EM, CompilerInstanceSettings,
                      StringInterner &SI, std::unique_ptr<FrontendAction> Act);
     ~CompilerInstance();
 
@@ -57,8 +58,8 @@ class CompilerInstance {
     FileManager       &getFileManager() { return *FM; }
     const FileManager &getFileManager() const { return *FM; }
 
-    ErrorManager       &getErrorManager() { return EM; }
-    const ErrorManager &getErrorManager() const { return EM; }
+    FrontendErrorManager       &getErrorManager() { return EM; }
+    const FrontendErrorManager &getErrorManager() const { return EM; }
 
     LangOpt       &getLangOpt() { return Settings.LangOptions; }
     const LangOpt &getLangOpt() const { return Settings.LangOptions; }

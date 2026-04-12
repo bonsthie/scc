@@ -13,7 +13,7 @@ const LangOpt &PreProcessor::defaultLangOpt() {
     return Opts;
 }
 
-PreProcessor::PreProcessor(File &F, ErrorManager &EM, FileManager &FM, StringInterner &SI,
+PreProcessor::PreProcessor(File &F, FrontendErrorManager &EM, FileManager &FM, StringInterner &SI,
                            const LangOpt &Opts)
     : EM(EM),
       FM(FM),

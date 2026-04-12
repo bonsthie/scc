@@ -45,10 +45,10 @@ class Token {
     bool isDirty() const { return IsDirty; }
     void setDirtyValue(std::string_view Word) { DirtyValue = Word; };
 
-    bool is(tok::TokenKind Tok) { return TKind == Tok; }
+    bool is(tok::TokenKind Tok) const { return TKind == Tok; }
 
     template <typename T, typename... Args>
-    bool is(T Tok, Args... TokTypes) {
+    bool is(T Tok, Args... TokTypes) const {
         return is(Tok) || is(TokTypes...);
     }
 

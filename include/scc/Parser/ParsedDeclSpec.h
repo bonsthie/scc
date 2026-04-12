@@ -2,6 +2,7 @@
 #define SCC_PARSER_PARSEDDECLSPEC_H
 
 #include <iostream>
+#include <string_view>
 
 #include "scc/AST/BuiltinType.h"
 #include "scc/AST/Qualifiers.h"
@@ -41,45 +42,37 @@ struct ParsedDeclSpec {
     LengthSpecifier Length = LengthSpecifier::Unspecified;
     SourceRange     LengthRange;
 
-    const Type       *T = nullptr;
+    const Type *T = nullptr;
+    std::string_view TypeName;
     Qualifiers  Quals;
     SourceRange TypeSourceRange;
 
-    bool hasStorageSpecifier() const { return StorageClass != StorageClassSpecifier::Unspecified; }
-    bool hasSignSpecifier() const { return Sign != SignSpecifier::Unspecified; }
-    bool hasLengthSpecifier() const { return Length != LengthSpecifier::Unspecified; }
-    bool hasTypeSpecifier() const { return T != nullptr; }
-    StorageClassSpecifier getStorageSpecifier() const { return StorageClass; }
-    tok::TokenKind        getStorageSpecifierTokenKind() const {
-        return static_cast<tok::TokenKind>(StorageClass);
-    }
-    SignSpecifier  getSignSpecifier() const { return Sign; }
-    tok::TokenKind getSignSpecifierTokenKind() const { return static_cast<tok::TokenKind>(Sign); }
-    const SourceRange &getSignSpecifierRange() const { return RangeSign; }
-    LengthSpecifier    getLengthSpecifier() const { return Length; }
-    tok::TokenKind     getLengthSpecifierTokenKind() const {
-        if (Length == LengthSpecifier::LongLong)
-            return tok::t_long;
-        return static_cast<tok::TokenKind>(Length);
-    }
-    const SourceRange &getLengthSpecifierRange() const { return LengthRange; }
+    bool hasStorageSpecifier() const;
+    bool hasSignSpecifier() const;
+    bool hasLengthSpecifier() const;
+    bool hasTypeSpecifier() const;
 
-    void setStorageSpecifier(StorageClassSpecifier New) { StorageClass = New; }
-    void setSignSpecifier(SignSpecifier New, const SourceRange &Range) {
-        Sign = New;
-        RangeSign = Range;
-    }
+    StorageClassSpecifier getStorageSpecifier() const;
+    tok::TokenKind        getStorageSpecifierTokenKind() const;
+    SignSpecifier         getSignSpecifier() const;
+    tok::TokenKind        getSignSpecifierTokenKind() const;
+    const SourceRange    &getSignSpecifierRange() const;
+    LengthSpecifier       getLengthSpecifier() const;
+    tok::TokenKind        getLengthSpecifierTokenKind() const;
+    const SourceRange    &getLengthSpecifierRange() const;
+    const Type           *getType() const;
+    std::string_view      getTypeName() const;
+    const SourceRange    &getTypeRange() const;
+    const SourceRange    &getTypeSpecifierRange() const;
 
-    void setLengthSpecifier(LengthSpecifier New) { Length = New; }
-    void setLengthSpecifier(LengthSpecifier New, const SourceRange &Range) {
-        Length = New;
-        LengthRange = Range;
-    }
+    void setStorageSpecifier(StorageClassSpecifier New);
+    void setSignSpecifier(SignSpecifier New, const SourceRange &Range);
 
-    void setTypeSpecifier(const Type *NewType, const SourceRange &Range) {
-        T = NewType;
-        TypeSourceRange = Range;
-    }
+    void setLengthSpecifier(LengthSpecifier New);
+    void setLengthSpecifier(LengthSpecifier New, const SourceRange &Range);
+
+    void setTypeSpecifier(const Type *NewType, const SourceRange &Range);
+    void setTypeSpecifier(const Type *NewType, const SourceRange &Range, std::string_view Name);
 
     bool tryAddStorageSpecifier(StorageClassSpecifier New);
     bool trySetStorageSpecifier(StorageClassSpecifier New);
@@ -90,6 +83,7 @@ struct ParsedDeclSpec {
     bool tryAddRestrict();
     bool tryAddVolatile();
     bool tryAddQualifiers(const Qualifiers &Other);
+
     void print(std::ostream &O = std::cout) const;
 };
 

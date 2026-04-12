@@ -1,5 +1,6 @@
 #include "scc/Parser/Parser.h"
 #include "scc/ADT/vector.h"
+#include "scc/Error/Error.h"
 #include "scc/Parser/ParsedDeclSpec.h"
 
 using namespace scc;
@@ -21,6 +22,15 @@ bool Parser::expect(tok::TokenKind TK) {
     return true;
 }
 
+void Parser::skipUntilDeclarationEnd() {
+    while (!CurTok.is(tok::semi, tok::eof)) {
+        if (next())
+            return;
+    }
+    if (CurTok.is(tok::semi))
+        next();
+}
+
 bool isType(tok::TokenKind TK) {
     switch (TK) {
 #define TYPE_KEYWORD(X) case tok::t_##X:
@@ -31,12 +41,16 @@ bool isType(tok::TokenKind TK) {
     }
 }
 
+static bool unknownIdentifierLooksLikeTypeSpecifier(const Token &Next) {
+    return Next.is(tok::identifier, tok::star, tok::l_paren);
+}
+
 DeclList Parser::parseTopLevelDecl() {
-    next(); // init fist token
-    auto DS = parseDeclSpec();
-    DS.print();
-    IsEOF = true;
-    return {};
+    if (CurTok.is(tok::not_init))
+        next();
+    if (CurTok.is(tok::eof))
+        return {};
+    return parseDeclaration();
 }
 
 ParsedDeclSpec Parser::parseDeclSpec() {
@@ -46,21 +60,29 @@ ParsedDeclSpec Parser::parseDeclSpec() {
         switch (CurTok.getTokenKind()) {
         case tok::identifier: {
             if (DS.hasTypeSpecifier())
-                return DS; // Main exit
+                return DS;
 
             const Type *T = Action.getTypeSpecifierType(CurTok);
-            DS.setTypeSpecifier(T, CurTok.getRange());
+            if (T->isUnknow() && !unknownIdentifierLooksLikeTypeSpecifier(peek())) {
+                DS.setTypeSpecifier(nullptr, CurTok.getRange(), CurTok.getValue());
+                return DS;
+            }
+
+            DS.setTypeSpecifier(T, CurTok.getRange(), CurTok.getValue());
             break;
         }
+        case tok::star:
+        case tok::comma:
+        case tok::kw_struct:
+        case tok::kw_union:
+            return DS;
 
         case tok::t_char:
         case tok::t_int:
         case tok::t_float:
         case tok::t_double:
         case tok::t_void:
-        case tok::t__Bool:
-        case tok::t__Imaginary:
-        case tok::t__Complex: {
+        case tok::t__Bool: {
             const Type *T = Action.getType(CurTok);
             if (!DS.tryAddTypeSpecifier(T, CurTok.getRange())) {
                 tok::TokenKind Previous = CurTok.getTokenKind();
@@ -75,6 +97,15 @@ ParsedDeclSpec Parser::parseDeclSpec() {
             }
             break;
         }
+
+        case tok::t__Imaginary:
+        case tok::t__Complex: {
+            // Temporary until full type-specifier parsing can combine these
+            // correctly with float/double/long double.
+            EM.todo("imaginary and complex identifier", CurTok.getRange(), err::warning)
+                .msg(" ignored for now");
+            break;
+        };
 
         case tok::t_signed:
         case tok::t_unsigned: {
@@ -138,6 +169,12 @@ ParsedDeclSpec Parser::parseDeclSpec() {
             break;
 
         default:
+            // For now, only diagnose bad lexer tokens here. The caller/future
+            // recovery code will decide whether to consume or synchronize.
+            if (CurTok.is(tok::unknown)) {
+                EM.unknownToken(CurTok).msg(" in declaration specifier");
+                HasErrorOccurred = EM.emit();
+            }
             return DS;
         }
         if (next())
@@ -154,8 +191,13 @@ DeclList Parser::parseDeclaration() {
     SmallVector<Decl *, 4> Decls;
 
     ParsedDeclSpec DS = parseDeclSpec();
-    if (hasErrorOccurred())
+    Action.actOnDeclSpec(DS);
+    HasErrorOccurred |= EM.emit();
+
+    if (hasErrorOccurred()) {
+        skipUntilDeclarationEnd();
         return {};
+    }
 
     do {
         ParsedDeclarator D = parseDeclarator();

@@ -1,5 +1,5 @@
 #include "scc/ADT/vector.h"
-#include "scc/Error/ErrorManager.h"
+#include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include "scc/Frontend/LangOpt.h"
 #include "scc/Lex/FileLexer.h"
@@ -15,13 +15,13 @@ using namespace scc;
 class FileLexTests : public ::testing::Test {
   public:
     std::unique_ptr<FileID>       FID;
-    std::unique_ptr<ErrorManager> EM;
+    std::unique_ptr<FrontendErrorManager> EM;
     BumpAllocator                 Arena;
     StringInterner                SI{Arena};
 
     void SetUp() override {
         FID = std::make_unique<FileID>("test File", 1);
-        EM = std::make_unique<ErrorManager>();
+        EM = std::make_unique<FrontendErrorManager>();
     }
 
     FileLexer create_lexer(const char *str) {

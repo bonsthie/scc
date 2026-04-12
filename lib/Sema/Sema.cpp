@@ -22,9 +22,7 @@ const Type *Sema::getType(Token &T) {
     case tok::t__Bool:
     case tok::t__Imaginary:
     case tok::t__Complex:
-        return getBuiltinType(static_cast<BuiltinTypeKind>(T.getTokenKind()))
-            ->asQualType()
-            .getType();
+        return getType(static_cast<BuiltinTypeKind>(T.getTokenKind()));
     case tok::identifier:
         return SM.lookupType(T.getValue());
     default:
@@ -34,8 +32,14 @@ const Type *Sema::getType(Token &T) {
     }
 }
 
+const Type *Sema::getType(BuiltinTypeKind Ty) {
+    return getBuiltinType(Ty)->asQualType().getType();
+}
+
+// Unknown identifiers become the shared unknown/error type here;
+// sema owns the final "unknown type name" diagnostic.
 const Type *Sema::getTypeSpecifierType(Token &T) {
     if (T.getTokenKind() == tok::identifier)
-        return SM.lookupTypeOrNull(T.getValue());
+        return SM.lookupType(T.getValue());
     return getType(T);
 }

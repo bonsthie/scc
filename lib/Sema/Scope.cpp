@@ -24,6 +24,7 @@ Type *ScopeMgr::lookupTypeOrNull(std::string_view Name) {
     return nullptr;
 }
 
+// Unknown identifiers become the shared unknown/error type here;
 Type *ScopeMgr::lookupType(std::string_view Name) {
     if (Type *D = lookupTypeOrNull(Name))
         return D;

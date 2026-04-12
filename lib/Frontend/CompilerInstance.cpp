@@ -5,8 +5,9 @@
 
 using namespace scc;
 
-CompilerInstance::CompilerInstance(FileManager &FM, ErrorManager &EM, CompilerInstanceSettings Settings,
-                                   StringInterner &SI, std::unique_ptr<FrontendAction> Act)
+CompilerInstance::CompilerInstance(FileManager &FM, FrontendErrorManager &EM,
+                                   CompilerInstanceSettings Settings, StringInterner &SI,
+                                   std::unique_ptr<FrontendAction> Act)
     : SI(&SI),
       Act(std::move(Act)),
       Settings(Settings),

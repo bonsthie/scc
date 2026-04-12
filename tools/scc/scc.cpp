@@ -7,6 +7,7 @@
 #include "scc/Frontend/CC1Args.h"
 #include "scc/Frontend/CompilerBuilder.h"
 #include "scc/Frontend/CompilerInstance.h"
+#include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/Frontend/LangOpt.h"
 #include "scc/PreProcessor/PreProcessor.h"
 #include "scc/String/StringInterner.h"
@@ -24,7 +25,7 @@ void configureColor(const ArgsList &Args) { Color::setDisable(!Args.hasArg(Opt_d
 } // namespace
 
 bool cc1(int argc, char **argv, char **) {
-    ErrorManager   EM;
+    FrontendErrorManager EM;
     SccOptionTable Opt(EM);
 
     std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::vector<const char *>(argv + 2, argv + argc)));
@@ -76,7 +77,7 @@ int main(int argc, char **argv, char **env) {
     if (argc >= 2 && strcmp(argv[1], "-cc1") == 0)
         return cc1(argc, argv, env);
 
-    ErrorManager   EM;
+    FrontendErrorManager EM;
     SccOptionTable Opt(EM);
 
     std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::vector<const char *>(argv + 1, argv + argc)));

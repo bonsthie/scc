@@ -39,7 +39,7 @@ class ErrorManager {
             int status = (*it)->emit(O);
             it = Errs.erase(it);
             if (status) {
-				Errs.clear();
+                Errs.clear();
                 return true;
             }
         }

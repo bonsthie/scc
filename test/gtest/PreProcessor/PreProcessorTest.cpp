@@ -3,9 +3,9 @@
 #include "scc/ADT/vector.h"
 #include "scc/PreProcessor/PreProcessor.h"
 
-#include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileFinder.h"
 #include "scc/FileManager/FileManager.h"
+#include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
 
@@ -74,7 +74,7 @@ TEST(PreProcessorTest, HandlesLocalIncludes) {
     auto    MainPath = Tmp.makeFile("main.c", "#include \"header.h\"\nint outer;\n");
     Tmp.makeFile("header.h", "int inner;\n");
 
-    ErrorManager   EM;
+    FrontendErrorManager EM;
     FileFinder     Finder({});
     FileManager    FM(Finder, EM);
     BumpAllocator  Arena;
@@ -97,7 +97,7 @@ TEST(PreProcessorTest, ReportsMissingInclude) {
     TempDir Tmp;
     auto    MainPath = Tmp.makeFile("main.c", "#include \"missing.h\"\n");
 
-    ErrorManager   EM;
+    FrontendErrorManager EM;
     FileFinder     Finder({});
     FileManager    FM(Finder, EM);
     BumpAllocator  Arena;
