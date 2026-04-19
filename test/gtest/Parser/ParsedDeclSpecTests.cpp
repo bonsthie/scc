@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "scc/AST/BuiltinType.h"
-#include "scc/Parser/ParsedDeclSpec.h"
+#include "scc/Sema/ParsedDeclSpec.h"
 
 using namespace scc;
 
@@ -53,6 +53,21 @@ TEST(ParsedDeclSpecTest, RejectsNullTypeSpecifier) {
 
     EXPECT_FALSE(DS.tryAddTypeSpecifier(nullptr, Range));
     EXPECT_FALSE(DS.hasTypeSpecifier());
+}
+
+TEST(ParsedDeclSpecTest, TracksStorageSpecifierTokenAndRange) {
+    ParsedDeclSpec DS;
+    Token          TypedefTok(tok::kw_typedef);
+
+    TypedefTok.setRange(SourceRange(nullptr, MemoryViewPos(3, 1), MemoryViewPos(3, 8)));
+
+    ASSERT_TRUE(DS.tryAddStorageSpecifier(StorageClassSpecifier::Typedef, TypedefTok.getRange()));
+
+    EXPECT_TRUE(DS.hasStorageSpecifier());
+    EXPECT_EQ(StorageClassSpecifier::Typedef, DS.getStorageSpecifier());
+    EXPECT_EQ(tok::kw_typedef, DS.getStorageSpecifierTokenKind());
+    EXPECT_EQ(TypedefTok.getRange().Begin.Line, DS.getStorageSpecifierRange().Begin.Line);
+    EXPECT_EQ(TypedefTok.getRange().Begin.Column, DS.getStorageSpecifierRange().Begin.Column);
 }
 
 TEST(ParsedDeclSpecTest, TracksSignAndLengthSpecifierTokensAndRanges) {

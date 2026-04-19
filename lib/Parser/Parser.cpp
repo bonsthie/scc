@@ -1,7 +1,8 @@
 #include "scc/Parser/Parser.h"
 #include "scc/ADT/vector.h"
 #include "scc/Error/Error.h"
-#include "scc/Parser/ParsedDeclSpec.h"
+#include "scc/Sema/ParsedDeclarator.h"
+#include "scc/Sema/ParsedDeclSpec.h"
 
 using namespace scc;
 
@@ -135,7 +136,7 @@ ParsedDeclSpec Parser::parseDeclSpec() {
         case tok::kw_extern:
         case tok::kw_register: {
             StorageClassSpecifier New = static_cast<StorageClassSpecifier>(CurTok.getTokenKind());
-            if (!DS.tryAddStorageSpecifier(New)) {
+            if (!DS.tryAddStorageSpecifier(New, CurTok.getRange())) {
                 EM.cannotCombine(CurTok.getTokenKind(), DS.getStorageSpecifierTokenKind(),
                                  CurTok.getRange())
                     .msg(" declaration specifier");
@@ -185,12 +186,25 @@ ParsedDeclSpec Parser::parseDeclSpec() {
     return DS;
 }
 
-ParsedDeclarator Parser::parseDeclarator() { return ParsedDeclarator(); }
+// fist token of the Declarator should be in CurTok
+ParsedDeclarator Parser::parseDeclarator() {
+    ParsedDeclarator D;
+
+    if (CurTok.is(tok::identifier)) {
+		D.setName(CurTok.getValue(), CurTok.getRange());
+    } else {
+        EM.todo("parse declarator", CurTok.getRange());
+    }
+    return D;
+}
 
 DeclList Parser::parseDeclaration() {
     SmallVector<Decl *, 4> Decls;
 
     ParsedDeclSpec DS = parseDeclSpec();
+    if (isEOF())
+        return {};
+
     Action.actOnDeclSpec(DS);
     HasErrorOccurred |= EM.emit();
 
@@ -201,11 +215,16 @@ DeclList Parser::parseDeclaration() {
 
     do {
         ParsedDeclarator D = parseDeclarator();
+        HasErrorOccurred |= EM.emit();
+        if (hasErrorOccurred()) {
+            skipUntilDeclarationEnd();
+            return Action.getASTContext().toOwnedList(Decls);
+        }
 
         Decl *Res = Action.actOnDeclarator(DS, D);
         if (Res)
             Decls.push_back(Res);
-    } while (consumeIf(tok::comma));
+    } while (consumeIf(tok::comma) && !next());
 
     if (!expect(tok::semi))
         return {};

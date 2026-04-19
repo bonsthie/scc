@@ -1,11 +1,11 @@
 #ifndef SCC_PARSER_PARSER_H
 #define SCC_PARSER_PARSER_H
 
-#include "ParseDeclarator.h"
-#include "ParsedDeclSpec.h"
 #include "ParserErrorManager.h"
 #include "scc/Frontend/LangOpt.h"
 #include "scc/PreProcessor/PreProcessor.h"
+#include "scc/Sema/ParsedDeclarator.h"
+#include "scc/Sema/ParsedDeclSpec.h"
 #include "scc/Sema/Sema.h"
 #include "scc/Token/Token.h"
 
@@ -23,6 +23,9 @@ class Parser {
     Token CurTok;
     Token LookaheadTok;
     bool  HasLookaheadTok = false;
+
+    friend class ParenParseScopeRAII;
+    bool InParen = false;
 
   public:
     Parser(PreProcessor &PP, Sema &Action, ParserErrorManager &EM, const LangOpt &Opts)

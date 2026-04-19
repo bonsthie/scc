@@ -1,6 +1,6 @@
 #include "scc/Frontend/DeclSpecSpelling.h"
 #include "scc/Parser/ParserErrorManager.h"
-#include "scc/Parser/ParsedDeclSpec.h"
+#include "scc/Sema/ParsedDeclSpec.h"
 
 using namespace scc;
 

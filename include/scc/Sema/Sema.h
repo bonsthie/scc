@@ -10,8 +10,8 @@
 #include "scc/AST/Type.h"
 #include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/Frontend/LangOpt.h"
-#include "scc/Parser/ParseDeclarator.h"
-#include "scc/Parser/ParsedDeclSpec.h"
+#include "scc/Sema/ParsedDeclarator.h"
+#include "scc/Sema/ParsedDeclSpec.h"
 #include "scc/Sema/Scope.h"
 #include "scc/Token/Token.h"
 
@@ -57,6 +57,9 @@ class Sema {
     // Return true if an error occurred.
     bool actOnDeclSpecType(ParsedDeclSpec &DS);
     bool actOnDeclSpecLengthAndSignSpecifier(ParsedDeclSpec &DS);
+
+	Type *createTypeFromDeclarator(Type *T, ParsedDeclarator &D);
+	Decl *createDeclFromDeclarator(ParsedDeclSpec &DS, ParsedDeclarator &D);
 };
 
 } // namespace scc

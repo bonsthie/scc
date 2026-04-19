@@ -1,5 +1,5 @@
-#ifndef SCC_PARSER_PARSEDDECLSPEC_H
-#define SCC_PARSER_PARSEDDECLSPEC_H
+#ifndef SCC_SEMA_PARSEDDECLSPEC_H
+#define SCC_SEMA_PARSEDDECLSPEC_H
 
 #include <iostream>
 #include <string_view>
@@ -35,6 +35,7 @@ enum class LengthSpecifier : int {
 
 struct ParsedDeclSpec {
     StorageClassSpecifier StorageClass = StorageClassSpecifier::Unspecified;
+    SourceRange           StorageClassRange;
 
     SignSpecifier Sign = SignSpecifier::Unspecified;
     SourceRange   RangeSign; // use by sema to emit error if the type can't have a Sign Specifier
@@ -54,6 +55,7 @@ struct ParsedDeclSpec {
 
     StorageClassSpecifier getStorageSpecifier() const;
     tok::TokenKind        getStorageSpecifierTokenKind() const;
+    const SourceRange    &getStorageSpecifierRange() const;
     SignSpecifier         getSignSpecifier() const;
     tok::TokenKind        getSignSpecifierTokenKind() const;
     const SourceRange    &getSignSpecifierRange() const;
@@ -66,6 +68,7 @@ struct ParsedDeclSpec {
     const SourceRange    &getTypeSpecifierRange() const;
 
     void setStorageSpecifier(StorageClassSpecifier New);
+    void setStorageSpecifier(StorageClassSpecifier New, const SourceRange &Range);
     void setSignSpecifier(SignSpecifier New, const SourceRange &Range);
 
     void setLengthSpecifier(LengthSpecifier New);
@@ -75,6 +78,7 @@ struct ParsedDeclSpec {
     void setTypeSpecifier(const Type *NewType, const SourceRange &Range, std::string_view Name);
 
     bool tryAddStorageSpecifier(StorageClassSpecifier New);
+    bool tryAddStorageSpecifier(StorageClassSpecifier New, const SourceRange &Range);
     bool trySetStorageSpecifier(StorageClassSpecifier New);
     bool tryAddSignSpecifier(SignSpecifier New, const SourceRange &Range);
     bool tryAddLengthSpecifier(LengthSpecifier New, const SourceRange &Range);
@@ -89,4 +93,4 @@ struct ParsedDeclSpec {
 
 } // namespace scc
 
-#endif // SCC_PARSER_PARSEDDECLSPEC_H
+#endif // SCC_SEMA_PARSEDDECLSPEC_H

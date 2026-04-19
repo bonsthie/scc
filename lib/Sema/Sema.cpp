@@ -6,6 +6,32 @@
 
 using namespace scc;
 
+Type *Sema::createTypeFromDeclarator(Type *T, ParsedDeclarator &D) {
+    (void)T;
+    (void)D;
+    return nullptr;
+}
+
+Decl *Sema::createDeclFromDeclarator(ParsedDeclSpec &DS, ParsedDeclarator &D) {
+    if (D.getName().empty()) {
+        EM.report(err::error).msg("missing declarator name");
+        return nullptr;
+    }
+
+    switch (DS.getStorageSpecifier()) {
+    case StorageClassSpecifier::Typedef:
+
+    case StorageClassSpecifier::Unspecified:
+
+    case StorageClassSpecifier::Auto:
+    case StorageClassSpecifier::Static:
+    case StorageClassSpecifier::Extern:
+    case StorageClassSpecifier::Register:
+        EM.todo("storagespecifier not handle yet", DS.getStorageSpecifierRange());
+        return nullptr;
+    }
+}
+
 Decl *Sema::actOnDeclarator(ParsedDeclSpec &DS, ParsedDeclarator &D) {
     (void)DS;
     (void)D;
@@ -32,9 +58,7 @@ const Type *Sema::getType(Token &T) {
     }
 }
 
-const Type *Sema::getType(BuiltinTypeKind Ty) {
-    return getBuiltinType(Ty)->asQualType().getType();
-}
+const Type *Sema::getType(BuiltinTypeKind Ty) { return getBuiltinType(Ty)->asQualType().getType(); }
 
 // Unknown identifiers become the shared unknown/error type here;
 // sema owns the final "unknown type name" diagnostic.

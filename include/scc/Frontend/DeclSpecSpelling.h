@@ -7,7 +7,7 @@
 #include "scc/AST/TagType.h"
 #include "scc/AST/Type.h"
 #include "scc/AST/TypedefType.h"
-#include "scc/Parser/ParsedDeclSpec.h"
+#include "scc/Sema/ParsedDeclSpec.h"
 #include "scc/Token/Token.h"
 
 namespace scc {

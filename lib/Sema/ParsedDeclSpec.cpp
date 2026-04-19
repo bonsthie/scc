@@ -1,4 +1,4 @@
-#include "scc/Parser/ParsedDeclSpec.h"
+#include "scc/Sema/ParsedDeclSpec.h"
 #include "scc/Frontend/DeclSpecSpelling.h"
 
 using namespace scc;
@@ -38,6 +38,10 @@ StorageClassSpecifier ParsedDeclSpec::getStorageSpecifier() const {
 
 tok::TokenKind ParsedDeclSpec::getStorageSpecifierTokenKind() const {
     return static_cast<tok::TokenKind>(StorageClass);
+}
+
+const SourceRange &ParsedDeclSpec::getStorageSpecifierRange() const {
+    return StorageClassRange;
 }
 
 SignSpecifier ParsedDeclSpec::getSignSpecifier() const {
@@ -86,6 +90,11 @@ void ParsedDeclSpec::setStorageSpecifier(StorageClassSpecifier New) {
     StorageClass = New;
 }
 
+void ParsedDeclSpec::setStorageSpecifier(StorageClassSpecifier New, const SourceRange &Range) {
+    StorageClass = New;
+    StorageClassRange = Range;
+}
+
 void ParsedDeclSpec::setSignSpecifier(SignSpecifier New, const SourceRange &Range) {
     Sign = New;
     RangeSign = Range;
@@ -115,6 +124,13 @@ bool ParsedDeclSpec::tryAddStorageSpecifier(StorageClassSpecifier New) {
     if (hasStorageSpecifier())
         return false;
     setStorageSpecifier(New);
+    return true;
+}
+
+bool ParsedDeclSpec::tryAddStorageSpecifier(StorageClassSpecifier New, const SourceRange &Range) {
+    if (hasStorageSpecifier())
+        return false;
+    setStorageSpecifier(New, Range);
     return true;
 }
 
