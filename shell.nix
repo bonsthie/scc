@@ -1,3 +1,4 @@
+# this nix shell don't work by itself for me i suggest using the dev flake insted
 {
   pkgs ? import <nixpkgs> { },
 }:
@@ -11,8 +12,5 @@ pkgs.mkShell {
   ];
   shellHook = ''
 	  alias bazel=bazelisk
-	  export TMPDIR=/tmp
-	  export TEMP=/tmp
-	  export TMP=/tmp
   '';
 }
