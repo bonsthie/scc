@@ -1,5 +1,5 @@
-#ifndef SCC_STRING_STRINGINTERNER
-#define SCC_STRING_STRINGINTERNER
+#ifndef SCC_STRING_STRINGINTERNER_H
+#define SCC_STRING_STRINGINTERNER_H
 
 #include "scc/Allocator/BumpAllocator.h"
 #include <cstddef>
@@ -36,4 +36,4 @@ class StringInterner {
 
 } // namespace scc
 
-#endif // SCC_STRING_STRINGINTERNER
+#endif // SCC_STRING_STRINGINTERNER_H

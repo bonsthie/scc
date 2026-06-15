@@ -6,6 +6,6 @@ namespace scc {
 
 SizedChar decode_logical_char(const char *Ptr, const char *End);
 
-}
+} // namespace scc
 
 #endif // SCC_LEX_DECODECHAR_H

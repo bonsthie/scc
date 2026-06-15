@@ -33,11 +33,11 @@ TEST(StackGrowAllocatorTest, LargeAllocationsBypassStack) {
     StackGrowAllocator<32> Alloc;
     auto               usedBefore = Alloc.stackBytesUsed();
 
-    auto *largeAlloc = Alloc.allocate_bytes(512, alignof(std::max_align_t));
+    auto *largeAlloc = Alloc.allocateBytes(512, alignof(std::max_align_t));
     ASSERT_NE(largeAlloc, nullptr);
     EXPECT_EQ(Alloc.stackBytesUsed(), usedBefore);
 
-    Alloc.deallocate_bytes(largeAlloc, 512);
+    Alloc.deallocateBytes(largeAlloc, 512);
 }
 
 TEST(StackGrowAllocatorTest, LifoDeallocateShrinksStackUsage) {
@@ -51,15 +51,15 @@ TEST(StackGrowAllocatorTest, LifoDeallocateShrinksStackUsage) {
     ASSERT_NE(Third, nullptr);
 
     auto UsedBeforeThirdFree = Alloc.stackBytesUsed();
-    Alloc.deallocate_bytes(Third, sizeof(int) * 1);
+    Alloc.deallocateBytes(Third, sizeof(int) * 1);
     EXPECT_LT(Alloc.stackBytesUsed(), UsedBeforeThirdFree);
 
     auto UsedBeforeSecondFree = Alloc.stackBytesUsed();
-    Alloc.deallocate_bytes(Second, sizeof(int) * 4);
+    Alloc.deallocateBytes(Second, sizeof(int) * 4);
     EXPECT_LT(Alloc.stackBytesUsed(), UsedBeforeSecondFree);
 
     auto UsedBeforeFirstFree = Alloc.stackBytesUsed();
-    Alloc.deallocate_bytes(First, sizeof(int) * 2);
+    Alloc.deallocateBytes(First, sizeof(int) * 2);
     EXPECT_LT(Alloc.stackBytesUsed(), UsedBeforeFirstFree);
     EXPECT_EQ(Alloc.stackBytesUsed(), 0u);
 }
@@ -73,7 +73,7 @@ TEST(StackGrowAllocatorTest, NonLifoDeallocateDoesNothing) {
     ASSERT_NE(Second, nullptr);
 
     auto UsedBefore = Alloc.stackBytesUsed();
-    Alloc.deallocate_bytes(First, sizeof(int) * 1);
+    Alloc.deallocateBytes(First, sizeof(int) * 1);
     EXPECT_EQ(Alloc.stackBytesUsed(), UsedBefore);
 
     Alloc.reset();

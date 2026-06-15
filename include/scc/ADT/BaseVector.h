@@ -14,12 +14,13 @@
 namespace scc {
 
 template <typename A>
-concept ByteAllocator = requires(A a, void *ptr, size_t size, size_t align) {
-    { a.allocate_bytes(size, align) } -> std::same_as<void *>;
-    { a.deallocate_bytes(ptr, size, align) } -> std::same_as<void>;
+concept ByteAllocator = requires(A a, void *Ptr, size_t Size, size_t Align) {
+    { a.allocateBytes(Size, Align) } -> std::same_as<void *>;
+    { a.deallocateBytes(Ptr, Size, Align) } -> std::same_as<void>;
 };
 
 template <typename T, size_t BaseSize, ByteAllocator Alloc>
+// NOLINTNEXTLINE(misc-multiple-inheritance)
 class BaseVector : public Span<T, BaseSize>, protected Alloc {
     using Base = Span<T, BaseSize>;
 
@@ -31,20 +32,20 @@ class BaseVector : public Span<T, BaseSize>, protected Alloc {
     template <typename... AllocArgs>
         requires(sizeof...(AllocArgs) > 0 && std::constructible_from<Alloc, AllocArgs...> &&
                  (!std::input_iterator<std::decay_t<AllocArgs>> && ...))
-    explicit BaseVector(AllocArgs &&...allocArgs)
-        : Alloc(std::forward<AllocArgs>(allocArgs)...) {
+    explicit BaseVector(AllocArgs &&...VAllocArgs)
+        : Alloc(std::forward<AllocArgs>(VAllocArgs)...) {
         initializeStorage();
     }
 
     template <std::input_iterator It, std::sentinel_for<It> Sent>
-    BaseVector(It first, Sent last) {
+    BaseVector(It First, Sent Last) {
         initializeStorage();
-        appendRange(first, last);
+        appendRange(First, Last);
     }
 
-    BaseVector(std::initializer_list<T> init) {
+    BaseVector(std::initializer_list<T> Init) {
         initializeStorage();
-        appendRange(init.begin(), init.end());
+        appendRange(Init.begin(), Init.end());
     }
 
     ~BaseVector() {
@@ -89,19 +90,19 @@ class BaseVector : public Span<T, BaseSize>, protected Alloc {
 
     size_t capacity() const { return Capacity; }
 
-    void push_back(const T &Value) { emplace_back(Value); }
+    void pushBack(const T &Value) { emplaceBack(Value); }
 
-    void push_back(T &&Value) { emplace_back(std::move(Value)); }
+    void pushBack(T &&Value) { emplaceBack(std::move(Value)); }
 
     template <typename... Args>
-    T &emplace_back(Args &&...args) {
+    T &emplaceBack(Args &&...VArgs) {
         ensureCapacityFor(Base::size() + 1);
-        new (&Base::data()[Base::size()]) T(std::forward<Args>(args)...);
+        new (&Base::data()[Base::size()]) T(std::forward<Args>(VArgs)...);
         Base::setSize(Base::size() + 1);
         return Base::data()[Base::size() - 1];
     }
 
-    void pop_back() {
+    void popBack() {
         if (Base::size() == 0)
             return;
         size_t NewSize = Base::size() - 1;
@@ -137,26 +138,26 @@ class BaseVector : public Span<T, BaseSize>, protected Alloc {
 
     void reserve(size_t NewCapacity) { ensureCapacityFor(NewCapacity); }
 
-    typename Base::iterator erase(typename Base::iterator pos) {
-        if (pos == Base::end())
-            return pos;
+    typename Base::iterator erase(typename Base::iterator Pos) {
+        if (Pos == Base::end())
+            return Pos;
 
-        auto start = Base::data();
-        auto index = static_cast<size_t>(pos - start);
-        auto count = Base::size();
+        auto Start = Base::data();
+        auto Index = static_cast<size_t>(Pos - Start);
+        auto Count = Base::size();
 
         if constexpr (std::is_trivially_copyable_v<T>) {
-            std::memmove(start + index, start + index + 1, (count - index - 1) * sizeof(T));
+            std::memmove(Start + Index, Start + Index + 1, (Count - Index - 1) * sizeof(T));
         } else {
-            for (size_t i = index; i + 1 < count; ++i) {
-                start[i].~T();
-                new (&start[i]) T(std::move(start[i + 1]));
+            for (size_t i = Index; i + 1 < Count; ++i) {
+                Start[i].~T();
+                new (&Start[i]) T(std::move(Start[i + 1]));
             }
-            start[count - 1].~T();
+            Start[Count - 1].~T();
         }
 
-        Base::setSize(count - 1);
-        return start + index;
+        Base::setSize(Count - 1);
+        return Start + Index;
     }
 
   private:
@@ -179,7 +180,7 @@ class BaseVector : public Span<T, BaseSize>, protected Alloc {
     }
 
     void reallocate(size_t NewCapacity) {
-        T *NewData = static_cast<T *>(allocator().allocate_bytes(NewCapacity * sizeof(T), alignof(T)));
+        T *NewData = static_cast<T *>(allocator().allocateBytes(NewCapacity * sizeof(T), alignof(T)));
         relocateElements(NewData);
 
         releaseStorage();
@@ -227,14 +228,14 @@ class BaseVector : public Span<T, BaseSize>, protected Alloc {
         Other.Base::setSize(0);
     }
 
-    void appendRange(auto first, auto last) {
-        for (; first != last; ++first)
-            emplace_back(*first);
+    void appendRange(auto First, auto Last) {
+        for (; First != Last; ++First)
+            emplaceBack(*First);
     }
 
     void releaseStorage() {
         if (Base::data()) {
-            allocator().deallocate_bytes(Base::data(), Capacity * sizeof(T), alignof(T));
+            allocator().deallocateBytes(Base::data(), Capacity * sizeof(T), alignof(T));
             Base::setData(nullptr);
             Capacity = 0;
         }

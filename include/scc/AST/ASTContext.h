@@ -1,5 +1,5 @@
-#ifndef SCC_AST_ASTCONTEXT
-#define SCC_AST_ASTCONTEXT
+#ifndef SCC_AST_ASTCONTEXT_H
+#define SCC_AST_ASTCONTEXT_H
 
 #include <cstddef>
 #include <string_view>
@@ -28,11 +28,11 @@ class ASTContext {
     }
 
     template <typename T, typename... Args>
-    T *construct(Args &&...ArgsList) {
-        return allocator().construct<T>(std::forward<Args>(ArgsList)...);
+    T *construct(Args &&...VArgs) {
+        return allocator().construct<T>(std::forward<Args>(VArgs)...);
     }
 };
 
 } // namespace scc
 
-#endif // SCC_AST_ASTCONTEXT
+#endif // SCC_AST_ASTCONTEXT_H

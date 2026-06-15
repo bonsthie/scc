@@ -3,71 +3,71 @@
 
 using namespace scc;
 
-static bool matchesIndex(int index, std::initializer_list<int> indices) {
-    for (int candidate : indices) {
-        if (candidate == index)
+static bool matches_index(int Index, std::initializer_list<int> Indices) {
+    for (int Candidate : Indices) {
+        if (Candidate == Index)
             return true;
     }
     return false;
 }
 
-Arg *ArgsList::getArg(int index) const {
-    auto it = ValMap.find(index);
-    if (it == ValMap.end())
+Arg *ArgsList::getArg(int Index) const {
+    auto It = ValMap.find(Index);
+    if (It == ValMap.end())
         return nullptr;
-    return it->second.get();
+    return It->second.get();
 }
 
-const ArgOccurrence *ArgsList::getFirstOccurrenceOf(std::initializer_list<int> indices) const {
+const ArgOccurrence *ArgsList::getFirstOccurrenceOf(std::initializer_list<int> Indices) const {
     for (const auto &Occurrence : Occurrences) {
-        if (matchesIndex(Occurrence.Type, indices))
+        if (matches_index(Occurrence.Type, Indices))
             return &Occurrence;
     }
     return nullptr;
 }
 
-const ArgOccurrence *ArgsList::getLastOccurrenceOf(std::initializer_list<int> indices) const {
+const ArgOccurrence *ArgsList::getLastOccurrenceOf(std::initializer_list<int> Indices) const {
     for (size_t i = Occurrences.size(); i > 0; --i) {
         const auto &Occurrence = Occurrences[i - 1];
-        if (matchesIndex(Occurrence.Type, indices))
+        if (matches_index(Occurrence.Type, Indices))
             return &Occurrence;
     }
     return nullptr;
 }
 
-int ArgsList::countOccurrencesOf(std::initializer_list<int> indices) const {
+int ArgsList::countOccurrencesOf(std::initializer_list<int> Indices) const {
     int Count = 0;
 
     for (const auto &Occurrence : Occurrences) {
-        if (matchesIndex(Occurrence.Type, indices))
+        if (matches_index(Occurrence.Type, Indices))
             ++Count;
     }
     return Count;
 }
 
 void ArgsList::addArgFlag(std::unique_ptr<Arg> A, const std::string &Spelling) {
-    int index = A->getType();
-    Occurrences.push_back({index, Spelling});
+    int Index = A->getType();
+    Occurrences.pushBack({Index, Spelling});
 
-    if (Arg *a = getArg(index)) {
+    if (Arg *a = getArg(Index)) {
         switch (a->getValueType()) {
         case Arg::StrList: {
-            auto strs = A->getValuesList();
-            a->addValuesToList(strs);
+            auto Strs = A->getValuesList();
+            a->addValuesToList(Strs);
             return;
         }
         case Arg::Str: {
-            auto str = A->getValue();
-            a->setValueSingle(str);
+            auto Str = A->getValue();
+            a->setValueSingle(Str);
             return;
         }
         case Arg::None:
-            assert("this function should be use for Arg without argument");
+            static_assert("this function should be use for Arg without argument");
         }
     }
-    ValMap.emplace(index, std::move(A));
+    ValMap.emplace(Index, std::move(A));
 }
 
-void ArgsList::addFile(std::string_view File) { Files.push_back(File); }
+void ArgsList::addFile(std::string_view File) { Files.pushBack(File); }
 
-const scc::vector<std::string_view> &ArgsList::getFiles() const { return Files; }
+const scc::Vector<std::string_view> &ArgsList::getFiles() const { return Files; }

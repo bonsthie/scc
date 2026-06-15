@@ -10,7 +10,7 @@ using namespace scc;
 CompilerInstance *CompilerBuilder::create() { /* TODO replace by stdin */ return create("test.c"); }
 
 CompilerInstance *CompilerBuilder::create(File *MainFile) {
-    auto Act = selectForntendAction();
+    auto *Act = selectForntendAction();
     if (Act == nullptr)
         return nullptr;
 

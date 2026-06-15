@@ -1,5 +1,5 @@
-#ifndef SCC_ALLOCATOR_BASIC_ALLOCATOR_H
-#define SCC_ALLOCATOR_BASIC_ALLOCATOR_H
+#ifndef SCC_ALLOCATOR_BASICALLOCATOR_H
+#define SCC_ALLOCATOR_BASICALLOCATOR_H
 
 #include <cstddef>
 #include <new>
@@ -10,36 +10,36 @@ namespace scc {
 
 class BasicAllocator : public Allocator {
   public:
-    static void *allocateRaw(size_t size, size_t alignment = alignof(std::max_align_t)) {
-        void *ptr = nullptr;
+    static void *allocateRaw(size_t Size, size_t Alignment = alignof(std::max_align_t)) {
+        void *Ptr = nullptr;
 #if __cpp_aligned_new
-        ptr = ::operator new(size, std::align_val_t(alignment));
+        Ptr = ::operator new(Size, std::align_val_t(Alignment));
 #else
         ptr = ::operator new(size);
 #endif
-        return ptr;
+        return Ptr;
     }
 
-    static void deallocateRaw(void *ptr, size_t size, size_t alignment = alignof(std::max_align_t)) {
-        (void)size;
-        if (!ptr)
+    static void deallocateRaw(void *Ptr, size_t Size, size_t Alignment = alignof(std::max_align_t)) {
+        (void)Size;
+        if (!Ptr)
             return;
 #if __cpp_aligned_new
-        ::operator delete(ptr, std::align_val_t(alignment));
+        ::operator delete(Ptr, std::align_val_t(Alignment));
 #else
         ::operator delete(ptr);
 #endif
     }
 
-    void *allocate_bytes(size_t size, size_t alignment = alignof(std::max_align_t)) override {
-        return allocateRaw(size, alignment);
+    void *allocateBytes(size_t Size, size_t Alignment = alignof(std::max_align_t)) override {
+        return allocateRaw(Size, Alignment);
     }
 
-    void deallocate_bytes(void *ptr, size_t size, size_t alignment = alignof(std::max_align_t)) override {
-        deallocateRaw(ptr, size, alignment);
+    void deallocateBytes(void *Ptr, size_t Size, size_t Alignment = alignof(std::max_align_t)) override {
+        deallocateRaw(Ptr, Size, Alignment);
     }
 };
 
 } // namespace scc
 
-#endif // SCC_ALLOCATOR_BASIC_ALLOCATOR_H
+#endif // SCC_ALLOCATOR_BASICALLOCATOR_H

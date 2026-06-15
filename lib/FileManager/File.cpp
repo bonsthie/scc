@@ -10,12 +10,12 @@ File::File(const FileID &FID) : FID(FID) {
         return;
     }
 
-    struct stat st;
-    if (fstat(FD, &st) < 0) {
+    struct stat St;
+    if (fstat(FD, &St) < 0) {
         FStatus = F_STAT;
         return;
     }
-    FileSize = st.st_size;
+    FileSize = St.st_size;
 
     Data = (char *)mmap(nullptr, FileSize, PROT_READ, MAP_PRIVATE, FD, 0);
     if (Data == MAP_FAILED) {

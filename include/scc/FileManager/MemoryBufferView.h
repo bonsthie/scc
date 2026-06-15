@@ -55,10 +55,10 @@ class MemoryBufferView {
   public:
     explicit MemoryBufferView(const char *Data, size_t Size) noexcept : Data(Data), Size(Size) {}
     MemoryBufferView(MemoryBufferView &&o) noexcept;
-    MemoryBufferView(MemoryBufferView &o) noexcept;
+    MemoryBufferView(const MemoryBufferView &o) noexcept;
     ~MemoryBufferView() = default;
 
-    MemoryBufferView &operator=(MemoryBufferView &o) noexcept;
+    MemoryBufferView &operator=(const MemoryBufferView &o) noexcept;
     MemoryBufferView &operator=(MemoryBufferView &&o) noexcept;
 
     const char &operator[](const size_t Idx) const { return Data[Idx]; }
@@ -68,7 +68,7 @@ class MemoryBufferView {
     size_t      size() const { return Size; }
     const char *raw() const { return Data; }
     const char *end() const { return Data + Size; }
-    char        operator[](int idx) { return Data[idx]; }
+    char        operator[](int Idx) { return Data[Idx]; }
 };
 
 } // namespace scc

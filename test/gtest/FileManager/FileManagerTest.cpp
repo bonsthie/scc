@@ -46,7 +46,7 @@ class FileManagerTest : public ::testing::Test {
         ASSERT_EQ(fs::current_path(), tempDir);
 
         // System include path points to tempDir/foo
-        scc::vector<std::string> sysPaths = {(tempDir / "foo").string()};
+        scc::Vector<std::string> sysPaths = {(tempDir / "foo").string()};
         FF = std::make_unique<FileFinder>(sysPaths);
 
         EM = std::make_unique<scc::ErrorManager>();

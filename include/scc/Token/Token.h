@@ -1,5 +1,5 @@
-#ifndef SCCLEXTOKEN_H
-#define SCCLEXTOKEN_H
+#ifndef SCC_TOKEN_TOKEN_H
+#define SCC_TOKEN_TOKEN_H
 
 #include "scc/FileManager/FileID.h"
 #include "scc/FileManager/MemoryBufferView.h"
@@ -41,7 +41,7 @@ class Token {
     void setValue(std::string_view Word) { Value = Word; };
     void setFileID(FileID *ID) { Range.FID = ID; }
 
-    void setDirty(bool value) { IsDirty = value; }
+    void setDirty(bool Value) { IsDirty = Value; }
     bool isDirty() const { return IsDirty; }
     void setDirtyValue(std::string_view Word) { DirtyValue = Word; };
 
@@ -80,7 +80,7 @@ class Token {
 // use a hash map of all the word is a Keyword and setup the CurTok
 void create_keyword_token(Token &CurTok);
 
-std::string clean_token(std::string_view str);
+std::string clean_token(std::string_view Str);
 
 std::string stringify_token_kind(tok::TokenKind Kind);
 std::string token_spelling(tok::TokenKind Kind);
@@ -90,4 +90,4 @@ std::ostream &operator<<(std::ostream &OS, const Token &T);
 
 } // namespace scc
 
-#endif // SCCLEXTOKEN_H
+#endif // SCC_TOKEN_TOKEN_H

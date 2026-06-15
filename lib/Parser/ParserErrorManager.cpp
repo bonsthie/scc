@@ -4,7 +4,7 @@
 
 using namespace scc;
 
-static std::string tokenForDiag(const Token &Tok) {
+static std::string token_for_diag(const Token &Tok) {
     if (!Tok.getValue().empty())
         return std::string(Tok.getValue());
     return token_spelling(Tok.getTokenKind());
@@ -16,7 +16,7 @@ Error &ParserErrorManager::expectedXButGotY(tok::TokenKind Expected, const Token
         .msg("expected '")
         .msg(token_spelling(Expected))
         .msg("' but got '")
-        .msg(tokenForDiag(Got))
+        .msg(token_for_diag(Got))
         .msg("'");
 }
 

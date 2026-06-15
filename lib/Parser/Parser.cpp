@@ -1,8 +1,8 @@
 #include "scc/Parser/Parser.h"
 #include "scc/ADT/vector.h"
 #include "scc/Error/Error.h"
-#include "scc/Sema/ParsedDeclarator.h"
 #include "scc/Sema/ParsedDeclSpec.h"
+#include "scc/Sema/ParsedDeclarator.h"
 
 using namespace scc;
 
@@ -32,17 +32,7 @@ void Parser::skipUntilDeclarationEnd() {
         next();
 }
 
-bool isType(tok::TokenKind TK) {
-    switch (TK) {
-#define TYPE_KEYWORD(X) case tok::t_##X:
-#include "scc/Token/TokenKinds.def"
-        return true;
-    default:
-        return false;
-    }
-}
-
-static bool unknownIdentifierLooksLikeTypeSpecifier(const Token &Next) {
+static bool unknown_identifier_looks_like_type_specifier(const Token &Next) {
     return Next.is(tok::identifier, tok::star, tok::l_paren);
 }
 
@@ -64,7 +54,7 @@ ParsedDeclSpec Parser::parseDeclSpec() {
                 return DS;
 
             const Type *T = Action.getTypeSpecifierType(CurTok);
-            if (T->isUnknow() && !unknownIdentifierLooksLikeTypeSpecifier(peek())) {
+            if (T->isUnknow() && !unknown_identifier_looks_like_type_specifier(peek())) {
                 DS.setTypeSpecifier(nullptr, CurTok.getRange(), CurTok.getValue());
                 return DS;
             }
@@ -186,6 +176,25 @@ ParsedDeclSpec Parser::parseDeclSpec() {
     return DS;
 }
 
+
+// tok = '(' parseParenRAIIScope
+// tok = '*' parsePointer
+// tok = '(' parseParenRAIIScope
+// tok = '*' parsePointer
+// tok = 'f' parseNamePointer
+// tok = ')' exit the RAII
+// tok = '(' parseParenRAIIScope / parse func
+// tok = 'int' parseArgsFuncDeclarator
+// tok = ')' exit the RAII
+// tok = ')' exit the RAII
+// tok = '[' parseTable
+// tok = ']' parseTableEnd
+// tok = ';' end def
+// build a function point type int (f)(int)
+// build a point on int (f)(int)
+// build a a table of pointer of int (f)(int)
+// build a point on table of pointer of int (f)(int)
+
 // fist token of the Declarator should be in CurTok
 ParsedDeclarator Parser::parseDeclarator() {
     ParsedDeclarator D;
@@ -223,7 +232,7 @@ DeclList Parser::parseDeclaration() {
 
         Decl *Res = Action.actOnDeclarator(DS, D);
         if (Res)
-            Decls.push_back(Res);
+            Decls.pushBack(Res);
     } while (consumeIf(tok::comma) && !next());
 
     if (!expect(tok::semi))

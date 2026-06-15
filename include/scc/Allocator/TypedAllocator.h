@@ -12,28 +12,28 @@ class TypedAllocator {
 
 public:
     TypedAllocator() = default;
-    explicit TypedAllocator(Allocator &alloc) : AllocPtr(&alloc) {}
-    explicit TypedAllocator(Allocator *alloc) {
-        if (alloc)
-            AllocPtr = alloc;
+    explicit TypedAllocator(Allocator &Alloc) : AllocPtr(&Alloc) {}
+    explicit TypedAllocator(Allocator *Alloc) {
+        if (Alloc)
+            AllocPtr = Alloc;
     }
 
-    void resetAllocator(Allocator &alloc) { AllocPtr = &alloc; }
+    void resetAllocator(Allocator &Alloc) { AllocPtr = &Alloc; }
 
-    void *allocate_bytes(size_t size, size_t alignment = alignof(std::max_align_t)) {
-        return allocator().allocate_bytes(size, alignment);
+    void *allocateBytes(size_t Size, size_t Alignment = alignof(std::max_align_t)) {
+        return allocator().allocateBytes(Size, Alignment);
     }
 
-    void deallocate_bytes(void *ptr, size_t size, size_t alignment = alignof(std::max_align_t)) {
-        allocator().deallocate_bytes(ptr, size, alignment);
+    void deallocateBytes(void *Ptr, size_t Size, size_t Alignment = alignof(std::max_align_t)) {
+        allocator().deallocateBytes(Ptr, Size, Alignment);
     }
 
-    T *allocate(size_t n = 1) {
-        return static_cast<T *>(allocate_bytes(sizeof(T) * n, alignof(T)));
+    T *allocate(size_t N = 1) {
+        return static_cast<T *>(allocateBytes(sizeof(T) * N, alignof(T)));
     }
 
-    void deallocate(T *ptr, size_t n = 1) {
-        deallocate_bytes(ptr, sizeof(T) * n, alignof(T));
+    void deallocate(T *Ptr, size_t N = 1) {
+        deallocateBytes(Ptr, sizeof(T) * N, alignof(T));
     }
 
   private:

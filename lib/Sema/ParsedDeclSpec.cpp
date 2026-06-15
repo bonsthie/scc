@@ -3,9 +3,7 @@
 
 using namespace scc;
 
-namespace {
-
-void print_word(std::ostream &O, bool &NeedsSpace, std::string_view Word) {
+static void print_word(std::ostream &O, bool &NeedsSpace, std::string_view Word) {
     if (Word.empty())
         return;
     if (NeedsSpace)
@@ -13,8 +11,6 @@ void print_word(std::ostream &O, bool &NeedsSpace, std::string_view Word) {
     O << Word;
     NeedsSpace = true;
 }
-
-} // namespace
 
 bool ParsedDeclSpec::hasStorageSpecifier() const {
     return StorageClass != StorageClassSpecifier::Unspecified;

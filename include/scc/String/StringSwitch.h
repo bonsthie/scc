@@ -14,13 +14,13 @@ class StringSwitch {
   public:
     explicit StringSwitch(std::string_view s) : S(s) {}
 
-    StringSwitch &Case(std::string_view lit, const T &v) {
-        if (!Res && S == lit)
+    StringSwitch &caseValue(std::string_view Lit, const T &v) {
+        if (!Res && S == Lit)
             Res = v;
         return *this;
     }
 
-    T Default(const T &v) const { return Res.value_or(v); }
+    T defaultValue(const T &v) const { return Res.value_or(v); }
 
     operator T() const { return *Res; }
 };

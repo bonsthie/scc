@@ -43,8 +43,8 @@ class SccOptionTable : public OptionTable {
 };
 
 // Convenience: build argv vector (already skipping argv[0])
-static scc::vector<const char *> mkArgv(std::initializer_list<const char *> args) {
-    return scc::vector<const char *>{args};
+static scc::Vector<const char *> mkArgv(std::initializer_list<const char *> args) {
+    return scc::Vector<const char *>{args};
 }
 
 TEST(SccOptionTable, ParsesFlagTest) {

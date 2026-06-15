@@ -1,5 +1,5 @@
-#ifndef SCC_ALLOCATOR_STACK_GROW_ALLOCATOR_H
-#define SCC_ALLOCATOR_STACK_GROW_ALLOCATOR_H
+#ifndef SCC_ALLOCATOR_STACKGROWALLOCATOR_H
+#define SCC_ALLOCATOR_STACKGROWALLOCATOR_H
 
 #include <cstddef>
 #include <memory>
@@ -16,45 +16,45 @@ class StackGrowAllocator : public Allocator {
 
     static constexpr size_t InlineStackBytes = DefaultStackBytes;
 
-    explicit StackGrowAllocator(size_t stackBytes = InlineStackBytes)
-        : StackCapacity(sanitizeStackBytes(stackBytes)) {}
+    explicit StackGrowAllocator(size_t StackBytes = InlineStackBytes)
+        : StackCapacity(sanitizeStackBytes(StackBytes)) {}
 
     StackGrowAllocator(const StackGrowAllocator &) = delete;
     StackGrowAllocator &operator=(const StackGrowAllocator &) = delete;
 
-    void *allocate_bytes(size_t size, size_t alignment = alignof(std::max_align_t)) override {
-        std::byte *candidate = StackStorage + StackOffset;
-        size_t     space = StackCapacity - StackOffset;
-        void      *aligned = candidate;
+    void *allocateBytes(size_t Size, size_t Alignment = alignof(std::max_align_t)) override {
+        std::byte *Candidate = StackStorage + StackOffset;
+        size_t     Space = StackCapacity - StackOffset;
+        void      *Aligned = Candidate;
 
-        if (std::align(alignment, size, aligned, space)) {
-            auto *bytePtr = static_cast<std::byte *>(aligned);
-            StackOffset = static_cast<size_t>(bytePtr - StackStorage) + size;
-            return bytePtr;
+        if (std::align(Alignment, Size, Aligned, Space)) {
+            auto *BytePtr = static_cast<std::byte *>(Aligned);
+            StackOffset = static_cast<size_t>(BytePtr - StackStorage) + Size;
+            return BytePtr;
         }
 
-        return BasicAllocator::allocateRaw(size, alignment);
+        return BasicAllocator::allocateRaw(Size, Alignment);
     }
 
-    void deallocate_bytes(void *ptr, size_t size,
-                          size_t alignment = alignof(std::max_align_t)) override {
-        (void)alignment;
-        if (!ptr)
+    void deallocateBytes(void *Ptr, size_t Size,
+                          size_t Alignment = alignof(std::max_align_t)) override {
+        (void)Alignment;
+        if (!Ptr)
             return;
 
-        std::byte *bytePtr = static_cast<std::byte *>(ptr);
-        std::byte *begin = StackStorage;
-        std::byte *end = begin + StackCapacity;
+        std::byte *BytePtr = static_cast<std::byte *>(Ptr);
+        std::byte *Begin = StackStorage;
+        std::byte *End = Begin + StackCapacity;
 
-        if (bytePtr >= begin && bytePtr < end) {
-            size_t allocStart = static_cast<size_t>(bytePtr - begin);
-            size_t allocEnd = allocStart + size;
-            if (allocEnd == StackOffset)
-                StackOffset = allocStart;
+        if (BytePtr >= Begin && BytePtr < End) {
+            size_t AllocStart = static_cast<size_t>(BytePtr - Begin);
+            size_t AllocEnd = AllocStart + Size;
+            if (AllocEnd == StackOffset)
+                StackOffset = AllocStart;
             return;
         }
 
-        BasicAllocator::deallocateRaw(ptr, size, alignment);
+        BasicAllocator::deallocateRaw(Ptr, Size, Alignment);
     }
 
     void reset() override { StackOffset = 0; }
@@ -63,10 +63,10 @@ class StackGrowAllocator : public Allocator {
     size_t stackBytesCapacity() const { return StackCapacity; }
 
   private:
-    static constexpr size_t sanitizeStackBytes(size_t value) {
-        if (value == 0 || value > InlineStackBytes)
+    static constexpr size_t sanitizeStackBytes(size_t Value) {
+        if (Value == 0 || Value > InlineStackBytes)
             return InlineStackBytes;
-        return value;
+        return Value;
     }
 
     alignas(AlignSize) std::byte StackStorage[InlineStackBytes];
@@ -79,4 +79,4 @@ StackGrowAllocator(size_t) -> StackGrowAllocator<>;
 
 } // namespace scc
 
-#endif // SCC_ALLOCATOR_STACK_GROW_ALLOCATOR_H
+#endif // SCC_ALLOCATOR_STACKGROWALLOCATOR_H

@@ -41,19 +41,19 @@ class Error {
     Error &operator=(Error &&) noexcept = default;
     virtual ~Error() = default;
 
-    Error &msg(const std::string &msg) {
-        Msg << msg;
+    Error &msg(const std::string &Message) {
+        Msg << Message;
         return *this;
     }
 
-    Error &quote(const std::string &msg) {
-        Msg << "\"" << msg << "\"";
+    Error &quote(const std::string &Message) {
+        Msg << "\"" << Message << "\"";
         return *this;
     }
 
     std::ostringstream &msg() { return Msg; }
 
-    Error &Char(char c) {
+    Error &quoteChar(char c) {
         Msg << "'" << c << "'";
         return *this;
     }

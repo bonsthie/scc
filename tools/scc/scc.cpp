@@ -20,17 +20,17 @@ using namespace scc;
 
 namespace {
 
-void configureColor(const ArgsList &Args) { Color::setDisable(!Args.hasArg(Opt_disable_colors)); }
+void configure_color(const ArgsList &Args) { Color::setDisable(!Args.hasArg(Opt_disable_colors)); }
 
 } // namespace
 
-bool cc1(int argc, char **argv, char **) {
+bool cc1(int Argc, char **Argv, char **) {
     FrontendErrorManager EM;
     SccOptionTable Opt(EM);
 
-    std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::vector<const char *>(argv + 2, argv + argc)));
+    std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::Vector<const char *>(Argv + 2, Argv + Argc)));
     if (Args)
-        configureColor(*Args);
+        configure_color(*Args);
     if (EM.emit() || !Args)
         return 1;
 
@@ -43,7 +43,7 @@ bool cc1(int argc, char **argv, char **) {
     StringInterner SI(BumpAlloca);
 
     auto        Inc = Args->getArg(Opt_I);
-    FileFinder  FF(Inc ? Inc->getValuesList() : scc::vector<std::string>{});
+    FileFinder  FF(Inc ? Inc->getValuesList() : scc::Vector<std::string>{});
     FileManager FM(FF, EM);
 
     CompilerBuilder Builder(FM, EM, *Args);
@@ -69,7 +69,7 @@ bool cc1(int argc, char **argv, char **) {
         return EM.emit();
     }
 
-    return CI->Execute();
+    return CI->execute();
 }
 
 int main(int argc, char **argv, char **env) {
@@ -80,16 +80,16 @@ int main(int argc, char **argv, char **env) {
     FrontendErrorManager EM;
     SccOptionTable Opt(EM);
 
-    std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::vector<const char *>(argv + 1, argv + argc)));
+    std::unique_ptr<ArgsList> Args(Opt.parseArgs(scc::Vector<const char *>(argv + 1, argv + argc)));
     if (Args)
-        configureColor(*Args);
+        configure_color(*Args);
     if (!Args)
         return 10;
     EM.emit();
     // return 1;
 
     auto        Inc = Args->getArg(Opt_I);
-    FileFinder  FF(Inc ? Inc->getValuesList() : scc::vector<std::string>{});
+    FileFinder  FF(Inc ? Inc->getValuesList() : scc::Vector<std::string>{});
     FileManager FM(FF, EM);
 
     File *F = FM.getFile("LexerTest.c");

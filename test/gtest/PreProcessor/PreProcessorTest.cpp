@@ -46,13 +46,13 @@ class TempDir {
     std::filesystem::path Path;
 };
 
-scc::vector<tok::TokenKind> lexAllTokens(PreProcessor &PP) {
-    scc::vector<tok::TokenKind> Kinds;
+scc::Vector<tok::TokenKind> lexAllTokens(PreProcessor &PP) {
+    scc::Vector<tok::TokenKind> Kinds;
     Token                       Tok;
 
     while (true) {
         bool ShouldStop = PP.next(Tok);
-        Kinds.push_back(Tok.getTokenKind());
+        Kinds.pushBack(Tok.getTokenKind());
         if (Tok.is(tok::eof))
             break;
         EXPECT_FALSE(ShouldStop);
@@ -86,7 +86,7 @@ TEST(PreProcessorTest, HandlesLocalIncludes) {
     PreProcessor PP(*MainFile, EM, FM, SI);
     auto         Kinds = lexAllTokens(PP);
 
-    scc::vector<tok::TokenKind> Expected = {tok::t_int, tok::identifier, tok::semi, // from header
+    scc::Vector<tok::TokenKind> Expected = {tok::t_int, tok::identifier, tok::semi, // from header
                                             tok::t_int, tok::identifier, tok::semi, tok::eof};
 
     EXPECT_EQ(Kinds, Expected);

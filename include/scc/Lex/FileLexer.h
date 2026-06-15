@@ -64,26 +64,26 @@ class FileLexer : public TokenStream {
     SizedChar handleTrigraph(const char *Ptr, bool EmitWarning);
     void      reportTrigraphWarning(const char *Ptr, int TrigraphValue, bool Converted);
     void      consumeChar(void);
-    void      consumeChar(SizedChar sc);
-    void      consumeChar(int size);
+    void      consumeChar(SizedChar Sc);
+    void      consumeChar(int Size);
 
     template <typename... Args>
-    bool consumeIfIs(int c, Args... chars) {
-        int    expected[] = {c, chars...};
-        size_t offset = 0;
-        size_t total = 0;
+    bool consumeIfIs(int c, Args... Chars) {
+        int    Expected[] = {c, Chars...};
+        size_t Offset = 0;
+        size_t Total = 0;
 
-        for (int ch : expected) {
-            SizedChar sc = peakCharAtIdx(offset);
-            if (sc.value != ch)
+        for (int Ch : Expected) {
+            SizedChar Sc = peakCharAtIdx(Offset);
+            if (Sc.Value != Ch)
                 return false;
-            if (sc.size > 1)
+            if (Sc.Size > 1)
                 ParseDirtyToken = true;
-            offset += sc.size;
-            total += sc.size;
+            Offset += Sc.Size;
+            Total += Sc.Size;
         }
 
-        consumeChar(total);
+        consumeChar(Total);
         return true;
     }
 
@@ -92,13 +92,13 @@ class FileLexer : public TokenStream {
     bool consumeCharUntil(int c, std::string &Str);
 
     // return the true and consume it only if equal to c
-    bool ConsumeCharIfEqual(int c);
+    bool consumeCharIfEqual(int c);
 
-    inline int getCharIfOneOf(int c) { return ConsumeCharIfEqual(c) ? c : 0; }
+    inline int getCharIfOneOf(int c) { return consumeCharIfEqual(c) ? c : 0; }
 
     template <typename... Args>
     int getCharIfOneOf(int c, Args... Next) {
-        if (ConsumeCharIfEqual(c))
+        if (consumeCharIfEqual(c))
             return c;
         return getCharIfOneOf(Next...);
     }
@@ -109,7 +109,7 @@ class FileLexer : public TokenStream {
     bool handleString(Token &CurTok, SizedChar LastChar);
     bool handleChar(Token &CurTok, SizedChar LastChar);
 
-    inline size_t LexSign(Token &CurTok, SizedChar LastChar);
+    inline size_t lexSign(Token &CurTok, SizedChar LastChar);
 
     std::string_view makeStringView(const MemoryViewPos &Begin, const MemoryViewPos &End) const;
     void             setTokenValue(Token &CurTok, const MemoryViewPos &End);

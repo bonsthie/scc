@@ -1,5 +1,5 @@
-#ifndef SCC_ALLOCATOR_BUMP_ALLOCATOR_H
-#define SCC_ALLOCATOR_BUMP_ALLOCATOR_H
+#ifndef SCC_ALLOCATOR_BUMPALLOCATOR_H
+#define SCC_ALLOCATOR_BUMPALLOCATOR_H
 
 #include <cstddef>
 #include <memory>
@@ -11,7 +11,7 @@ namespace scc {
 
 class BumpAllocator : public Allocator {
   public:
-    explicit BumpAllocator(size_t chunk_size = 1024 * 1024) : chunkSize(chunk_size) {
+    explicit BumpAllocator(size_t ChunkSize = 1024 * 1024) : ChunkSize(ChunkSize) {
         allocChunk();
     }
 
@@ -19,26 +19,27 @@ class BumpAllocator : public Allocator {
     BumpAllocator &operator=(const BumpAllocator &) = delete;
 
     void reset() override {
-        for (auto &chunk : chunks) {
-            chunk.offset = 0;
+        for (auto &Chunk : Chunks) {
+            Chunk.Offset = 0;
         }
-        currentChunkIdx = 0;
+        CurrentChunkIdx = 0;
     }
+
+    void *allocateBytes(size_t Size, size_t Alignment = alignof(std::max_align_t)) override;
 
   private:
     struct Chunk {
-        std::unique_ptr<std::byte[]> data;
-        size_t                       offset = 0;
+        std::unique_ptr<std::byte[]> Data;
+        size_t                       Offset = 0;
     };
 
-    void *allocate_bytes(size_t size, size_t alignment = alignof(std::max_align_t)) override;
     void  allocChunk();
 
-    scc::vector<Chunk> chunks;
-    size_t             currentChunkIdx = 0;
-    size_t             chunkSize;
+    scc::Vector<Chunk> Chunks;
+    size_t             CurrentChunkIdx = 0;
+    size_t             ChunkSize;
 };
 
 } // namespace scc
 
-#endif // SCC_ALLOCATOR_BUMP_ALLOCATOR_H
+#endif // SCC_ALLOCATOR_BUMPALLOCATOR_H

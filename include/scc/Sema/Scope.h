@@ -38,17 +38,17 @@ class Scope {
 // also `we need to think about the RecordScope mode
 
 class ScopeMgr {
-    scc::vector<Scope<Decl>> DeclScopes;
-    scc::vector<Scope<Type>> TypeScopes;
+    scc::Vector<Scope<Decl>> DeclScopes;
+    scc::Vector<Scope<Type>> TypeScopes;
 
   public:
     void popScope() {
-        DeclScopes.pop_back();
-        TypeScopes.pop_back();
+        DeclScopes.popBack();
+        TypeScopes.popBack();
     }
     void newScope() {
-        DeclScopes.emplace_back();
-        TypeScopes.emplace_back();
+        DeclScopes.emplaceBack();
+        TypeScopes.emplaceBack();
     }
 
     bool addDecl(std::string_view Name, Decl *D);

@@ -1,5 +1,5 @@
-#ifndef SCC_AST_ASTCONSUMER
-#define SCC_AST_ASTCONSUMER
+#ifndef SCC_AST_ASTCONSUMER_H
+#define SCC_AST_ASTCONSUMER_H
 
 #include "scc/AST/Decl.h"
 #include <iostream>
@@ -39,4 +39,4 @@ class SyntaxOnlyConsumer final : public ASTConsumer {
 
 } // namespace scc
 
-#endif // SCC_AST_ASTCONSUMER
+#endif // SCC_AST_ASTCONSUMER_H

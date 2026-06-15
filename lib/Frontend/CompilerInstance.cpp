@@ -1,7 +1,7 @@
 #include "scc/Frontend/CompilerInstance.h"
 
-#include "scc/Frontend/FrontendAction.h"
 #include "scc/AST/ASTContext.h"
+#include "scc/Frontend/FrontendAction.h"
 
 using namespace scc;
 
@@ -17,4 +17,4 @@ CompilerInstance::CompilerInstance(FileManager &FM, FrontendErrorManager &EM,
 
 CompilerInstance::~CompilerInstance() = default;
 
-bool CompilerInstance::Execute() { return Act->Execute(*this); }
+bool CompilerInstance::execute() { return Act->execute(*this); }

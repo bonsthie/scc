@@ -1,4 +1,4 @@
-
+// This is an X-macro file and must be re-enterable. NOLINT(llvm-header-guard)
 #ifndef FLAG
 #    ifdef OPT_ENUM
 #        define FLAG(Enum, FlagType, Kind, VType, Desc, Hidden) Opt_##Enum,

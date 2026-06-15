@@ -14,15 +14,15 @@ namespace scc {
 enum class OptKind { Flag, Joined, Separate, JoinedOrSeparate, Equal };
 enum class ValType { None, Str, StrList };
 
-using ArgvIt = scc::vector<const char *>::const_iterator;
+using ArgvIt = scc::Vector<const char *>::const_iterator;
 
 struct OptionSpec {
-    int         key;      // Opt_target, Opt_inc, Opt_o
-    const char *spelling; // "-I", "-D", "-O", "--std=", "-Wl,", ...
-    OptKind     kind;
-    ValType     vtype;
-    const char *help;
-    bool        hidde = false; // his the option display in --help. use for file extension
+    int         Key;      // Opt_target, Opt_inc, Opt_o
+    const char *Spelling; // "-I", "-D", "-O", "--std=", "-Wl,", ...
+    OptKind     Kind;
+    ValType     Vtype;
+    const char *Help;
+    bool        Hidde = false; // his the option display in --help. use for file extension
 };
 
 class OptionTable {
@@ -33,14 +33,14 @@ class OptionTable {
     OptionTable(ErrorManager &EM) : EM(EM) {}
     ~OptionTable() = default;
 
-    ArgsList *parseArgs(const scc::vector<const char *> &argv);
+    ArgsList *parseArgs(const scc::Vector<const char *> &Argv);
 
     void printOpt(std::ostream &O);
 
   private:
-    std::string printHasOption(OptKind kind);
+    std::string printHasOption(OptKind Kind);
 
-    std::unique_ptr<Arg> nextArg(ArgvIt &it, ArgvIt end, std::string *MatchedSpelling = nullptr);
+    std::unique_ptr<Arg> nextArg(ArgvIt &It, ArgvIt End, std::string *MatchedSpelling = nullptr);
 };
 
 } // namespace scc

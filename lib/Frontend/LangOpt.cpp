@@ -51,11 +51,11 @@ LangVersion LangOptBuilder::getCVersion() {
         return LangDefault;
 
     LangVersion LV = StringSwitch<LangVersion>(STD->getValue())
-                         .Case("c89", LangVersion::C89)
-                         .Case("gnu89", LangVersion::GNU89)
-                         .Case("gnu99", LangVersion::GNU99)
-                         .Case("c99", LangVersion::C99)
-                         .Default(LangVersion::UNKONW);
+                         .caseValue("c89", LangVersion::C89)
+                         .caseValue("gnu89", LangVersion::GNU89)
+                         .caseValue("gnu99", LangVersion::GNU99)
+                         .caseValue("c99", LangVersion::C99)
+                         .defaultValue(LangVersion::UNKONW);
 
     if (LV == LangVersion::UNKONW) {
         const std::string &STDValue = STD->getValue();

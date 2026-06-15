@@ -46,7 +46,7 @@ class FileFinderTest : public ::testing::Test {
         ASSERT_EQ(fs::current_path(), tempDir);
 
         // System include path points to tempDir/foo
-        scc::vector<std::string> paths = {(tempDir / "foo").string()};
+        scc::Vector<std::string> paths = {(tempDir / "foo").string()};
         FF = std::make_unique<FileFinder>(paths);
     }
 

@@ -1,5 +1,5 @@
-#ifndef SCC_FILEMANGER_FILEFINDER_H
-#define SCC_FILEMANGER_FILEFINDER_H
+#ifndef SCC_FILEMANAGER_FILEFINDER_H
+#define SCC_FILEMANAGER_FILEFINDER_H
 
 #include <atomic>
 #include <filesystem>
@@ -15,7 +15,7 @@ namespace scc {
 class FileFinder {
 
     // use for system path include <foo.h> or -internal-isystem
-    scc::vector<std::filesystem::path>        SystemPaths;
+    scc::Vector<std::filesystem::path>        SystemPaths;
     std::unordered_map<std::string, FileID &> SystemPathFiles;
 
     std::unordered_map<std::string, FileID> AbsPathFiles;
@@ -23,7 +23,7 @@ class FileFinder {
     std::atomic_int ID = 0;
 
   public:
-    FileFinder(const scc::vector<std::string> &SysPaths);
+    FileFinder(const scc::Vector<std::string> &SysPaths);
 
     /// return the FileID for the Name file from the BaseFile or the System path
     FileID *getFileID(const std::string &Name, const FileID &BaseFile);
@@ -33,16 +33,16 @@ class FileFinder {
     FileID *getSystemFileID(const std::string &Name);
 
     void addSystemPath(const std::string &SysPath);
-    void addSystemPaths(const scc::vector<std::string> &SysPaths);
+    void addSystemPaths(const scc::Vector<std::string> &SysPaths);
 
   private:
     FileID *openNewSystemFile(const std::string &Name);
     // create a FileID for a new File (Name) base on relative path
     FileID *openNewRelativeFileFromAbsPath(const std::string &Name);
 
-    std::string absolutePath(const std::string &path);
+    std::string absolutePath(const std::string &Path);
 };
 
 } // namespace scc
 
-#endif // SCC_FILEMANGER_FILEFINDER_H
+#endif // SCC_FILEMANAGER_FILEFINDER_H

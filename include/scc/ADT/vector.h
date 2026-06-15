@@ -21,7 +21,7 @@ class SmallVector : public BaseVector<T, StackSize, SmallVectorAllocator<T, Stac
 };
 
 template <typename T, size_t StackSize = 16>
-class vector : public BaseVector<T, StackSize, BasicAllocator> {
+class Vector : public BaseVector<T, StackSize, BasicAllocator> {
     using Base = BaseVector<T, StackSize, BasicAllocator>;
 
   public:

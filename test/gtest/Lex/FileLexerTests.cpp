@@ -74,12 +74,12 @@ class FileLexTests : public ::testing::Test {
         ASSERT_EQ(B.Column, p.Column);
     }
 
-    static bool drainToEOF(scc::FileLexer &FL, scc::vector<tok::TokenKind> &out) {
+    static bool drainToEOF(scc::FileLexer &FL, scc::Vector<tok::TokenKind> &out) {
         Token TK;
         bool  err = false;
         do {
             err = FL.next(TK) || err;
-            out.push_back(TK.getTokenKind());
+            out.pushBack(TK.getTokenKind());
         } while (TK.getTokenKind() != tok::eof);
         return err;
     }
@@ -158,14 +158,14 @@ TEST_F(FileLexTests, All_C_Keywords_TokenizeAsKeywords) {
 
     // Build a space-separated input of all keywords
     std::string                src;
-    scc::vector<tok::TokenKind> kinds;
+    scc::Vector<tok::TokenKind> kinds;
     for (auto &c : KWS) {
         if (!src.empty())
             src.push_back(' ');
         src += c.kw;
-        kinds.push_back(c.kind);
+        kinds.pushBack(c.kind);
     }
-    kinds.push_back(tok::eof);
+    kinds.pushBack(tok::eof);
 
     auto  FL = create_lexer(src.c_str());
     Token TK;
@@ -264,7 +264,7 @@ TEST_F(FileLexTests, NestedBlockComment_Unsupported_ProducesTokensAfterInnerClos
 
 TEST_F(FileLexTests, NestedBlockComment_Unsupported_ProducesSomeErrorOrTokens) {
     auto                        FL = create_lexer("/* a /* b */ c */");
-    scc::vector<tok::TokenKind> kinds;
+    scc::Vector<tok::TokenKind> kinds;
     drainToEOF(FL, kinds);
     ASSERT_FALSE(kinds.empty());
     ASSERT_EQ(kinds.back(), tok::eof);
@@ -275,7 +275,7 @@ TEST_F(FileLexTests, NestedBlockComment_Unsupported_ProducesSomeErrorOrTokens) {
 
 TEST_F(FileLexTests, Unterminated_BlockComment_EmitsErrorOrEOF) {
     auto                        FL = create_lexer("/* oops");
-    scc::vector<tok::TokenKind> kinds;
+    scc::Vector<tok::TokenKind> kinds;
     bool                        hadError = drainToEOF(FL, kinds);
     ASSERT_EQ(kinds.back(), tok::eof);
     EXPECT_TRUE(hadError) << "Expected an unterminated block comment to raise a lexer error.";
@@ -620,7 +620,7 @@ TEST_F(FileLexTests, StringLiteral_Concatenation_Produces_Two_Tokens) {
 
 TEST_F(FileLexTests, StringLiteral_Unterminated_UnknownOrEOF) {
     auto                        FL = create_lexer("\"oops");
-    scc::vector<tok::TokenKind> kinds;
+    scc::Vector<tok::TokenKind> kinds;
     bool                        hadError = drainToEOF(FL, kinds);
     ASSERT_EQ(kinds.back(), tok::eof);
     EXPECT_TRUE(hadError) << "Expected unterminated string literal to signal a lexer error.";
@@ -662,7 +662,7 @@ TEST_F(FileLexTests, CharLiteral_Hex_And_Octal) {
 
 TEST_F(FileLexTests, CharLiteral_Unterminated_UnknownOrEOF) {
     auto                        FL = create_lexer("'a");
-    scc::vector<tok::TokenKind> kinds;
+    scc::Vector<tok::TokenKind> kinds;
     bool                        hadError = drainToEOF(FL, kinds);
     ASSERT_EQ(kinds.back(), tok::eof);
     EXPECT_TRUE(hadError) << "Expected unterminated char literal to signal a lexer error.";

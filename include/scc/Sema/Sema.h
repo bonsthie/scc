@@ -10,8 +10,8 @@
 #include "scc/AST/Type.h"
 #include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/Frontend/LangOpt.h"
-#include "scc/Sema/ParsedDeclarator.h"
 #include "scc/Sema/ParsedDeclSpec.h"
+#include "scc/Sema/ParsedDeclarator.h"
 #include "scc/Sema/Scope.h"
 #include "scc/Token/Token.h"
 

@@ -1,6 +1,6 @@
-#include "scc/Error/ErrorManager.h"
 #include "scc/FileManager/FileID.h"
 #include "scc/FileManager/MemoryBufferView.h"
+#include "scc/Frontend/FrontendErrorManager.h"
 #include "scc/Lex/FileLexer.h"
 #include "scc/String/StringInterner.h"
 #include "scc/Token/Token.h"
@@ -10,33 +10,33 @@
 
 namespace {
 
-volatile std::size_t gTokenSink = 0;
+volatile std::size_t GTokenSink = 0;
 
 } // namespace
 
-extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t *data, std::size_t size) {
-    scc::ErrorManager   errorManager;
-    scc::BumpAllocator  arena;
-    scc::StringInterner stringInterner(arena);
-    scc::FileID         fileId("<fuzz-input>", 1);
+extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t *Data, std::size_t Size) {
+    scc::FrontendErrorManager ErrorManager;
+    scc::BumpAllocator        Arena;
+    scc::StringInterner       StringInterner(Arena);
+    scc::FileID               FileId("<fuzz-input>", 1);
 
-    scc::MemoryBufferView buffer(reinterpret_cast<const char *>(data), size);
-    scc::FileLexer        lexer(std::move(buffer), stringInterner, fileId, errorManager);
+    scc::MemoryBufferView Buffer(reinterpret_cast<const char *>(Data), Size);
+    scc::FileLexer        Lexer(std::move(Buffer), StringInterner, FileId, ErrorManager);
 
-    scc::Token token;
-    bool       sawTerminal = false;
+    scc::Token Token;
+    bool       SawTerminal = false;
 
-    while (!sawTerminal) {
-        const bool stop = lexer.next(token);
-        gTokenSink += static_cast<std::size_t>(token.getTokenKind());
-        gTokenSink += token.getValue().size();
-        gTokenSink += token.getDirtyValue().size();
-        gTokenSink += token.getPosBegin().Buff;
-        gTokenSink += token.getPosEnd().Buff;
+    while (!SawTerminal) {
+        const bool Stop = Lexer.next(Token);
+        GTokenSink += static_cast<std::size_t>(Token.getTokenKind());
+        GTokenSink += Token.getValue().size();
+        GTokenSink += Token.getDirtyValue().size();
+        GTokenSink += Token.getPosBegin().Buff;
+        GTokenSink += Token.getPosEnd().Buff;
 
-        sawTerminal = stop || token.getTokenKind() == scc::tok::eof;
+        SawTerminal = Stop || Token.getTokenKind() == scc::tok::eof;
     }
 
-    gTokenSink += static_cast<std::size_t>(errorManager.size());
+    GTokenSink += static_cast<std::size_t>(ErrorManager.size());
     return 0;
 }

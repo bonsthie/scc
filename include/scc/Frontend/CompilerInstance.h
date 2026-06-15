@@ -1,5 +1,5 @@
-#ifndef SCC_COMPILERINSTANCE_H
-#define SCC_COMPILERINSTANCE_H
+#ifndef SCC_FRONTEND_COMPILERINSTANCE_H
+#define SCC_FRONTEND_COMPILERINSTANCE_H
 
 #include "scc/AST/ASTContext.h"
 #include "scc/Frontend/CompilerInstanceSettings.h"
@@ -30,9 +30,9 @@ class CompilerInstance {
                      StringInterner &SI, std::unique_ptr<FrontendAction> Act);
     ~CompilerInstance();
 
-    bool Execute();
+    bool execute();
 
-    void InitSema() {
+    void initSema() {
         if (!Ctx)
             Ctx = std::make_unique<ASTContext>();
         Action = std::make_unique<Sema>(*Ctx, EM, Settings.LangOptions);
@@ -69,4 +69,4 @@ class CompilerInstance {
 
 } // namespace scc
 
-#endif // SCC_COMPILERINSTANCE_H
+#endif // SCC_FRONTEND_COMPILERINSTANCE_H

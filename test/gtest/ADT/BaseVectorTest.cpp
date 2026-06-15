@@ -51,7 +51,7 @@ TEST(BaseVectorTest, StoresWithinBaseCapacity) {
     BaseVector<int, 4, BasicAllocator> Vec;
 
     for (int I = 0; I < 4; ++I)
-        Vec.push_back(I);
+        Vec.pushBack(I);
 
     ASSERT_EQ(Vec.size(), 4u);
     EXPECT_EQ(Vec.capacity(), 4u);
@@ -62,9 +62,9 @@ TEST(BaseVectorTest, StoresWithinBaseCapacity) {
 TEST(BaseVectorTest, GrowsBeyondBaseCapacity) {
     BaseVector<int, 2, BasicAllocator> Vec;
 
-    Vec.push_back(10);
-    Vec.push_back(20);
-    Vec.push_back(30);
+    Vec.pushBack(10);
+    Vec.pushBack(20);
+    Vec.pushBack(30);
 
     EXPECT_GE(Vec.capacity(), 4u);
     ASSERT_EQ(Vec.size(), 3u);
@@ -77,14 +77,14 @@ TEST(BaseVectorTest, ManagesMoveOnlyTypesAndDestroysElements) {
     EXPECT_EQ(MoveOnlyCounter::Alive, 0);
     {
         BaseVector<MoveOnlyCounter, 2, BasicAllocator> Vec;
-        Vec.push_back(MoveOnlyCounter(1));
-        Vec.push_back(MoveOnlyCounter(2));
-        Vec.push_back(MoveOnlyCounter(3));
+        Vec.pushBack(MoveOnlyCounter(1));
+        Vec.pushBack(MoveOnlyCounter(2));
+        Vec.pushBack(MoveOnlyCounter(3));
         EXPECT_EQ(Vec.size(), 3u);
         EXPECT_GE(Vec.capacity(), 4u);
         EXPECT_EQ(MoveOnlyCounter::Alive, 3);
 
-        Vec.pop_back();
+        Vec.popBack();
         EXPECT_EQ(Vec.size(), 2u);
         EXPECT_EQ(MoveOnlyCounter::Alive, 2);
     }
@@ -95,7 +95,7 @@ TEST(BaseVectorTest, AcceptsAllocatorArguments) {
     int liveAllocators = 0;
     {
         BaseVector<int, 2, CountingAllocator> Vec(liveAllocators);
-        Vec.push_back(123);
+        Vec.pushBack(123);
         EXPECT_EQ(liveAllocators, 1);
     }
     EXPECT_EQ(liveAllocators, 0);

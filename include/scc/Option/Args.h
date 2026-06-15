@@ -25,31 +25,31 @@ namespace scc {
 class Arg {
   public:
     ~Arg() = default;
-    enum valueType { None, Str, StrList };
+    enum ValueType { None, Str, StrList };
 
   private:
     const int                Type;
-    scc::vector<std::string> Value;
-    Arg::valueType           ValueType;
+    scc::Vector<std::string> Value;
+    Arg::ValueType           Kind;
     bool                     Claim = false;
 
   public:
-    explicit Arg(const int type) : Type(type), ValueType(None) {}
-    explicit Arg(const int type, valueType VType, const std::string &str)
-        : Type(type),
-          Value{str},
-          ValueType(VType) {}
-    explicit Arg(const int type, const scc::vector<std::string> &strs)
-        : Type(type),
-          Value(strs),
-          ValueType(StrList) {}
+    explicit Arg(const int Type) : Type(Type), Kind(None) {}
+    explicit Arg(const int Type, ValueType VType, const std::string &Str)
+        : Type(Type),
+          Value{Str},
+          Kind(VType) {}
+    explicit Arg(const int Type, const scc::Vector<std::string> &Strs)
+        : Type(Type),
+          Value(Strs),
+          Kind(StrList) {}
 
-    bool isFlag() const { return ValueType == None; }
-    bool isSingle() const { return ValueType == Str; }
-    bool isMulti() const { return ValueType == StrList; }
+    bool isFlag() const { return Kind == None; }
+    bool isSingle() const { return Kind == Str; }
+    bool isMulti() const { return Kind == StrList; }
 
     int getType() const { return Type; }
-    int getValueType() const { return ValueType; }
+    int getValueType() const { return Kind; }
 
     int count() const { return Value.size(); }
     int empty() const { return Value.empty(); }
@@ -59,32 +59,32 @@ class Arg {
         return Value[0];
     }
 
-    const scc::vector<std::string> &getValuesList() {
+    const scc::Vector<std::string> &getValuesList() {
         assert(isMulti() && "getValueList Should be Use only for Arg With Multiple Value");
         return Value;
     }
 
     // only works for StrList Arg
-    bool addValueToList(const std::string &str) {
+    bool addValueToList(const std::string &Str) {
         if (isMulti()) {
-            Value.push_back(str);
+            Value.pushBack(Str);
             return true;
         }
         return false;
     }
 
-    bool addValuesToList(const scc::vector<std::string> &strs) {
+    bool addValuesToList(const scc::Vector<std::string> &Strs) {
         assert(isMulti() && "addValuesToList Should be Use only for Arg With Multiple Value");
-        for (auto s : strs) {
+        for (auto s : Strs) {
             if (addValueToList(s) == true)
                 return true;
         }
         return false;
     }
 
-    void setValueSingle(const std::string &str) {
+    void setValueSingle(const std::string &Str) {
         assert(isSingle() && "setValueSingle Should be Use only for Arg With one Value");
-        Value.front() = str;
+        Value.front() = Str;
     }
 
     void claim() { Claim = true; }
@@ -104,22 +104,22 @@ class ArgsList {
     using ValMapType = std::map<int, std::unique_ptr<Arg>>;
 
     ValMapType                    ValMap;
-    scc::vector<ArgOccurrence>    Occurrences;
-    scc::vector<std::string_view> Files;
+    scc::Vector<ArgOccurrence>    Occurrences;
+    scc::Vector<std::string_view> Files;
 
   public:
     ~ArgsList() = default;
 
-    Arg *getArg(int index) const;
+    Arg *getArg(int Index) const;
 
     int size() const { return ValMap.size(); }
 
-    bool hasArg(int index) const { return getArg(index) != nullptr; }
+    bool hasArg(int Index) const { return getArg(Index) != nullptr; }
 
-    const scc::vector<ArgOccurrence> &getOccurrences() const { return Occurrences; }
-    const ArgOccurrence *getFirstOccurrenceOf(std::initializer_list<int> indices) const;
-    const ArgOccurrence *getLastOccurrenceOf(std::initializer_list<int> indices) const;
-    int                  countOccurrencesOf(std::initializer_list<int> indices) const;
+    const scc::Vector<ArgOccurrence> &getOccurrences() const { return Occurrences; }
+    const ArgOccurrence *getFirstOccurrenceOf(std::initializer_list<int> Indices) const;
+    const ArgOccurrence *getLastOccurrenceOf(std::initializer_list<int> Indices) const;
+    int                  countOccurrencesOf(std::initializer_list<int> Indices) const;
 
     void addArgFlag(std::unique_ptr<Arg> A, const std::string &Spelling = "");
     void addFile(std::string_view File);
@@ -127,7 +127,7 @@ class ArgsList {
     ValMapType::iterator begin() { return ValMap.begin(); }
     ValMapType::iterator end() { return ValMap.end(); }
 
-    const scc::vector<std::string_view> &getFiles() const;
+    const scc::Vector<std::string_view> &getFiles() const;
 };
 
 } // namespace scc

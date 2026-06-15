@@ -37,9 +37,9 @@ TEST(StringUtilsTest, TrimsQuotedStrings) {
 
 TEST(StringSwitchTest, MatchesCasesOrFallsBackToDefault) {
     StringSwitch<int> SS("beta");
-    int               Value = SS.Case("alpha", 1).Case("beta", 2).Default(3);
+    int               Value = SS.caseValue("alpha", 1).caseValue("beta", 2).defaultValue(3);
     EXPECT_EQ(Value, 2);
 
     StringSwitch<int> DefaultOnly("zeta");
-    EXPECT_EQ(DefaultOnly.Default(42), 42);
+    EXPECT_EQ(DefaultOnly.defaultValue(42), 42);
 }

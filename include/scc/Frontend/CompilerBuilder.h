@@ -1,5 +1,5 @@
-#ifndef SCC_COMPILERBUILDER_H
-#define SCC_COMPILERBUILDER_H
+#ifndef SCC_FRONTEND_COMPILERBUILDER_H
+#define SCC_FRONTEND_COMPILERBUILDER_H
 
 #include <string>
 
@@ -39,4 +39,4 @@ class CompilerBuilder {
 
 } // namespace scc
 
-#endif // SCC_COMPILERBUILDER_H
+#endif // SCC_FRONTEND_COMPILERBUILDER_H

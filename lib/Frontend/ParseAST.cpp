@@ -9,7 +9,7 @@
 
 using namespace scc;
 
-bool scc::ParseAST(Parser &P, ASTConsumer &Consumer) {
+bool scc::parse_ast(Parser &P, ASTConsumer &Consumer) {
 
     while (!P.isEOF()) {
         DeclList Decls = P.parseTopLevelDecl();

@@ -13,11 +13,11 @@ enum SccCC1OptionIndex {
 
 class SccOptionTable : public OptionTable {
 
-    static constexpr OptionSpec opt[] = {
+    static constexpr OptionSpec Opt[] = {
 #include "scc/Frontend/CC1Args.def"
     };
 
-    std::span<const OptionSpec> specs() const override { return opt; }
+    std::span<const OptionSpec> specs() const override { return Opt; }
 
   public:
     SccOptionTable(ErrorManager &EM) : OptionTable(EM) {}

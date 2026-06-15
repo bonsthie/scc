@@ -31,14 +31,13 @@ bool PreProcessor::nextRaw(Token &Tok) {
         }
     }
 
-    bool err = CurrentTokStream->next(Tok);
+    bool Err = CurrentTokStream->next(Tok);
 
-    if (err) {
+    if (Err) {
         if (Tok.is(tok::eof)) {
             popTokenStream();
             return next(Tok);
-        } else
-            return true;
+        }             return true;
     }
 
     return false;
@@ -61,7 +60,7 @@ bool PreProcessor::handlePP(Token &Tok) {
     FileLexer *FL = static_cast<FileLexer *>(CurrentTokStream);
     assert(FL && "handlePP can't be use with other things than FileLexer");
 
-    bool err = nextRaw(Tok);
+    bool Err = nextRaw(Tok);
 
     switch (Tok.getTokenKind()) {
     case tok::pp_include:
@@ -69,8 +68,8 @@ bool PreProcessor::handlePP(Token &Tok) {
 
     case tok::unknown:
     case tok::identifier: {
-        std::string value(Tok.getValue());
-        EM.report(err::error).msg("'" + value + "' Invalid PreProcessing directive");
+        std::string Value(Tok.getValue());
+        EM.report(err::error).msg("'" + Value + "' Invalid PreProcessing directive");
         return true;
     }
 
@@ -81,7 +80,7 @@ bool PreProcessor::handlePP(Token &Tok) {
         return true;
     }
 
-    return err;
+    return Err;
 }
 
 bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
@@ -92,9 +91,9 @@ bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
     switch (Tok.getTokenKind()) {
 
     case tok::string_literal: {
-        std::string path(Tok.getValue());
-        path = trim_quote(path);
-        File *F = FM.getFile(path, FL.getFID());
+        std::string Path(Tok.getValue());
+        Path = trim_quote(Path);
+        File *F = FM.getFile(Path, FL.getFID());
 
         if (F == nullptr) {
             EM.last().at(Tok.posViewBegin());
@@ -105,9 +104,9 @@ bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
     }
 
     case tok::system_string: {
-        std::string path(Tok.getValue());
-        path = trim_quote_system(path);
-        File *F = FM.getSystemFile(path);
+        std::string Path(Tok.getValue());
+        Path = trim_quote_system(Path);
+        File *F = FM.getSystemFile(Path);
 
         if (F == nullptr) {
             EM.last().at(Tok.posViewBegin());

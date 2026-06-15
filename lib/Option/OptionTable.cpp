@@ -9,141 +9,141 @@
 
 using namespace scc;
 
-ArgsList *OptionTable::parseArgs(const scc::vector<const char *> &argv) {
-    auto   Args = new ArgsList;
-    ArgvIt it = argv.begin(), end = argv.end();
+ArgsList *OptionTable::parseArgs(const scc::Vector<const char *> &Argv) {
+    auto *   Args = new ArgsList;
+    ArgvIt It = Argv.begin(), End = Argv.end();
 
-    while (it != end) {
-        std::string_view tok = (*it ? std::string_view(*it) : std::string_view());
-        if (!tok.empty() && tok[0] != '-') {
-            Args->addFile(tok);
-            ++it;
+    while (It != End) {
+        std::string_view Tok = (*It ? std::string_view(*It) : std::string_view());
+        if (!Tok.empty() && Tok[0] != '-') {
+            Args->addFile(Tok);
+            ++It;
             continue;
         }
 
         std::string MatchedSpelling;
-        if (auto a = nextArg(it, end, &MatchedSpelling)) {
+        if (auto a = nextArg(It, End, &MatchedSpelling)) {
             Args->addArgFlag(std::move(a), MatchedSpelling);
         } else {
-            ++it;
+            ++It;
         }
     }
     return Args;
 }
 
-static inline bool starts_with(std::string_view s, std::string_view pfx) {
-    return s.size() >= pfx.size() && s.compare(0, pfx.size(), pfx) == 0;
+static inline bool starts_with(std::string_view s, std::string_view Pfx) {
+    return s.size() >= Pfx.size() && s.compare(0, Pfx.size(), Pfx) == 0;
 }
 
-static const OptionSpec *findVisibleOptionForAlias(std::span<const OptionSpec> Options,
+static const OptionSpec *find_visible_option_for_alias(std::span<const OptionSpec> Options,
                                                    const OptionSpec            &Alias) {
     for (const auto &Option : Options) {
-        if (!Option.hidde && Option.key == Alias.key)
+        if (!Option.Hidde && Option.Key == Alias.Key)
             return &Option;
     }
 
     return nullptr;
 }
 
-std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &it, ArgvIt end, std::string *MatchedSpelling) {
+std::unique_ptr<Arg> OptionTable::nextArg(ArgvIt &It, ArgvIt End, std::string *MatchedSpelling) {
     std::span<const OptionSpec> Options = specs();
 
-    std::string_view tok = (*it ? std::string_view(*it) : std::string_view());
+    std::string_view Tok = (*It ? std::string_view(*It) : std::string_view());
     for (const auto &Opt : Options) {
-        std::string_view spell = Opt.spelling ? std::string_view(Opt.spelling) : std::string_view();
+        std::string_view Spell = Opt.Spelling ? std::string_view(Opt.Spelling) : std::string_view();
 
-        switch (Opt.kind) {
+        switch (Opt.Kind) {
         case OptKind::JoinedOrSeparate:
         case OptKind::Joined: {
             // e.g., "-I/usr/include" where spelling is "-I"
-            if (starts_with(tok, spell) && tok.size() > spell.size()) {
-                std::string val(tok.substr(spell.size()));
+            if (starts_with(Tok, Spell) && Tok.size() > Spell.size()) {
+                std::string Val(Tok.substr(Spell.size()));
                 if (MatchedSpelling)
-                    *MatchedSpelling = std::string(spell);
-                ++it; // consumed current token
-                return std::make_unique<Arg>((int)Opt.key, (Arg::valueType)Opt.vtype,
-                                             std::move(val));
+                    *MatchedSpelling = std::string(Spell);
+                ++It; // consumed current token
+                return std::make_unique<Arg>((int)Opt.Key, (Arg::ValueType)Opt.Vtype,
+                                             std::move(Val));
             }
-            if (Opt.kind == OptKind::Joined)
+            if (Opt.Kind == OptKind::Joined)
                 return nullptr;
             // fall back on separate
             [[fallthrough]];
         }
         case OptKind::Separate: {
             // e.g., "-o output" where spelling is "-o"
-            if (tok == spell) {
-                auto next = std::next(it);
-                if (next == end) {
-                    EM.report(err::error).msg(std::string(spell)).msg(" missing argument");
+            if (Tok == Spell) {
+                const auto *Next = std::next(It);
+                if (Next == End) {
+                    EM.report(err::error).msg(std::string(Spell)).msg(" missing argument");
                     return nullptr;
                 }
-                std::string_view val_sv(*next ? *next : "");
-                if (!val_sv.empty() && val_sv.front() == '-') {
-                    EM.report(err::error).msg(std::string(spell)).msg(" missing argument");
+                std::string_view ValSv(*Next ? *Next : "");
+                if (!ValSv.empty() && ValSv.front() == '-') {
+                    EM.report(err::error).msg(std::string(Spell)).msg(" missing argument");
                     return nullptr;
                 }
-                std::string val(val_sv);
+                std::string Val(ValSv);
                 if (MatchedSpelling)
-                    *MatchedSpelling = std::string(spell);
-                it = std::next(next);
-                return std::make_unique<Arg>((int)Opt.key, (Arg::valueType)Opt.vtype,
-                                             std::move(val));
+                    *MatchedSpelling = std::string(Spell);
+                It = std::next(Next);
+                return std::make_unique<Arg>((int)Opt.Key, (Arg::ValueType)Opt.Vtype,
+                                             std::move(Val));
             }
             break;
         }
 
         case OptKind::Equal: {
             // e.g., "--opt=value" where spelling is "--opt="
-            if (starts_with(tok, spell) && tok.size() > spell.size()) {
-                std::string val(tok.substr(spell.size()));
+            if (starts_with(Tok, Spell) && Tok.size() > Spell.size()) {
+                std::string Val(Tok.substr(Spell.size()));
                 if (MatchedSpelling)
-                    *MatchedSpelling = std::string(spell);
-                ++it;
-                return std::make_unique<Arg>((int)Opt.key, (Arg::valueType)Opt.vtype,
-                                             std::move(val));
+                    *MatchedSpelling = std::string(Spell);
+                ++It;
+                return std::make_unique<Arg>((int)Opt.Key, (Arg::ValueType)Opt.Vtype,
+                                             std::move(Val));
             }
             break;
         }
         case OptKind::Flag: {
-            if (tok == spell) {
+            if (Tok == Spell) {
                 if (MatchedSpelling)
-                    *MatchedSpelling = std::string(spell);
-                ++it;
-                return std::make_unique<Arg>((int)Opt.key);
+                    *MatchedSpelling = std::string(Spell);
+                ++It;
+                return std::make_unique<Arg>((int)Opt.Key);
             }
             break;
         }
         }
     }
 
-    EM.report(err::error).msg("unknow flag '").msg(std::string(tok)).msg("'");
+    EM.report(err::error).msg("unknow flag '").msg(std::string(Tok)).msg("'");
     return nullptr;
 }
 
 void OptionTable::printOpt(std::ostream &O) {
-    std::span<const OptionSpec> opt = specs();
+    std::span<const OptionSpec> Opt = specs();
 
-    for (const auto &Option : opt) {
-        std::string fullSpelling = Option.spelling + printHasOption(Option.kind);
+    for (const auto &Option : Opt) {
+        std::string FullSpelling = Option.Spelling + printHasOption(Option.Kind);
 
-        if (Option.hidde) {
-            const OptionSpec *Base = findVisibleOptionForAlias(opt, Option);
+        if (Option.Hidde) {
+            const OptionSpec *Base = find_visible_option_for_alias(Opt, Option);
             if (!Base)
                 continue;
 
-            std::string target = Base->spelling + printHasOption(Base->kind);
-            O << " " << std::left << std::setw(20) << fullSpelling << "alias of " << target
+            std::string Target = Base->Spelling + printHasOption(Base->Kind);
+            O << " " << std::left << std::setw(20) << FullSpelling << "alias of " << Target
               << "\n";
             continue;
         }
 
-        std::string help = Option.help ? std::string(Option.help) : std::string();
-        O << " " << std::left << std::setw(20) << fullSpelling << help << "\n";
+        std::string Help = Option.Help ? std::string(Option.Help) : std::string();
+        O << " " << std::left << std::setw(20) << FullSpelling << Help << "\n";
     }
 }
 
-std::string OptionTable::printHasOption(OptKind kind) {
-    switch (kind) {
+std::string OptionTable::printHasOption(OptKind Kind) {
+    switch (Kind) {
     case OptKind::Joined:
     case OptKind::Equal:
         return "<arg>";

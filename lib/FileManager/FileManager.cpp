@@ -34,9 +34,9 @@ File *FileManager::fileFormFileID(const FileID *FID, const std::string &Path) {
 
     // if the file already exist
     {
-        auto it = Files.find(*FID);
-        if (it != Files.end())
-            return &it->second;
+        auto It = Files.find(*FID);
+        if (It != Files.end())
+            return &It->second;
     }
 
     File F(*FID);

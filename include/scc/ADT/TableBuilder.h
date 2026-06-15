@@ -8,14 +8,14 @@ namespace scc {
 
 template <typename Key, typename T, size_t N>
 struct TableBuilder {
-    std::array<T, N> data{};
+    std::array<T, N> Data{};
 
-    constexpr TableBuilder &add(Key key, T value) {
-        data[static_cast<size_t>(key)] = value;
+    constexpr TableBuilder &add(Key Index, T Value) {
+        Data[static_cast<size_t>(Index)] = Value;
         return *this;
     }
 
-    constexpr std::array<T, N> build() { return data; }
+    constexpr std::array<T, N> build() { return Data; }
 };
 
 } // namespace scc

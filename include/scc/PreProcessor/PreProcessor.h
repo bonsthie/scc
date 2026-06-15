@@ -18,7 +18,7 @@
 namespace scc {
 
 class PreProcessor {
-    scc::vector<std::unique_ptr<TokenStream>> TSList;
+    scc::Vector<std::unique_ptr<TokenStream>> TSList;
     TokenStream                              *CurrentTokStream = nullptr;
 
     FrontendErrorManager &EM;
@@ -48,7 +48,7 @@ class PreProcessor {
     bool handleInclude(Token &Tok, FileLexer &FL);
 
     TokenStream *addNewTokenStream(File &F) {
-        TSList.emplace_back(std::make_unique<FileLexer>(F, SI, EM, Opts));
+        TSList.emplaceBack(std::make_unique<FileLexer>(F, SI, EM, Opts));
         return (CurrentTokStream = TSList.back().get());
     }
 
@@ -59,7 +59,7 @@ class PreProcessor {
     }
 
     void popTokenStream() {
-        TSList.pop_back();
+        TSList.popBack();
         CurrentTokStream = nullptr;
     }
 };

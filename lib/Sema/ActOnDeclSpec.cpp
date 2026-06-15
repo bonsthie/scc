@@ -6,25 +6,23 @@
 
 using namespace scc;
 
-namespace {
+static bool has_sign_specifier(const ParsedDeclSpec &DS) {
+    return DS.Sign != SignSpecifier::Unspecified;
+}
 
-bool hasSignSpecifier(const ParsedDeclSpec &DS) { return DS.Sign != SignSpecifier::Unspecified; }
-
-bool hasLengthSpecifier(const ParsedDeclSpec &DS) {
+static bool has_length_specifier(const ParsedDeclSpec &DS) {
     return DS.Length != LengthSpecifier::Unspecified;
 }
 
-SourceRange getImplicitIntRange(const ParsedDeclSpec &DS) {
+static SourceRange get_implicit_int_range(const ParsedDeclSpec &DS) {
     if (DS.TypeSourceRange.isValid())
         return DS.TypeSourceRange;
-    if (hasSignSpecifier(DS))
+    if (has_sign_specifier(DS))
         return DS.RangeSign;
-    if (hasLengthSpecifier(DS))
+    if (has_length_specifier(DS))
         return DS.LengthRange;
     return {};
 }
-
-} // namespace
 
 bool Sema::actOnDeclSpecType(ParsedDeclSpec &DS) {
     const Type *T = DS.T;
@@ -36,8 +34,8 @@ bool Sema::actOnDeclSpecType(ParsedDeclSpec &DS) {
         return true;
     }
 
-    SourceRange Range = getImplicitIntRange(DS);
-    if (hasLengthSpecifier(DS) || hasSignSpecifier(DS) || Opts.implicit_intEnable) {
+    SourceRange Range = get_implicit_int_range(DS);
+    if (has_length_specifier(DS) || has_sign_specifier(DS) || Opts.implicit_intEnable) {
         DS.T = getType(BuiltinTypeKind::TYint);
         DS.TypeSourceRange = Range;
         return false;
@@ -56,7 +54,7 @@ bool Sema::actOnDeclSpecType(ParsedDeclSpec &DS) {
 }
 
 bool Sema::actOnDeclSpecLengthAndSignSpecifier(ParsedDeclSpec &DS) {
-    if (!hasLengthSpecifier(DS) && !hasSignSpecifier(DS))
+    if (!has_length_specifier(DS) && !has_sign_specifier(DS))
         return false;
 
     const Type *T = DS.T;
@@ -68,7 +66,7 @@ bool Sema::actOnDeclSpecLengthAndSignSpecifier(ParsedDeclSpec &DS) {
 
     switch (Kind) {
     case TYchar:
-        if (hasLengthSpecifier(DS)) {
+        if (has_length_specifier(DS)) {
             EM.invalidTypeModifier(length_specifier_to_string(DS.Length), TypeName, DS.LengthRange);
             return true;
         }
@@ -78,7 +76,7 @@ bool Sema::actOnDeclSpecLengthAndSignSpecifier(ParsedDeclSpec &DS) {
         return false;
 
     case TYdouble:
-        if (hasSignSpecifier(DS)) {
+        if (has_sign_specifier(DS)) {
             EM.invalidTypeModifier(sign_specifier_to_string(DS.Sign), TypeName, DS.RangeSign);
             return true;
         }
@@ -89,7 +87,7 @@ bool Sema::actOnDeclSpecLengthAndSignSpecifier(ParsedDeclSpec &DS) {
         return false;
 
     default:
-        if (hasSignSpecifier(DS)) {
+        if (has_sign_specifier(DS)) {
             EM.invalidTypeModifier(sign_specifier_to_string(DS.Sign), TypeName, DS.RangeSign);
             return true;
         }
@@ -99,11 +97,11 @@ bool Sema::actOnDeclSpecLengthAndSignSpecifier(ParsedDeclSpec &DS) {
 }
 
 bool Sema::actOnDeclSpec(ParsedDeclSpec &DS) {
-    bool err = false;
+    bool Err = false;
     // TODO verify at the start the _Imaginary and Complex that can only be float or double
 
-    err |= actOnDeclSpecType(DS);
-    err |= actOnDeclSpecLengthAndSignSpecifier(DS);
+    Err |= actOnDeclSpecType(DS);
+    Err |= actOnDeclSpecLengthAndSignSpecifier(DS);
 
-    return err;
+    return Err;
 }

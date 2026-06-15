@@ -1,5 +1,5 @@
-#ifndef SCC_FRONTEND_FRONTENDACTION
-#define SCC_FRONTEND_FRONTENDACTION
+#ifndef SCC_FRONTEND_FRONTENDACTION_H
+#define SCC_FRONTEND_FRONTENDACTION_H
 
 #include "scc/AST/ASTConsumer.h"
 #include "scc/Frontend/CompilerInstance.h"
@@ -8,16 +8,17 @@
 
 namespace scc {
 
-bool ParseAST(Parser &P, ASTConsumer &Consumer);
+bool parse_ast(Parser &P, ASTConsumer &Consumer);
 
 class FrontendAction {
   public:
     virtual ~FrontendAction() = default;
-    virtual bool Execute(CompilerInstance &CI) = 0;
+    virtual bool execute(CompilerInstance &CI) = 0;
 };
 
 class DumpToken : public FrontendAction {
-    bool Execute(CompilerInstance &CI) {
+  public:
+    bool execute(CompilerInstance &CI) {
         auto &PP = CI.getPreprocessor();
         auto &EM = CI.getErrorManager();
 
@@ -33,7 +34,8 @@ class DumpToken : public FrontendAction {
 };
 
 class DumpRawToken : public FrontendAction {
-    bool Execute(CompilerInstance &CI) {
+  public:
+    bool execute(CompilerInstance &CI) {
         auto &PP = CI.getPreprocessor();
         auto &EM = CI.getErrorManager();
 
@@ -50,36 +52,36 @@ class DumpRawToken : public FrontendAction {
 
 class ASTFrontendAction : public FrontendAction {
   public:
-    bool Execute(CompilerInstance &CI) final {
-        std::unique_ptr<ASTConsumer> Consumer = CreateConsumer(CI);
+    bool execute(CompilerInstance &CI) final {
+        std::unique_ptr<ASTConsumer> Consumer = createConsumer(CI);
         if (!Consumer)
             return false;
 
-        CI.InitSema();
+        CI.initSema();
 
         ParserErrorManager PEM(CI.getErrorManager());
         Parser             P(CI.getPreprocessor(), CI.getSema(), PEM, CI.getLangOpt());
-        return ParseAST(P, *Consumer);
+        return parse_ast(P, *Consumer);
     }
 
   protected:
-    virtual std::unique_ptr<ASTConsumer> CreateConsumer(CompilerInstance &CI) = 0;
+    virtual std::unique_ptr<ASTConsumer> createConsumer(CompilerInstance &CI) = 0;
 };
 
 class DumpASTAction final : public ASTFrontendAction {
   protected:
-    std::unique_ptr<ASTConsumer> CreateConsumer(CompilerInstance &) override {
+    std::unique_ptr<ASTConsumer> createConsumer(CompilerInstance &) override {
         return std::make_unique<DumpASTConsumer>();
     }
 };
 
 class SyntaxOnly final : public ASTFrontendAction {
   protected:
-    std::unique_ptr<ASTConsumer> CreateConsumer(CompilerInstance &) override {
+    std::unique_ptr<ASTConsumer> createConsumer(CompilerInstance &) override {
         return std::make_unique<SyntaxOnlyConsumer>();
     }
 };
 
 } // namespace scc
 
-#endif // SCC_FRONTEND_FRONTENDACTION
+#endif // SCC_FRONTEND_FRONTENDACTION_H

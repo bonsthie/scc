@@ -1,5 +1,5 @@
-#ifndef SCC_LEX_SIZEDCHAR
-#define SCC_LEX_SIZEDCHAR
+#ifndef SCC_LEX_SIZEDCHAR_H
+#define SCC_LEX_SIZEDCHAR_H
 
 #include <cstdint>
 
@@ -9,24 +9,24 @@ namespace scc {
 // `consumed` is the number of raw source characters used to produce it.
 // Example: "defi\\\nne" -> reading after 'i' returns {'n', 3}.
 struct SizedChar {
-    int     value;
-    uint8_t size;
+    int     Value;
+    uint8_t Size;
 
-    bool operator==(SizedChar &sc) { return value == sc.value; }
-    bool operator!=(SizedChar &sc) { return value != sc.value; }
-    bool operator>=(SizedChar &sc) { return value >= sc.value; }
-    bool operator<=(SizedChar &sc) { return value <= sc.value; }
-    bool operator<(SizedChar &sc) { return value < sc.value; }
-    bool operator>(SizedChar &sc) { return value > sc.value; }
+    bool operator==(SizedChar &Sc) { return Value == Sc.Value; }
+    bool operator!=(SizedChar &Sc) { return Value != Sc.Value; }
+    bool operator>=(SizedChar &Sc) { return Value >= Sc.Value; }
+    bool operator<=(SizedChar &Sc) { return Value <= Sc.Value; }
+    bool operator<(SizedChar &Sc) { return Value < Sc.Value; }
+    bool operator>(SizedChar &Sc) { return Value > Sc.Value; }
 
-    bool operator==(int c) { return value == c; }
-    bool operator!=(int c) { return value != c; }
-    bool operator>=(int c) { return value >= c; }
-    bool operator<=(int c) { return value <= c; }
-    bool operator<(int c) { return value < c; }
-    bool operator>(int c) { return value > c; }
+    bool operator==(int c) { return Value == c; }
+    bool operator!=(int c) { return Value != c; }
+    bool operator>=(int c) { return Value >= c; }
+    bool operator<=(int c) { return Value <= c; }
+    bool operator<(int c) { return Value < c; }
+    bool operator>(int c) { return Value > c; }
 };
 
 } // namespace scc
 
-#endif // SCC_LEX_SIZEDCHAR
+#endif // SCC_LEX_SIZEDCHAR_H
