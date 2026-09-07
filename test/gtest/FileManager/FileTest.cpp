@@ -37,7 +37,7 @@ TEST(File, ZeroLength) {
     FileID fid{path.string(), 1};
     File   f(fid);
 
-    EXPECT_EQ(f.status(), File::F_MAPING);
+    EXPECT_EQ(f.status(), File::FOK);
     EXPECT_EQ(f.size(), 0u);
     EXPECT_TRUE(f.view().size() == 0u);
     // data() may be nullptr or valid; assert consistent with your contract

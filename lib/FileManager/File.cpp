@@ -15,6 +15,10 @@ File::File(const FileID &FID) : FID(FID) {
         FStatus = F_STAT;
         return;
     }
+
+    if (St.st_size == 0) {
+        return;
+    }
     FileSize = St.st_size;
 
     Data = (char *)mmap(nullptr, FileSize, PROT_READ, MAP_PRIVATE, FD, 0);
