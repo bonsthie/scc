@@ -4,7 +4,11 @@ import shlex
 import lit.formats
 
 config.name = "scc tests"
-config.test_format = lit.formats.ShTest(True)
+
+config.test_format = lit.formats.ShTest(
+    execute_external=True,
+    force_execute_external=True,
+)
 
 config.suffixes = ['.c']
 
