@@ -18,9 +18,9 @@
 namespace scc {
 
 class Sema {
-    [[maybe_unused]] ASTContext   &Ctx;
+    [[maybe_unused]] ASTContext           &Ctx;
     [[maybe_unused]] FrontendErrorManager &EM;
-    const LangOpt                 &Opts;
+    const LangOpt                         &Opts;
 
     ScopeMgr SM;
 
@@ -58,8 +58,8 @@ class Sema {
     bool actOnDeclSpecType(ParsedDeclSpec &DS);
     bool actOnDeclSpecLengthAndSignSpecifier(ParsedDeclSpec &DS);
 
-	Type *createTypeFromDeclarator(Type *T, ParsedDeclarator &D);
-	Decl *createDeclFromDeclarator(ParsedDeclSpec &DS, ParsedDeclarator &D);
+    Type *createTypeFromDeclarator(Type *T, ParsedDeclarator &D);
+    Decl *createDeclFromDeclarator(ParsedDeclSpec &DS, ParsedDeclarator &D);
 };
 
 } // namespace scc
