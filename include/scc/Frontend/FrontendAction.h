@@ -16,7 +16,7 @@ class FrontendAction {
     virtual bool execute(CompilerInstance &CI) = 0;
 };
 
-class DumpToken : public FrontendAction {
+class DumpToken final : public FrontendAction {
   public:
     bool execute(CompilerInstance &CI) {
         auto &PP = CI.getPreprocessor();
@@ -33,7 +33,7 @@ class DumpToken : public FrontendAction {
     }
 };
 
-class DumpRawToken : public FrontendAction {
+class DumpRawToken final : public FrontendAction {
   public:
     bool execute(CompilerInstance &CI) {
         auto &PP = CI.getPreprocessor();
