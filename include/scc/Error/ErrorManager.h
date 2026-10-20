@@ -36,9 +36,9 @@ class ErrorManager {
 
     bool emit() {
         for (auto *It = Errs.begin(); It != Errs.end();) {
-            int Status = (*It)->emit(O);
+            bool Stop = (*It)->emit(O) & err::Stop;
             It = Errs.erase(It);
-            if (Status) {
+            if (Stop) {
                 Errs.clear();
                 return true;
             }

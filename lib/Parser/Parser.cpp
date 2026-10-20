@@ -65,7 +65,7 @@ DeclList Parser::parseDeclaration() {
         Decl *Res = Action.actOnDeclarator(DS, D);
         if (Res)
             Decls.pushBack(Res);
-    } while (consumeIf(tok::comma) && !next());
+    } while (consumeIf(tok::comma) && !CurTok.is(tok::eof));
 
     if (!expect(tok::semi))
         return {};

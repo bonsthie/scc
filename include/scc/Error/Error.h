@@ -1,6 +1,7 @@
 #ifndef SCC_ERROR_ERROR_H
 #define SCC_ERROR_ERROR_H
 
+#include "scc/Colors/Colors.h"
 #include "scc/FileManager/MemoryBufferView.h"
 #include <optional>
 #include <ostream>
@@ -14,15 +15,15 @@ namespace err {
 enum DiagLevel {
     warning,
     error,
+    note,
 };
 
 enum EmitionLeveL { Emit = 1, Stop = 1 << 1, EmitStop = Emit | Stop };
 
 enum class Code {
-	OK,
-	ERROR, // EM manager error has been set
+    OK,
+    ERROR, // EM manager error has been set
 };
-
 
 } // namespace err
 
@@ -67,7 +68,7 @@ class Error {
     std::string    getMsg() const { return Msg.str(); }
 
     virtual err::EmitionLeveL shouldEmit() const {
-        return Level == err::warning ? err::Emit : err::EmitStop;
+        return Level != err::error ? err::Emit : err::EmitStop;
     }
 
     virtual void print(std::ostream &O) const;
@@ -76,6 +77,9 @@ class Error {
 
     // TODO : take from the prog name
     std::string getProgramNameString() const { return "scc"; }
+
+    // return a bold escape sequence if the text should be bold
+    std::string boldText() const { return Level == err::note ? "" : Color::bold(); }
 };
 
 } // namespace scc

@@ -1,5 +1,5 @@
-#include "scc/Colors/Colors.h"
 #include "scc/Error/Error.h"
+#include "scc/Colors/Colors.h"
 
 using namespace scc;
 
@@ -9,7 +9,7 @@ void Error::print(std::ostream &O) const {
     else
         O << getProgramNameString() << ": " << Color::bold();
 
-    O << getPrintLevelString() << Color::bold() << ": " << Msg.str() << Color::reset() << "\n";
+    O << getPrintLevelString() << boldText() << ": " << Msg.str() << Color::reset() << "\n";
 }
 
 int Error::emit(std::ostream &O) const {
@@ -25,6 +25,8 @@ std::string Error::getPrintLevelString() const {
         return std::string(Color::red()) + "error" + Color::reset();
     case err::DiagLevel::warning:
         return std::string(Color::magenta()) + "warning" + Color::reset();
+    case err::DiagLevel::note:
+        return std::string(Color::cyan()) + "note" + Color::reset();
     }
     return "";
 }

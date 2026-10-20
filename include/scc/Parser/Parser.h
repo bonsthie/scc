@@ -49,14 +49,19 @@ class Parser {
     // Returns the resulting Decl, or nullptr on error.
     DeclList parseTopLevelDecl();
 
-	// Parse Qualifiers and type info
-	// typedef auto extern inline
-	// unsigned signed long short
-	// and the type int float foo bar;
-    ParsedDeclSpec   parseDeclSpec();
+    // Parse Qualifiers and type info
+    // typedef auto extern inline
+    // unsigned signed long short
+    // and the type int float foo bar;
+    ParsedDeclSpec parseDeclSpec();
 
-    ParsedDeclarator parseDeclarator();
-    DeclList         parseDeclaration();
+    ParsedDeclarator                parseDeclarator();
+    bool                            parseDeclaratorInternal(ParsedDeclarator &D);
+    std::optional<DeclaratorChunks> parseDeclaratorPrefixPointer();
+    std::optional<DeclaratorChunks> parseDeclaratorSufix();
+    bool                            parseMisplacedBracketDeclarator(ParsedDeclarator &D);
+
+    DeclList parseDeclaration();
 
   private:
     bool next() {

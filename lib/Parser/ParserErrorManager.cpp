@@ -1,5 +1,17 @@
-#include "scc/Frontend/DeclSpecSpelling.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ParserErrorManager.cpp                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bonsthie <bonsthie@42angouleme.fr>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/10/20 14:11:17 by bonsthie          #+#    #+#             */
+/*   Updated: 2026/10/20 14:22:32 by bonsthie         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "scc/Parser/ParserErrorManager.h"
+#include "scc/Frontend/DeclSpecSpelling.h"
 #include "scc/Sema/ParsedDeclSpec.h"
 
 using namespace scc;
@@ -11,12 +23,17 @@ static std::string token_for_diag(const Token &Tok) {
 }
 
 Error &ParserErrorManager::expectedXButGotY(tok::TokenKind Expected, const Token &Got) {
-    return report(err::error)
-        .at(Got.posViewBegin())
-        .msg("expected '")
-        .msg(token_spelling(Expected))
-        .msg("' but got '")
+    return expectedX(Got.posViewBegin(), Expected)
+        .msg(" but got '")
         .msg(token_for_diag(Got))
+        .msg("'");
+}
+
+Error &ParserErrorManager::toClose(const Token OpenTok) {
+    return report(err::note)
+        .at(OpenTok.posViewBegin())
+        .msg("to match this '")
+        .msg(token_spelling(OpenTok.getTokenKind()))
         .msg("'");
 }
 
