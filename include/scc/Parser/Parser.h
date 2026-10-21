@@ -54,6 +54,7 @@ class Parser {
     // unsigned signed long short
     // and the type int float foo bar;
     ParsedDeclSpec parseDeclSpec();
+    void           parseQualifiers(Qualifiers &Quals);
 
     ParsedDeclarator                parseDeclarator();
     bool                            parseDeclaratorInternal(ParsedDeclarator &D);

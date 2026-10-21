@@ -9,21 +9,25 @@ using namespace scc;
 static constexpr LangOpt OptC89 = {
     .trigraphsEnable = true,
     .implicit_intEnable = true,
+    .duplicate_decl_specifierWarning = true,
 };
 
 static constexpr LangOpt OptC99 = {
     .trigraphsWarning = true,
     .implicit_intWarning = true,
+    .duplicate_decl_specifierWarning = true,
 };
 
 static constexpr LangOpt OptGNU89 = {
     .trigraphsWarning = true,
     .implicit_intWarning = true,
+    .duplicate_decl_specifierWarning = true,
 };
 
 static constexpr LangOpt OptGNU99 = {
     .trigraphsWarning = true,
     .implicit_intWarning = true,
+    .duplicate_decl_specifierWarning = true,
 };
 
 static constexpr auto VersionTable = //

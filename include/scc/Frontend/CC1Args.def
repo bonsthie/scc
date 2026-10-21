@@ -29,6 +29,8 @@ F_FLAG(trigraphs, trigraphs, "trigraph support", false)
 // ex : foo() { return 1; } or typedef foo;
 WARN_FLAG(implicit_int, implicit-int, "implicit int warning", false)
 F_FLAG(implicit_int, implicit-int, "implicit int support", false)
+WARN_FLAG(duplicate_decl_specifier, duplicate-decl-specifier,
+          "duplicate qualifier warning", false)
 
 
 #undef FLAG

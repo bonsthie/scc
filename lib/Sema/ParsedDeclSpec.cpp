@@ -163,32 +163,19 @@ bool ParsedDeclSpec::tryAddTypeSpecifier(const Type *New, const SourceRange &Ran
 }
 
 bool ParsedDeclSpec::tryAddConst() {
-    if (Quals.IsConst)
-        return false;
-    Quals.IsConst = true;
-    return true;
+    return Quals.tryAddConst();
 }
 
 bool ParsedDeclSpec::tryAddRestrict() {
-    if (Quals.IsRestrict)
-        return false;
-    Quals.IsRestrict = true;
-    return true;
+    return Quals.tryAddRestrict();
 }
 
 bool ParsedDeclSpec::tryAddVolatile() {
-    if (Quals.IsVolatile)
-        return false;
-    Quals.IsVolatile = true;
-    return true;
+    return Quals.tryAddVolatile();
 }
 
 bool ParsedDeclSpec::tryAddQualifiers(const Qualifiers &Other) {
-    if ((Quals.IsConst && Other.IsConst) || (Quals.IsRestrict && Other.IsRestrict) ||
-        (Quals.IsVolatile && Other.IsVolatile))
-        return false;
-    Quals.merge(Other);
-    return true;
+    return Quals.tryAddQualifiers(Other);
 }
 
 void ParsedDeclSpec::print(std::ostream &O) const {

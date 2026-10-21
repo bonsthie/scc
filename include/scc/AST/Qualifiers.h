@@ -17,6 +17,35 @@ struct Qualifiers {
     SCC_PREFERRED_TYPE(bool)
     uint64_t IsVolatile : 1 = 0;
 
+    constexpr bool tryAddConst() {
+        if (IsConst)
+            return false;
+        IsConst = true;
+        return true;
+    }
+
+    constexpr bool tryAddRestrict() {
+        if (IsRestrict)
+            return false;
+        IsRestrict = true;
+        return true;
+    }
+
+    constexpr bool tryAddVolatile() {
+        if (IsVolatile)
+            return false;
+        IsVolatile = true;
+        return true;
+    }
+
+    constexpr bool tryAddQualifiers(const Qualifiers &Other) {
+        if ((IsConst && Other.IsConst) || (IsRestrict && Other.IsRestrict) ||
+            (IsVolatile && Other.IsVolatile))
+            return false;
+        merge(Other);
+        return true;
+    }
+
     constexpr void merge(const Qualifiers &Other) {
         IsConst |= Other.IsConst;
         IsRestrict |= Other.IsRestrict;

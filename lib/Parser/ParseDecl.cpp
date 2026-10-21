@@ -97,15 +97,18 @@ bool Parser::parseDeclaratorInternal(ParsedDeclarator &D) {
 std::optional<DeclaratorChunks> Parser::parseDeclaratorPrefixPointer() {
     if (!CurTok.is(tok::star))
         return std::nullopt;
+    SourceRange Range = CurTok.getRange();
     next();
-    return DeclaratorChunks(DeclPointerChunk{.Qual = {}}, CurTok.getRange());
+    Qualifiers Quals;
+    parseQualifiers(Quals);
+    return DeclaratorChunks(DeclPointerChunk{.Qual = Quals}, Range);
 }
 
 std::optional<DeclaratorChunks> Parser::parseDeclaratorSufix() {
 
     switch (CurTok.getTokenKind()) {
     default: {
-        if (CurTok.is(tok::comma, tok::r_paren)) {
+        if (CurTok.is(tok::comma, tok::r_paren, tok::semi)) {
             return std::nullopt;
         }
 

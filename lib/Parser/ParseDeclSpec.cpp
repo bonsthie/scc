@@ -7,6 +7,31 @@ static bool unknown_identifier_looks_like_type_specifier(const Token &Next) {
     return Next.is(tok::identifier, tok::star, tok::l_paren);
 }
 
+void Parser::parseQualifiers(Qualifiers &Quals) {
+    while (true) {
+        bool Added;
+        switch (CurTok.getTokenKind()) {
+        case tok::kw_const:
+            Added = Quals.tryAddConst();
+            break;
+        case tok::kw_restrict:
+            Added = Quals.tryAddRestrict();
+            break;
+        case tok::kw_volatile:
+            Added = Quals.tryAddVolatile();
+            break;
+        default:
+            return;
+        }
+
+        if (!Added && Opts.duplicate_decl_specifierWarning) {
+            EM.duplicateQualifier(CurTok.getTokenKind(), CurTok.getRange());
+            HasErrorOccurred |= EM.emit();
+        }
+        if (next())
+            return;
+    }
+}
 
 ParsedDeclSpec Parser::parseDeclSpec() {
     ParsedDeclSpec DS;
@@ -100,28 +125,10 @@ ParsedDeclSpec Parser::parseDeclSpec() {
         }
 
         case tok::kw_const:
-            if (!DS.tryAddConst()) {
-                EM.duplicateQualifier(CurTok.getTokenKind(), CurTok.getRange())
-                    .msg(" declaration specifier");
-                HasErrorOccurred = EM.emit();
-            }
-            break;
-
         case tok::kw_restrict:
-            if (!DS.tryAddRestrict()) {
-                EM.duplicateQualifier(CurTok.getTokenKind(), CurTok.getRange())
-                    .msg(" declaration specifier");
-                HasErrorOccurred = EM.emit();
-            }
-            break;
-
         case tok::kw_volatile:
-            if (!DS.tryAddVolatile()) {
-                EM.duplicateQualifier(CurTok.getTokenKind(), CurTok.getRange())
-                    .msg(" declaration specifier");
-                HasErrorOccurred = EM.emit();
-            }
-            break;
+            parseQualifiers(DS.Quals);
+            continue;
 
         default:
             // For now, only diagnose bad lexer tokens here. The caller/future

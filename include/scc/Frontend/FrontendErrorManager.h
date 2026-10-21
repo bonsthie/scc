@@ -32,10 +32,10 @@ class FrontendErrorManager : public ErrorManager {
     }
 
     Error &duplicateQualifier(std::string_view Qualifier, const SourceRange &Range) {
-        return atRange(report(err::error), Range)
-            .msg("duplicate Qualifer '")
+        return atRange(report(err::warning), Range)
+            .msg("duplicate '")
             .msg(std::string(Qualifier))
-            .msg("'");
+            .msg("' declaration specifier [-Wduplicate-decl-specifier]");
     }
 
     Error &cannotCombine(std::string_view X, std::string_view Y, const SourceRange &Range) {
