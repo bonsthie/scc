@@ -59,6 +59,8 @@ class Parser {
     bool                            parseDeclaratorInternal(ParsedDeclarator &D);
     std::optional<DeclaratorChunks> parseDeclaratorPrefixPointer();
     std::optional<DeclaratorChunks> parseDeclaratorSufix();
+    std::optional<DeclaratorChunks> parseDeclaratorSufixArray();
+    std::optional<DeclaratorChunks> parseDeclaratorSufixFunction();
     bool                            parseMisplacedBracketDeclarator(ParsedDeclarator &D);
 
     DeclList parseDeclaration();

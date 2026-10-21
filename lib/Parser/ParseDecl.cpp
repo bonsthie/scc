@@ -3,6 +3,7 @@
 #include "scc/Parser/Parser.h"
 #include "scc/Sema/ParsedDeclarator.h"
 #include "scc/Token/Token.h"
+#include <optional>
 #include <ostream>
 
 using namespace scc;
@@ -84,7 +85,7 @@ bool Parser::parseDeclaratorInternal(ParsedDeclarator &D) {
         return true;
     }
 
-    if (auto Suffix = parseDeclaratorSufix())
+    while (auto Suffix = parseDeclaratorSufix())
         D.pushChunk(*Suffix);
 
     if (Pointer)
@@ -101,7 +102,50 @@ std::optional<DeclaratorChunks> Parser::parseDeclaratorPrefixPointer() {
 }
 
 std::optional<DeclaratorChunks> Parser::parseDeclaratorSufix() {
-    // TODO: Parse an array or function suffix and return its chunk.
+
+    switch (CurTok.getTokenKind()) {
+    default: {
+        if (CurTok.is(tok::comma, tok::r_paren)) {
+            return std::nullopt;
+        }
+
+        if (CurTok.is(tok::equal)) {
+            EM.todo("assignation initialisation", CurTok.getRange());
+        } else {
+            EM.unknownToken(CurTok);
+        }
+        return std::nullopt;
+    }
+
+    case tok::l_paren:
+        return parseDeclaratorSufixFunction();
+    case tok::l_square:
+        return parseDeclaratorSufixArray();
+    }
+}
+
+std::optional<DeclaratorChunks> Parser::parseDeclaratorSufixArray() {
+    next();
+    if (CurTok.is(tok::r_square)) {
+        DeclaratorChunks Decl(DeclArrayChunk{}, CurTok.getRange());
+        next();
+        return Decl;
+    }
+
+    EM.todo("parse decalrator suffix array [...]", CurTok.getRange());
+    return std::nullopt;
+}
+
+std::optional<DeclaratorChunks> Parser::parseDeclaratorSufixFunction() {
+    next();
+
+    if (CurTok.is(tok::r_paren)) {
+        DeclaratorChunks Decl(DeclFuncChunk{}, CurTok.getRange());
+        next();
+        return Decl;
+    }
+
+    EM.todo("parse decalrator function parameter (...)", CurTok.getRange());
     return std::nullopt;
 }
 
