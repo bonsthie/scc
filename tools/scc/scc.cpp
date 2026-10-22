@@ -115,7 +115,7 @@ int main(int argc, char **argv, char **env) {
         std::cout << CurTok << std::endl;
         if (EM.size())
             EM.emit();
-    } while (!CurTok.is(tok::eof));
+    } while (CurTok.isNot(tok::eof));
 
     // // Opt.printOpt(std::cout);
     // if (auto a = Args->getArg(Opt_oui))

@@ -6,14 +6,14 @@
 using namespace scc;
 
 bool Parser::consumeIf(tok::TokenKind TK) {
-    if (!CurTok.is(TK))
+    if (CurTok.isNot(TK))
         return false;
     next();
     return true;
 }
 
 bool Parser::expect(tok::TokenKind TK) {
-    if (!CurTok.is(TK)) {
+    if (CurTok.isNot(TK)) {
         HasErrorOccurred = true;
         EM.expectedXButGotY(TK, CurTok);
         return false;
@@ -23,7 +23,7 @@ bool Parser::expect(tok::TokenKind TK) {
 }
 
 void Parser::skipUntilDeclarationEnd() {
-    while (!CurTok.is(tok::semi, tok::eof)) {
+    while (CurTok.isNot(tok::semi, tok::eof)) {
         if (next())
             return;
     }
@@ -65,7 +65,7 @@ DeclList Parser::parseDeclaration() {
         Decl *Res = Action.actOnDeclarator(DS, D);
         if (Res)
             Decls.pushBack(Res);
-    } while (consumeIf(tok::comma) && !CurTok.is(tok::eof));
+    } while (consumeIf(tok::comma) && CurTok.isNot(tok::eof));
 
     if (!expect(tok::semi))
         return {};

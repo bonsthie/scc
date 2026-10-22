@@ -52,6 +52,11 @@ class Token {
         return is(Tok) || is(TokTypes...);
     }
 
+    template <typename... Args>
+    bool isNot(Args... TokTypes) const {
+        return !is(TokTypes...);
+    }
+
   public:
     void setPosBegin(const MemoryViewPos &P) { Range.Begin = P; }
     void setPosEnd(const MemoryViewPos &P) { Range.End = P; }

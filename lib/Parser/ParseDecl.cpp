@@ -62,7 +62,7 @@ bool Parser::parseDeclaratorInternal(ParsedDeclarator &D) {
         next();
         if (parseDeclaratorInternal(D))
             return true;
-        if (!CurTok.is(tok::r_paren)) {
+        if (CurTok.isNot(tok::r_paren)) {
             EM.expectedX(CurTok.posViewBegin(), tok::r_paren);
             EM.toClose(LParen);
             return true;
@@ -95,7 +95,7 @@ bool Parser::parseDeclaratorInternal(ParsedDeclarator &D) {
 }
 
 std::optional<DeclaratorChunks> Parser::parseDeclaratorPrefixPointer() {
-    if (!CurTok.is(tok::star))
+    if (CurTok.isNot(tok::star))
         return std::nullopt;
     SourceRange Range = CurTok.getRange();
     next();

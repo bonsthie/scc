@@ -78,7 +78,7 @@ bool FileLexer::next(Token &CurTok) {
 
 bool FileLexer::nextRaw(Token &CurTok) {
     // if the token is already consume by peak();
-    if (NextToken.is(tok::not_init) == false) {
+    if (NextToken.isNot(tok::not_init)) {
         CurTok = NextToken;
         NextToken.setTokenKind(tok::not_init);
         return false;

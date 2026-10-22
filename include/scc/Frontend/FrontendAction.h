@@ -28,7 +28,7 @@ class DumpToken final : public FrontendAction {
             PP.next(CurTok);
             if (!EM.emit())
                 std::cout << CurTok << std::endl;
-        } while (!CurTok.is(tok::eof));
+        } while (CurTok.isNot(tok::eof));
         return false;
     }
 };
@@ -45,7 +45,7 @@ class DumpRawToken final : public FrontendAction {
             PP.nextRaw(CurTok);
             if (!EM.emit())
                 std::cout << CurTok << std::endl;
-        } while (!CurTok.is(tok::eof));
+        } while (CurTok.isNot(tok::eof));
         return false;
     }
 };

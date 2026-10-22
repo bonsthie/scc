@@ -34,6 +34,10 @@ TEST(TokenTest, VariadicIsHelperAndKeywordCreation) {
     Token T(tok::identifier, "int");
 
     EXPECT_TRUE(T.is(tok::identifier, tok::numeric_constant));
+    EXPECT_FALSE(T.isNot(tok::identifier));
+    EXPECT_TRUE(T.isNot(tok::numeric_constant));
+    EXPECT_FALSE(T.isNot(tok::numeric_constant, tok::identifier));
+    EXPECT_TRUE(T.isNot(tok::numeric_constant, tok::string_literal));
 
     create_keyword_token(T);
     EXPECT_EQ(T.getTokenKind(), tok::t_int);
