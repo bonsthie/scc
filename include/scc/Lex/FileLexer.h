@@ -16,7 +16,7 @@ class FileLexer : public TokenStream {
     const LangOpt   &Opts;
     StringInterner  &SI;
     MemoryBufferView MemBufferView;
-    FileID           FID;
+    const FileID    &FID;
     MemoryViewPos    Pos;
 
     Token LastToken;

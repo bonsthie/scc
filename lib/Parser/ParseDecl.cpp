@@ -63,7 +63,7 @@ bool Parser::parseDeclaratorInternal(ParsedDeclarator &D) {
         if (parseDeclaratorInternal(D))
             return true;
         if (CurTok.isNot(tok::r_paren)) {
-            EM.expectedX(CurTok.posViewBegin(), tok::r_paren);
+            EM.expectedX(CurTok.getRange(), tok::r_paren);
             EM.toClose(LParen);
             return true;
         }
@@ -81,7 +81,7 @@ bool Parser::parseDeclaratorInternal(ParsedDeclarator &D) {
         return parseMisplacedBracketDeclarator(D);
 
     default:
-        EM.expectedX(CurTok.posViewBegin(), tok::identifier, tok::l_paren);
+        EM.expectedX(CurTok.getRange(), tok::identifier, tok::l_paren);
         return true;
     }
 

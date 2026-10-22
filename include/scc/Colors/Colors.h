@@ -28,6 +28,7 @@ class Color {
     static const char *red() { return code("\x1b[31m"); }
     static const char *yellow() { return code("\x1b[33m"); }
     static const char *blue() { return code("\x1b[34m"); }
+    static const char *lightBlue() { return code("\x1b[94m"); }
     static const char *magenta() { return code("\x1b[35m"); }
     static const char *cyan() { return code("\x1b[36m"); }
 };

@@ -7,7 +7,11 @@ int const const value;
 int * volatile volatile pointer;
 
 // WARN: warning: duplicate 'const' declaration specifier [-Wduplicate-decl-specifier]
+// WARN-NEXT: 6 | int const const value;
+// WARN-NEXT:   |           ^~~~~
 // WARN: warning: duplicate 'volatile' declaration specifier [-Wduplicate-decl-specifier]
+// WARN-NEXT: 7 | int * volatile volatile pointer;
+// WARN-NEXT:   |                ^~~~~~~~
 
 // QUIET-NOT: warning: duplicate
 // QUIET: ParsedDeclarator

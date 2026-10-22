@@ -31,9 +31,10 @@ enum class Code {
 #define WARN_MSG
 
 class Error {
-    err::DiagLevel         Level;
-    std::ostringstream     Msg;
-    std::optional<PosView> Pos;
+    err::DiagLevel               Level;
+    std::ostringstream           Msg;
+    std::optional<PosView>       Pos;
+    std::optional<MemoryViewPos> End;
 
   public:
     explicit Error(err::DiagLevel Level) : Level(Level) {}
@@ -61,6 +62,13 @@ class Error {
 
     Error &at(PosView P) {
         Pos = P;
+        End.reset();
+        return *this;
+    }
+
+    Error &at(const SourceRange &Range) {
+        Pos = Range.posViewBegin();
+        End = Range.End;
         return *this;
     }
 
@@ -72,6 +80,7 @@ class Error {
     }
 
     virtual void print(std::ostream &O) const;
+    void         printCode(std::ostream &O) const;
     int          emit(std::ostream &O) const;
     std::string  getPrintLevelString() const;
 

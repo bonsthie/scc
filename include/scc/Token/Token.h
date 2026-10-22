@@ -39,7 +39,7 @@ class Token {
 
     void setTokenKind(tok::TokenKind T) { TKind = T; };
     void setValue(std::string_view Word) { Value = Word; };
-    void setFileID(FileID *ID) { Range.FID = ID; }
+    void setFileID(const FileID *ID) { Range.FID = ID; }
 
     void setDirty(bool Value) { IsDirty = Value; }
     bool isDirty() const { return IsDirty; }

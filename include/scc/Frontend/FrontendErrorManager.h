@@ -15,7 +15,7 @@ class FrontendErrorManager : public ErrorManager {
 
     static Error &atRange(Error &Diag, const SourceRange &Range) {
         if (Range.isValid())
-            Diag.at(Range.posViewBegin());
+            Diag.at(Range);
         return Diag;
     }
 
@@ -25,7 +25,7 @@ class FrontendErrorManager : public ErrorManager {
 
     Error &unknownToken(const Token &Tok) {
         return report(err::error)
-            .at(Tok.posViewBegin())
+            .at(Tok.getRange())
             .msg("unknown token '")
             .msg(tokenForDiag(Tok))
             .msg("'");

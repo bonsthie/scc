@@ -96,7 +96,7 @@ bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
         File *F = FM.getFile(Path, FL.getFID());
 
         if (F == nullptr) {
-            EM.last().at(Tok.posViewBegin());
+            EM.last().at(Tok.getRange());
             return true;
         }
         addNewTokenStream(*F);
@@ -109,7 +109,7 @@ bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
         File *F = FM.getSystemFile(Path);
 
         if (F == nullptr) {
-            EM.last().at(Tok.posViewBegin());
+            EM.last().at(Tok.getRange());
             return true;
         }
         addNewTokenStream(*F);
@@ -117,7 +117,7 @@ bool PreProcessor::handleInclude(Token &Tok, FileLexer &FL) {
     }
 
     default: {
-        EM.report(err::error).at(Tok.posViewBegin()).msg("expected \"FILENAME\" or <FILENAME>");
+        EM.report(err::error).at(Tok.getRange()).msg("expected \"FILENAME\" or <FILENAME>");
         return true;
     }
     }

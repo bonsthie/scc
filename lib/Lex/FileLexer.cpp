@@ -138,7 +138,7 @@ bool FileLexer::lexInclude(Token &CurTok) {
 
             if (Err) {
                 EM.report(err::error)
-                    .at(CurTok.posViewEnd())
+                    .at(CurTok.getRange())
                     .msg("include missing closing ")
                     .quoteChar('>');
                 CurTok.flush();
@@ -163,7 +163,7 @@ void FileLexer::reportTrigraphWarning(const char *Ptr, int TrigraphValue, bool C
     const char    *Begin = MemBufferView.raw() + Pos.Buff;
     MemoryViewPos  DiagPos = advance_pos(Begin, Ptr, Pos);
     Error         &Diag = EM.report(err::warning);
-    Diag.at({DiagPos, &FID});
+    Diag.at(SourceRange(&FID, DiagPos, advance_pos(Ptr, Ptr + 3, DiagPos)));
 
     if (Converted) {
         Diag.msg("trigraph converted to ")
@@ -410,7 +410,7 @@ bool FileLexer::handleString(Token &CurTok, SizedChar Limiter) {
     }
 
     EM.report(err::error) //
-        .at(CurTok.posViewEnd())
+        .at(SourceRange(&FID, CurTok.getPosBegin(), Pos))
         .msg("missing closing ")
         .quoteChar(Limiter.Value);
     CurTok.flush();
@@ -527,7 +527,7 @@ inline size_t FileLexer::lexSign(Token &CurTok, SizedChar LastChar) {
             }
 
             EM.report(err::error) //
-                .at(CurTok.posViewBegin())
+                .at(SourceRange(&FID, CurTok.getPosBegin(), Pos))
                 .msg("unterminated /* comment");
             return true;
         default:

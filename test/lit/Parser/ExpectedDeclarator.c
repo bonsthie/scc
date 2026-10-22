@@ -3,3 +3,5 @@
 int 123;
 
 // CHECK: ExpectedDeclarator.c:3:5: error: expected identifier or '('
+// CHECK-NEXT: 3 | int 123;
+// CHECK-NEXT:   |     ^~~

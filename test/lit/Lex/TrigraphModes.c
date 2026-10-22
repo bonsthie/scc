@@ -14,6 +14,8 @@
 
 // C99-NOT: pp_hash '#'
 // C99: warning: trigraph ignored [-Wtrigraphs]
+// C99-NEXT: {{[0-9]+}} | {{[?][?]=}}
+// C99-NEXT: {{ *}}| ^~~
 // C99-NEXT: question '?'
 // C99-NEXT: question '?'
 // C99-NEXT: equal '='
@@ -21,6 +23,8 @@
 // C99-NOT: pp_hash '#'
 
 // F-ON: warning: trigraph converted to '#' character [-Wtrigraphs]
+// F-ON-NEXT: {{[0-9]+}} | {{[?][?]=}}
+// F-ON-NEXT: {{ *}}| ^~~
 // F-ON-NEXT: pp_hash '#'
 // F-ON-NEXT: eof
 // F-ON-NOT: question '?'
@@ -34,6 +38,8 @@
 
 // MIX-WARN-NOT: pp_hash '#'
 // MIX-WARN: warning: trigraph ignored [-Wtrigraphs]
+// MIX-WARN-NEXT: {{[0-9]+}} | {{[?][?]=}}
+// MIX-WARN-NEXT: {{ *}}| ^~~
 // MIX-WARN-NEXT: question '?'
 // MIX-WARN-NEXT: question '?'
 // MIX-WARN-NEXT: equal '='

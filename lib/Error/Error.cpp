@@ -10,6 +10,7 @@ void Error::print(std::ostream &O) const {
         O << getProgramNameString() << ": " << Color::bold();
 
     O << getPrintLevelString() << boldText() << ": " << Msg.str() << Color::reset() << "\n";
+    printCode(O);
 }
 
 int Error::emit(std::ostream &O) const {

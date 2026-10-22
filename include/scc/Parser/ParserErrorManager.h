@@ -47,6 +47,11 @@ class ParserErrorManager {
         }
         return Diag;
     }
+    template <typename... ExpectedKinds>
+    Error &expectedX(const SourceRange &Range, ExpectedKinds... Kinds) {
+        return expectedX(Range.posViewBegin(), Kinds...).at(Range);
+    }
+
     Error &toClose(const Token OpenTok);
     Error &unknownToken(const Token &Tok) { return EM.unknownToken(Tok); }
     Error &duplicateQualifier(tok::TokenKind Qualifier, const SourceRange &Range);

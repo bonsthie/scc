@@ -37,7 +37,7 @@ struct SourceRange {
     MemoryViewPos End;
 
     SourceRange() = default;
-    SourceRange(FileID *FID, MemoryViewPos Begin, MemoryViewPos End)
+    SourceRange(const FileID *FID, MemoryViewPos Begin, MemoryViewPos End)
         : FID(FID),
           Begin(Begin),
           End(End) {}

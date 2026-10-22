@@ -23,7 +23,7 @@ static std::string token_for_diag(const Token &Tok) {
 }
 
 Error &ParserErrorManager::expectedXButGotY(tok::TokenKind Expected, const Token &Got) {
-    return expectedX(Got.posViewBegin(), Expected)
+    return expectedX(Got.getRange(), Expected)
         .msg(" but got '")
         .msg(token_for_diag(Got))
         .msg("'");
@@ -31,7 +31,7 @@ Error &ParserErrorManager::expectedXButGotY(tok::TokenKind Expected, const Token
 
 Error &ParserErrorManager::toClose(const Token OpenTok) {
     return report(err::note)
-        .at(OpenTok.posViewBegin())
+        .at(OpenTok.getRange())
         .msg("to match this '")
         .msg(token_spelling(OpenTok.getTokenKind()))
         .msg("'");
