@@ -7,6 +7,7 @@ Checks: >
   -misc-const-correctness,
   -misc-include-cleaner,
   -misc-no-recursion,
+  -misc-static-assert,
   -misc-non-private-member-variables-in-classes,
   -misc-unused-parameters,
   -misc-use-anonymous-namespace,
