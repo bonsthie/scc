@@ -1,5 +1,6 @@
 
 #include "scc/Colors/Colors.h"
+#include "scc/Parser/DelimiterTracker.h"
 #include "scc/Parser/Parser.h"
 #include "scc/Sema/ParsedDeclarator.h"
 #include "scc/Token/Token.h"
@@ -58,16 +59,13 @@ bool Parser::parseDeclaratorInternal(ParsedDeclarator &D) {
     }
 
     case tok::l_paren: {
-        auto LParen = CurTok;
-        next();
+        DelimiterTracker Parens(*this, tok::l_paren);
+        if (!Parens.consumeOpen())
+            return true;
         if (parseDeclaratorInternal(D))
             return true;
-        if (CurTok.isNot(tok::r_paren)) {
-            EM.expectedX(CurTok.getRange(), tok::r_paren);
-            EM.toClose(LParen);
+        if (!Parens.consumeClose())
             return true;
-        }
-        next();
         break;
     }
 
@@ -128,10 +126,13 @@ std::optional<DeclaratorChunks> Parser::parseDeclaratorSufix() {
 }
 
 std::optional<DeclaratorChunks> Parser::parseDeclaratorSufixArray() {
-    next();
+    DelimiterTracker Brackets(*this, tok::l_square);
+    if (!Brackets.consumeOpen())
+        return std::nullopt;
     if (CurTok.is(tok::r_square)) {
         DeclaratorChunks Decl(DeclArrayChunk{}, CurTok.getRange());
-        next();
+        if (!Brackets.consumeClose())
+            return std::nullopt;
         return Decl;
     }
 
@@ -140,11 +141,14 @@ std::optional<DeclaratorChunks> Parser::parseDeclaratorSufixArray() {
 }
 
 std::optional<DeclaratorChunks> Parser::parseDeclaratorSufixFunction() {
-    next();
+    DelimiterTracker Parens(*this, tok::l_paren);
+    if (!Parens.consumeOpen())
+        return std::nullopt;
 
     if (CurTok.is(tok::r_paren)) {
         DeclaratorChunks Decl(DeclFuncChunk{}, CurTok.getRange());
-        next();
+        if (!Parens.consumeClose())
+            return std::nullopt;
         return Decl;
     }
 

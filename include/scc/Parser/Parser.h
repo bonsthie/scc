@@ -24,8 +24,7 @@ class Parser {
     Token LookaheadTok;
     bool  HasLookaheadTok = false;
 
-    friend class ParenParseScopeRAII;
-    bool InParen = false;
+    friend class DelimiterTracker;
 
   public:
     Parser(PreProcessor &PP, Sema &Action, ParserErrorManager &EM, const LangOpt &Opts)
