@@ -1,6 +1,0 @@
-#ifndef SCC_PARSER_DECLSPECSPELLING_H
-#define SCC_PARSER_DECLSPECSPELLING_H
-
-#include "scc/Frontend/DeclSpecSpelling.h"
-
-#endif // SCC_PARSER_DECLSPECSPELLING_H

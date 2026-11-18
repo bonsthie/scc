@@ -5,6 +5,7 @@
 #include "scc/AST/TagDecl.h"
 #include "scc/AST/TagType.h"
 #include "scc/AST/TypedefType.h"
+#include "scc/Colors/Colors.h"
 
 #include <cstdint>
 #include <ostream>
@@ -83,10 +84,10 @@ static const char *builtin_type_kind_name(BuiltinTypeKind Kind) {
 
 static void print_name(std::ostream &O, const NamedDecl::NameType &Name) {
     if (Name.has_value()) {
-        O << '\'' << *Name << '\'';
+        O << '\'' << Color::lightBlue() << *Name << Color::reset() << '\'';
         return;
     }
-    O << "<anonymous>";
+    O << Color::dim() << "<anonymous>" << Color::reset();
 }
 
 static void print_indent(std::ostream &O, size_t IndentLevel) {
@@ -97,11 +98,12 @@ static void print_indent(std::ostream &O, size_t IndentLevel) {
 static void print_decl_prefix(std::ostream &O, const char *DeclName, const void *DeclAddress,
                               size_t IndentLevel = 0) {
     print_indent(O, IndentLevel);
-    O << DeclName << ' ' << DeclAddress;
+    O << Color::bold() << DeclName << Color::reset() << ' ' << Color::dim() << DeclAddress
+      << Color::reset();
 }
 
 static void print_decl_kind(std::ostream &O, const Decl &Decl) {
-    O << " kind=" << decl_kind_name(Decl.kind());
+    O << " kind=" << Color::magenta() << decl_kind_name(Decl.kind()) << Color::reset();
 }
 
 static void print_named_decl_details(std::ostream &O, const NamedDecl &Decl) {
@@ -143,7 +145,8 @@ static const char *tag_decl_keyword(TagDeclKind Kind) {
 
 static void print_tag_decl_details(std::ostream &O, const TagDecl &Decl) {
     print_decl_kind(O, Decl);
-    O << " tag=" << tag_decl_kind_name(Decl.getTagDeclKind()) << " name=";
+    O << " tag=" << Color::magenta() << tag_decl_kind_name(Decl.getTagDeclKind()) << Color::reset()
+      << " name=";
     print_name(O, Decl.getName());
 }
 
@@ -284,6 +287,7 @@ static void print_type(std::ostream &O, const class scc::Type *Ty) {
 }
 
 static void print_qual_type(std::ostream &O, QualType Ty) {
+    O << Color::green();
     bool NeedsSpace = false;
     if (Ty.isConstQualified()) {
         O << "const";
@@ -305,13 +309,14 @@ static void print_qual_type(std::ostream &O, QualType Ty) {
         O << ' ';
 
     print_type(O, Ty.getType());
+    O << Color::reset();
 }
 
 static void print_record_decl(std::ostream &O, const char *DeclName, const RecordDecl &Decl,
                               size_t IndentLevel) {
     print_decl_prefix(O, DeclName, &Decl, IndentLevel);
     print_tag_decl_details(O, Decl);
-    O << " fields=" << Decl.size();
+    O << " fields=" << Color::yellow() << Decl.size() << Color::reset();
 
     if (Decl.empty()) {
         O << '\n';
@@ -364,7 +369,7 @@ static void print_enum_fields(std::ostream &O, const EnumDecl &Decl, size_t Inde
 static void print_enum_decl(std::ostream &O, const EnumDecl &Decl, size_t IndentLevel) {
     print_decl_prefix(O, "EnumDecl", &Decl, IndentLevel);
     print_tag_decl_details(O, Decl);
-    O << " fields=" << Decl.size();
+    O << " fields=" << Color::yellow() << Decl.size() << Color::reset();
 
     if (Decl.empty()) {
         O << '\n';
@@ -408,7 +413,7 @@ void TypedefDecl::print(std::ostream &O) const {
     print_named_decl_details(O, *this);
     O << " underlying=";
     print_qual_type(O, Underlying);
-    O << " underlying_type=" << get_type_address(Underlying);
+    O << " underlying_type=" << Color::dim() << get_type_address(Underlying) << Color::reset();
     O << '\n';
 }
 
